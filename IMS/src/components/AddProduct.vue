@@ -113,8 +113,8 @@ export default {
   right: 50%;
   top: 50%;
   transform: translate(50%, -50%);
-  width: 400px; /* Fixed width for the form */
-  max-width: 100%; /* Ensure it doesn't overflow the screen */
+  width: 400px; 
+  max-width: 100%; 
 }
 
 .form-header {
@@ -141,13 +141,13 @@ export default {
 
 .form-container {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Two columns */
-  gap: 15px; /* Space between fields */
+  grid-template-columns: 1fr 1fr; 
+  gap: 15px; 
   width: 100%;
 }
 
 .form-group {
-  width: 100%; /* Ensure form elements fill the available space */
+  width: 100%;
 }
 
 label {
@@ -174,7 +174,7 @@ select {
 
 .form-actions {
   display: flex;
-  justify-content: flex-end; /* Align the button to the right */
+  justify-content: flex-end; 
   width: 100%;
   margin-top: 20px;
   margin-left: 50px;

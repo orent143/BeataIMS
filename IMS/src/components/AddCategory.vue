@@ -20,7 +20,7 @@
 <script>
 export default {
   props: {
-    isVisible: Boolean // Controls the visibility of the form
+    isVisible: Boolean 
   },
   data() {
     return {
@@ -31,13 +31,13 @@ export default {
   },
   methods: {
     closeForm() {
-      this.$emit('close'); // Emit close event to parent component
+      this.$emit('close'); 
     },
     submitForm() {
       if (this.newCategory.name) {
-        const newCategory = { ...this.newCategory, id: Date.now() }; // Assign unique id based on timestamp
-        this.$emit('add', newCategory); // Emit the new category to the parent component
-        this.closeForm(); // Close the form after adding the category
+        const newCategory = { ...this.newCategory, id: Date.now() }; 
+        this.$emit('add', newCategory); 
+        this.closeForm();
       }
     }
   }
@@ -50,13 +50,13 @@ export default {
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.459);
-  position: fixed; /* Fixed positioning for the form */
+  position: fixed; 
   right: 50%;
   top: 50%;
   transform: translate(50%, -50%);
   width: 400px;
   max-width: 100%;
-  z-index: 1000; /* Ensure the form appears above content */
+  z-index: 1000; 
 }
 
 .form-header {

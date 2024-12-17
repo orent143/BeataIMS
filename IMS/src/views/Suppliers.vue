@@ -14,7 +14,6 @@
           <i class="fas fa-search search-icon"></i>
         </div>
 
-        <!-- Filter Button with dropdown for status -->
         <div class="filter-container">
           <button class="filter-btn" @click="toggleFilterDropdown">
             <i class="fas fa-filter"></i>
@@ -29,7 +28,6 @@
           </div>
         </div>
 
-        <!-- Add Stock Button -->
         <button @click="toggleAddForm" class="add-product-btn">Add</button>
       </div>
     </div>
@@ -53,7 +51,6 @@
               <td>${{ supplier.contacts }}</td>
               <td>{{ supplier.email }}</td>
               <td>
-                <!-- Action buttons -->
                 <button class="action-btn" @click="editItem(supplier)">Edit</button>
                 <button class="action-btn" @click="removeItem(supplier.id)">Remove</button>
               </td>
@@ -63,7 +60,6 @@
       </div>
     </div>
 
-    <!-- Add or Edit Item Form -->
     <add-supplier 
       v-if="showAddForm" 
       :isVisible="showAddForm" 
@@ -71,7 +67,6 @@
       @add="addItem"
     />
 
-    <!-- Edit Item Form -->
     <edit-supplier
       v-if="showEditForm"
       :isVisible="showEditForm"
@@ -98,7 +93,7 @@ export default {
       showFilterDropdown: false,
       showAddForm: false,
       showEditForm: false,
-      selectedItem: null, // Store the item to be edited
+      selectedItem: null,
       supplierItems: [
         { id: 1, name: 'Coffee Co.', category: 'Grocery', contacts: '0912345678', email: 'CoffeeCo.com', status: 'In Stock' },
         { id: 2, name: 'Dairy Corp.', category: 'Grocery', contacts: '0912345678', email: 'DairyCorp.com', status: 'Low Stock' },
@@ -139,25 +134,25 @@ export default {
     },
     editItem(item) {
       this.selectedItem = item;
-      this.showEditForm = true; // Show the Edit Form
+      this.showEditForm = true;
     },
     updateItem(updatedItem) {
       const index = this.supplierItems.findIndex(supplier => supplier.id === updatedItem.id);
       if (index !== -1) {
-        this.supplierItems.splice(index, 1, updatedItem); // Update the item
+        this.supplierItems.splice(index, 1, updatedItem);
       }
-      this.filterItems(); // Reapply filtering after update
-      this.toggleEditForm(); // Close the form after updating
+      this.filterItems();
+      this.toggleEditForm();
     },
     removeItem(itemId) {
       this.supplierItems = this.supplierItems.filter(item => item.id !== itemId);
       this.filterItems();
     },
     addItem(newItem) {
-      newItem.id = this.supplierItems.length + 1; // Generate new ID
-      this.supplierItems.push(newItem); // Add to supplierItems
-      this.filterItems(); // Reapply filtering after adding
-      this.toggleAddForm(); // Close the add form
+      newItem.id = this.supplierItems.length + 1;
+      this.supplierItems.push(newItem);
+      this.filterItems();
+      this.toggleAddForm();
     }
   },
   created() {
@@ -170,17 +165,15 @@ export default {
 };
 </script>
 
-  
-  
-  <style scoped>
-  /* Use same styles as Inventory page */
-  .app-container {
+<style scoped>
+.app-container {
   display: flex;
   flex-direction: column;
   width: 80vw;
   max-width: 80vw;
   margin-left: 40px;
 }
+
 .header-container {
   display: flex;
   align-items: center;
@@ -196,7 +189,6 @@ export default {
   font-weight: 900;
 }
 
-
 .header-actions {
   display: flex;
   align-items: center;
@@ -204,11 +196,11 @@ export default {
 }
 
 .main-content {
-    display: flex;
-    padding: 4px;
-  }
-  
-  .inventory-container {
+  display: flex;
+  padding: 4px;
+}
+
+.inventory-container {
   flex-grow: 1;
   height: 40vw;
   background-color: #dfdfdf;
@@ -217,33 +209,33 @@ export default {
   margin-left: 5px;
   padding: 0;
 }
-  
-  /* Styling for the stock table */
-  .supplier-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .supplier-table th,
-  .supplier-table td {
-    padding: 10px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-  }
-  .supplier-table tbody{
-    font-family: 'Arial', sans-serif;
-  font-size: 15px;
-  }
 
-  .supplier-table th {
-    background-color: #f4f4f4;
-    padding: 13px;
-    font-weight: bold;
-  }
- 
-  .search-container {
+.supplier-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.supplier-table th,
+.supplier-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.supplier-table tbody {
+  font-family: 'Arial', sans-serif;
+  font-size: 15px;
+}
+
+.supplier-table th {
+  background-color: #f4f4f4;
+  padding: 13px;
+  font-weight: bold;
+}
+
+.search-container {
   position: relative;
   margin-right: 3px;
 }
@@ -318,7 +310,7 @@ export default {
 .add-product-btn:hover {
   background-color: #00b32dad;
 }
-/* Add a gap between the action buttons */
+
 .action-btn {
   padding: 6px 9px;
   background-color: #007bff;
@@ -340,6 +332,4 @@ export default {
 .action-btn:active {
   background-color: #004080;
 }
-
-  </style>
-  
+</style>

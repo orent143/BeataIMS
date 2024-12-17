@@ -20,22 +20,22 @@
   <script>
   export default {
     props: {
-      isVisible: Boolean, // Controls the visibility of the form
-      category: Object // The category being edited
+      isVisible: Boolean,
+      category: Object 
     },
     data() {
       return {
-        editedCategory: { ...this.category } // Copy the category to be edited
+        editedCategory: { ...this.category }
       };
     },
     methods: {
       closeForm() {
-        this.$emit('close'); // Emit close event to parent component
+        this.$emit('close'); 
       },
       submitForm() {
         if (this.editedCategory.name) {
-          this.$emit('save', this.editedCategory); // Emit the edited category to the parent component
-          this.closeForm(); // Close the form after saving
+          this.$emit('save', this.editedCategory);
+          this.closeForm(); 
         }
       }
     }

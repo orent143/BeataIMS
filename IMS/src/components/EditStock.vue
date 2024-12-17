@@ -48,8 +48,8 @@
         this.$emit('close');
       },
       submitForm() {
-        this.$emit('update', this.editedItem); // Emit updated item to parent
-        this.closeForm(); // Close the form after submitting
+        this.$emit('update', this.editedItem); 
+        this.closeForm(); 
       }
     }
   };
@@ -115,10 +115,10 @@
   }
   .form-actions {
   display: flex;
-  justify-content: center; /* Center the button */
+  justify-content: center; 
   width: 100%;
-  margin-top: 10px; /* Adjusted margin for better alignment */
-  grid-column: span 2; /* Span across both columns to align with status */
+  margin-top: 10px; 
+  grid-column: span 2; 
 }
 .add-item-btn {
   padding: 10px 20px;

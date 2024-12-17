@@ -17,7 +17,6 @@
     </div>
 
     <div class="main-content">
-      <!-- Add the Report Cards here -->
       <div class="report-cards">
         <div class="report-card">
           <div class="report-card-header">
@@ -89,24 +88,24 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 10px; /* Add space between header actions */
+  gap: 10px;
 }
 
 .main-content {
-  display: flex; /* Use flexbox for layout */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
-  height: 100vh; /* Full viewport height */
-  padding: 4px; /* Padding around the main content */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 4px;
 }
 
 .report-cards {
   display: flex;
-  flex-direction: column; /* Stack the cards vertically */
-  gap: 40px; /* Add space between cards */
-  margin-bottom: 10px; /* Space below the cards */
-  margin-top: 40px; /* Space below the cards */
-  align-items: center; /* Center the cards horizontally */
+  flex-direction: column;
+  gap: 40px;
+  margin-bottom: 10px;
+  margin-top: 40px;
+  align-items: center;
   width: 100%;
 }
 
@@ -114,68 +113,68 @@
   background-color: #D9D9D9;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 70%; /* Make the cards full-width */
+  width: 70%;
   padding: 15px;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center content horizontally */
-  justify-content: center; /* Center content vertically */
-  text-align: center; /* Center the text inside */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .report-card-header {
   font-size: 18px;
   font-weight: bold;
   color: #333;
-  text-align: center; /* Center header text */
+  text-align: center;
 }
 
 .report-card-body {
   font-size: 14px;
   color: #555;
-  text-align: center; /* Center body text */
+  text-align: center;
 }
 
 .search-container {
-  position: relative; /* Set position relative for the icon */
-  margin-right: 3px; /* Space between search and button */
+  position: relative;
+  margin-right: 3px;
 }
 
 .search-icon {
-  position: absolute; /* Position absolute to place it inside the input */
-  right: 10px; /* Position it on the right */
-  top: 50%; /* Center vertically */
-  transform: translateY(-50%); /* Adjust for vertical centering */
-  color: #333; /* Icon color */
-  pointer-events: none; /* Prevent clicks on the icon */
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #333;
+  pointer-events: none;
 }
 
 .search-bar {
-  padding: 8px 30px 8px 8px; /* Add right padding for icon space */
+  padding: 8px 30px 8px 8px;
   border: 1px solid #94949400;
   border-radius: 10px;
   width: 130px;
-  font-size: 14px; /* Adjust font size */
-  font-weight: bold; /* Adjust font weight */
-  color: #333; /* Change font color */
-  background-color: #D9D9D9; /* Change background color */
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  background-color: #D9D9D9;
 }
 
 .add-product-btn {
   padding: 8px 12px;
-  background-color: #01A501; /* Button background */
+  background-color: #01A501;
   color: rgb(0, 0, 0);
   border: none;
   border-radius: 10px;
   width: 70px;
   cursor: pointer;
-  font-size: 14px; /* Adjust font size */
-  font-family: 'Arial', sans-serif; /* Change font family */
-  font-weight: bold; /* Make font bold */
-  text-align: center; /* Center the text */
+  font-size: 14px;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  text-align: center;
 }
 
 .add-product-btn:hover {
-  background-color: #00b32dad; /* Darker on hover */
+  background-color: #00b32dad;
 }
 </style>

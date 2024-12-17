@@ -37,7 +37,7 @@
   <script>
 export default {
   props: {
-    isVisible: Boolean // This prop controls the visibility of the popout form
+    isVisible: Boolean 
   },
   data() {
     return {
@@ -51,11 +51,11 @@ export default {
   },
   methods: {
     closeForm() {
-      this.$emit('close'); // Emit close event to parent component
+      this.$emit('close'); 
     },
     submitForm() {
-      this.$emit('add', { ...this.newSupplier }); // Emit new item data to parent
-      this.newSupplier = { name: '', category: '', contacts: '', email: ''}; // Reset form
+      this.$emit('add', { ...this.newSupplier }); 
+      this.newSupplier = { name: '', category: '', contacts: '', email: ''}; 
     }
   }
 };
@@ -72,8 +72,8 @@ export default {
     right: 50%;
     top: 50%;
     transform: translate(50%, -50%);
-    width: 400px; /* Fixed width for the form */
-    max-width: 100%; /* Ensure it doesn't overflow the screen */
+    width: 400px; 
+    max-width: 100%;
   }
   
   .form-header {
@@ -100,13 +100,13 @@ export default {
   
   .form-container {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Two columns */
-    gap: 15px; /* Space between fields */
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px; 
     width: 100%;
   }
   
   .form-group {
-    width: 100%; /* Ensure form elements fill the available space */
+    width: 100%; 
   }
 
   
@@ -134,10 +134,10 @@ export default {
   
   .form-actions {
     display: flex;
-    justify-content: center; /* Center the button */
+    justify-content: center; 
     width: 100%;
-    margin-top: 10px; /* Adjusted margin for better alignment */
-    grid-column: span 2; /* Span across both columns to align with status */
+    margin-top: 10px; 
+    grid-column: span 2; 
   }
   
   .add-item-btn {

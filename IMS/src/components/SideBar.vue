@@ -7,7 +7,6 @@
 
     <ul v-if="!isCollapsed" class="sidebar-list">
       <li v-for="(link, index) in links" :key="index">
-        <!-- Manage Inventory - Don't apply active link styling -->
         <router-link
           v-if="link.submenu"
           :to="link.path"
@@ -25,7 +24,6 @@
           <i :class="link.icon"></i> {{ link.name }}
         </router-link>
 
-        <!-- Submenu for Manage Inventory -->
         <ul v-if="link.submenu && link.isOpen" class="submenu">
           <li v-for="(subLink, subIndex) in link.submenu" :key="subIndex">
             <router-link
@@ -48,7 +46,6 @@
       </li>
     </ul>
 
-    <!-- Logout link at the bottom (positioned as a footer) -->
     <div class="sidebar-footer">
       <router-link to="/login" class="sidebar-link" @click="logout">
         <i class="fas fa-sign-out-alt"></i> Logout
@@ -72,7 +69,7 @@ export default {
             { name: 'Products', path: '/inventory', icon: 'fas fa-cogs' },
             { name: 'Stocks', path: '/stock', icon: 'fas fa-cogs' }
           ],
-          isOpen: false // Keep track of the submenu's open state
+          isOpen: false
         },
         { name: 'Sales', path: '/sales', icon: 'fas fa-cash-register' },
         { name: 'Suppliers', path: '/suppliers', icon: 'fas fa-truck' },
@@ -86,122 +83,116 @@ export default {
       link.isOpen = !link.isOpen;
     },
     logout() {
-      // Perform the logout action, e.g., clear session, token, etc.
       console.log("Logging out...");
-      // Example: Redirect to login page or clear the session:
-      // this.$router.push('/login');
     }
   }
 };
 </script>
+
 <style scoped>
 .sidebar {
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Ensures content is spread out */
-  width: 200px; /* Default width */
+  justify-content: space-between;
+  width: 200px;
   padding: 20px;
   background-color: #FF32BA;
-  height: 100vh; /* Full height */
-  position: fixed; /* Keep it fixed */
-  transition: width 0.3s ease; /* Smooth transition */
-  box-shadow: 2px 0 10px #FF00A9; /* Elevation effect */
+  height: 100vh;
+  position: fixed;
+  transition: width 0.3s ease;
+  box-shadow: 2px 0 10px #FF00A9;
 }
 
 .sidebar-logo {
   width: 42%;
-  height: auto; 
-  margin: 0 auto; 
-  display: block; /* Ensure it's a block element */
+  height: auto;
+  margin: 0 auto;
+  display: block;
 }
 
 .sidebar-title {
-  text-align: center; /* Center align title text */
-  margin-top: 5px; /* Adjust top margin */
-  margin-bottom: 30px; /* Adjust bottom margin */
+  text-align: center;
+  margin-top: 5px;
+  margin-bottom: 30px;
 }
 
 .collapsed {
-  width: 50px; /* Width when collapsed */
+  width: 50px;
 }
 
 .toggle-btn {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 20px; /* Adjust size as needed */
-  color: #fff; /* Icon color */
+  font-size: 20px;
+  color: #fff;
 }
 
 .sidebar-title-text {
-  color: #fff; /* Title color */
+  color: #fff;
   font-size: 25px;
-  font-family: 'Verdana', sans-serif; /* Font style */
-  margin-top: 10px; /* Space between logo and title text */
-  display: block; /* Ensure title text is on a new line */
+  font-family: 'Verdana', sans-serif;
+  margin-top: 10px;
+  display: block;
 }
 
 .sidebar-list {
-  list-style-type: none; /* Remove bullet points */
-  padding: 0; /* Remove default padding */
-  margin-bottom: auto; /* Push content up to top */
+  list-style-type: none;
+  padding: 0;
+  margin-bottom: auto;
 }
 
 .sidebar-link {
-  color: #ffffff; /* Link color */
+  color: #ffffff;
   text-decoration: none;
   font-weight: 0;
   font-size: 17px;
   font-family: 'Arial', sans-serif;
-  display: flex; /* Make links block elements */
-  align-items: center; /* Center vertically */
-  padding: 5px 10px; /* Spacing */
-  margin: 15px 0; /* Spacing between links */
-  transition: color 0.3s, border-color 0.3s; /* Smooth color transition */
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  margin: 15px 0;
+  transition: color 0.3s, border-color 0.3s;
 }
 
 .sidebar-link i {
-  margin-right: 20px; /* Space between icon and text */
-  font-size: 18px; /* Icon size */
-  vertical-align: middle; /* Center align with text */
+  margin-right: 20px;
+  font-size: 18px;
+  vertical-align: middle;
 }
 
 .sidebar-link:hover {
-  color: #000000; /* Change link color on hover */
-  border-color: #000000; /* Change border color on hover */
+  color: #000000;
+  border-color: #000000;
 }
 
-/* Highlight active link */
 .active-link {
-  color: #000000; /* Color for active link */
-  font-weight: bold; /* Make active link bold */
+  color: #000000;
+  font-weight: bold;
   background-color: #ffffff !important;
   padding: 8px 5px !important;
   width: 100%;
-  box-sizing: content-box; /* Include padding and borders in width */
-  border: 2px solid #ffffff; /* Add border */
-  border-radius: 4px; /* Optional: rounded corners */
+  box-sizing: content-box;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
 }
 
-/* Remove bullets from the submenu */
 .submenu {
   list-style-type: none;
-  padding-left: 0; /* Remove left padding */
-  margin-left: 20px; /* Indent the submenu items */
+  padding-left: 0;
+  margin-left: 20px;
 }
 
-/* Add specific style for the collapsed sidebar links */
 .collapsed .sidebar-link {
-  justify-content: center; /* Center the icon when collapsed */
+  justify-content: center;
 }
 
-/* Style for the logout link at the bottom */
 .sidebar-footer {
-  width: 100%; /* Full width */
+  width: 100%;
   display: flex;
-  justify-content: left; /* Center the logout link */
-  padding: 0; /* Remove extra padding */
-  margin-top: auto; /* Push the footer to the bottom */
+  justify-content: left;
+  padding: 0;
+  margin-top: auto;
 }
 
 .sidebar-footer .sidebar-link {
@@ -210,16 +201,16 @@ export default {
   font-family: 'Arial', sans-serif;
   padding: 10px 20px;
   border-radius: 25px;
-  margin-top: 15px; /* Space between links and logout button */
+  margin-top: 15px;
   display: flex;
   align-items: left;
 }
 
 .sidebar-footer .sidebar-link i {
-  margin-right: 18px; /* Space between icon and text */
+  margin-right: 18px;
 }
 
 .sidebar-footer .sidebar-link:hover {
-  color: #000000; /* Change link color on hover */
+  color: #000000;
 }
 </style>
