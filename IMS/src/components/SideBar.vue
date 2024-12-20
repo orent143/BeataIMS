@@ -71,8 +71,8 @@ export default {
           ],
           isOpen: false
         },
-        { name: 'Sales', path: '/sales', icon: 'fas fa-cash-register' },
-        { name: 'Suppliers', path: '/suppliers', icon: 'fas fa-truck' },
+        { name: 'Orders', path: '/sales', icon: 'fas fa-cash-register' },
+        { name: 'Create Orders', path: '/suppliers', icon: 'fas fa-truck' },
         { name: 'Categories', path: '/category', icon: 'fas fa-th-list' },
         { name: 'Reports', path: '/reports', icon: 'fas fa-chart-line' }
       ]
