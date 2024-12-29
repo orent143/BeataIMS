@@ -6,6 +6,9 @@ import Sales from '@/views/Sales.vue';
 import Suppliers from '@/views/Suppliers.vue';
 import Reports from '@/views/Reports.vue';
 import Category from '@/views/Category.vue';
+import SummaryReport from '@/views/reports/SummaryReport.vue';
+import LowStockReport from '@/views/reports/LowStockReport.vue';
+import SalesReport from '@/views/reports/SalesReport.vue';
 
 const routes = [
   { path: '/', component: Home },
@@ -14,7 +17,10 @@ const routes = [
   { path: '/sales', component: Sales },
   { path: '/suppliers', component: Suppliers },
   { path: '/category', component: Category },
-  { path: '/reports', component: Reports }
+  { path: '/reports', component: Reports },
+  { path: '/reports/summary', component: SummaryReport },
+  { path: '/reports/lowStock', component: LowStockReport },
+  { path: '/reports/sales', component: SalesReport },
 ];
 
 const router = createRouter({

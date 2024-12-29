@@ -18,7 +18,10 @@
 
     <div class="main-content">
       <div class="report-cards">
-        <div class="report-card">
+        <div 
+          class="report-card"
+          @click="goToReport('summary')"
+        >
           <div class="report-card-header">
             <h3>Summary Report</h3>
           </div>
@@ -27,7 +30,10 @@
           </div>
         </div>
 
-        <div class="report-card">
+        <div 
+          class="report-card"
+          @click="goToReport('lowStock')"
+        >
           <div class="report-card-header">
             <h3>Low Stock Report</h3>
           </div>
@@ -36,7 +42,10 @@
           </div>
         </div>
 
-        <div class="report-card">
+        <div 
+          class="report-card"
+          @click="goToReport('sales')"
+        >
           <div class="report-card-header">
             <h3>Sales Report</h3>
           </div>
@@ -58,8 +67,38 @@
 </template>
 
 <script>
-// Your script section remains the same
+export default {
+  data() {
+    return {
+      searchTerm: '',
+      showAddForm: false,
+      editingItem: null,
+      filteredItems: [], // Assuming you have the items to filter
+    };
+  },
+  methods: {
+    toggleAddForm() {
+      this.showAddForm = !this.showAddForm;
+    },
+    goToReport(reportType) {
+    this.$router.push(`/reports/${reportType}`);
+    },
+    addItem(item) {
+      // Handle adding the item
+    },
+    setEditItem(item) {
+      this.editingItem = item;
+    },
+    removeItem(itemId) {
+      // Handle item removal
+    },
+    saveItem(updatedItem) {
+      // Handle saving the updated item
+    }
+  },
+};
 </script>
+
 
 <style scoped>
 .app-container {
@@ -120,6 +159,11 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  cursor: pointer; /* Makes the card visually clickable */
+}
+
+.report-card:hover {
+  background-color: #f0f0f0; /* Adds hover effect */
 }
 
 .report-card-header {
