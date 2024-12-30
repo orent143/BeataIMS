@@ -1,127 +1,340 @@
 <template>
   <div class="app-container">
-   <div class="header-container">
-     <h1 class="products-header">Dashboard</h1>
-     <div class="header-actions">
-       <div class="search-container">
-         <input
-           type="text"
-           v-model="searchTerm"
-           placeholder="Search"
-           class="search-bar"
-         />
-         <i class="fas fa-search search-icon"></i>
-       </div>
-     
-       <button @click="toggleAddForm" class="add-product-btn">Add</button>
-     </div>
-   </div>
+    <div class="header-container">
+      <h1 class="products-header">Dashboard</h1>
+      <div class="header-actions">
+        <div class="date-display">
+          <i class="fas fa-calendar"></i>
+          <span>{{ currentDate }}</span>
+        </div>
+      </div>
+    </div>
 
-   <div class="main-content">
-     <div class="dashboard-container">
-       <AddItem v-if="showAddForm" @add="addItem" :isVisible="showAddForm" @close="toggleAddForm" />
-       <InventoryList
-         :items="filteredItems"
-         @edit="setEditItem"
-         @remove="removeItem"
-       />
-       <EditItem v-if="editingItem" :item="editingItem" @save="saveItem" />
-     </div>
-   </div>
- </div>
+    <div class="main-content">
+      <div class="dashboard-container">
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+          <div class="card total-sales">
+            <div class="card-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="card-content">
+              <h3>Total Sales</h3>
+              <p class="amount">₱{{ totalSales.toFixed(2) }}</p>
+              <p class="subtitle">Today's Revenue</p>
+            </div>
+          </div>
+
+          <div class="card total-products">
+            <div class="card-icon">
+              <i class="fas fa-box"></i>
+            </div>
+            <div class="card-content">
+              <h3>Total Products</h3>
+              <p class="amount">{{ totalProducts }}</p>
+              <p class="subtitle">In Inventory</p>
+            </div>
+          </div>
+
+          <div class="card low-stock">
+            <div class="card-icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="card-content">
+              <h3>Low Stock</h3>
+              <p class="amount">{{ lowStockCount }}</p>
+              <p class="subtitle">Items Need Restock</p>
+            </div>
+          </div>
+
+          <div class="card top-selling">
+            <div class="card-icon">
+              <i class="fas fa-star"></i>
+            </div>
+            <div class="card-content">
+              <h3>Top Selling</h3>
+              <p class="product-name">{{ topSellingProduct }}</p>
+              <p class="subtitle">Most Popular Item</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="recent-activity">
+          <h2>Recent Activity</h2>
+          <div class="activity-list">
+            <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
+              <div class="activity-icon">
+                <i :class="activity.icon"></i>
+              </div>
+              <div class="activity-details">
+                <p class="activity-title">{{ activity.title }}</p>
+                <p class="activity-time">{{ activity.time }}</p>
+              </div>
+              <div class="activity-status" :class="activity.status.toLowerCase()">
+                {{ activity.status }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-
+export default {
+  name: 'Home',
+  data() {
+    return {
+      currentDate: new Date().toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }),
+      totalSales: 25850.75,
+      totalProducts: 156,
+      lowStockCount: 8,
+      topSellingProduct: 'Espresso',
+      recentActivities: [
+        {
+          id: 1,
+          icon: 'fas fa-shopping-cart',
+          title: 'New sale recorded',
+          time: '5 minutes ago',
+          status: 'Completed'
+        },
+        {
+          id: 2,
+          icon: 'fas fa-box',
+          title: 'Inventory updated',
+          time: '15 minutes ago',
+          status: 'Success'
+        },
+        {
+          id: 3,
+          icon: 'fas fa-exclamation-circle',
+          title: 'Low stock alert',
+          time: '1 hour ago',
+          status: 'Warning'
+        },
+        {
+          id: 4,
+          icon: 'fas fa-truck',
+          title: 'New supplier order',
+          time: '2 hours ago',
+          status: 'Pending'
+        }
+      ]
+    }
+  }
+}
 </script>
 
 <style scoped>
 .app-container {
-display: flex;
-flex-direction: column;
-width: 80dvw;
-max-width: 80dvw;
-margin-left: 40px;
+  display: flex;
+  flex-direction: column;
+  width: 80vw;
+  max-width: 80vw;
+  margin-left: 40px;
 }
 
 .header-container {
-display: flex;
-align-items: center;
-justify-content: space-between;
-margin-left: 18px;
-width: 95%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-left: 18px;
+  width: 95%;
+  margin-bottom: 20px;
 }
 
 .products-header {
-color: #000000;
-font-size: 30px;
-font-family: 'Arial', sans-serif;
-font-weight: 900;
+  color: #000000;
+  font-size: 30px;
+  font-family: 'Arial', sans-serif;
+  font-weight: 900;
 }
 
-.header-actions {
-display: flex;
-align-items: center;
-gap: 10px; /* Add space between header actions */
+.date-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  color: #666;
+  font-weight: 500;
 }
 
 .main-content {
-display: flex; /* Use flexbox for layout */
-padding: 4px; /* Padding around the main content */
+  display: flex;
+  padding: 4px;
 }
 
 .dashboard-container {
-flex-grow: 1; /* Allow it to fill available space */
-height: 40dvw; /* Adjust height */
-background-color: #dfdfdf; /* Background color */
-border-radius: 25px; /* Maintain border radius */
-overflow-y: auto; /* Enable scrolling if content overflows */
-margin-left: 5px; /* Space between the sidebar and inventory container */
-padding: 0; /* No padding */
+  flex-grow: 1;
+  background-color: #dfdfdf;
+  border-radius: 25px;
+  overflow-y: auto;
+  margin-left: 5px;
+  padding: 20px;
 }
 
-
-
-.search-container {
-position: relative; /* Set position relative for the icon */
-margin-right: 3px; /* Space between search and button */
+/* Summary Cards */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
 }
 
-.search-icon {
-position: absolute; /* Position absolute to place it inside the input */
-right: 10px; /* Position it on the right */
-top: 50%; /* Center vertically */
-transform: translateY(-50%); /* Adjust for vertical centering */
-color: #333; /* Icon color */
-pointer-events: none; /* Prevent clicks on the icon */
+.card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.search-bar {
-padding: 8px 30px 8px 8px; /* Add right padding for icon space */
-border: 1px solid #94949400;
-border-radius: 10px;
-width: 130px;
-font-size: 14px; /* Adjust font size */
-font-weight: bold; /* Adjust font weight */
-color: #333; /* Change font color */
-background-color: #D9D9D9; /* Change background color */
+.card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
 }
 
-.add-product-btn {
-padding: 8px 12px;
-background-color: #01A501; /* Button background */
-color: rgb(0, 0, 0);
-border: none;
-border-radius: 10px;
-width: 70px;
-cursor: pointer;
-font-size: 14px; /* Adjust font size */
-font-family: 'Arial', sans-serif; /* Change font family */
-font-weight: bold; /* Make font bold */
-text-align: center; /* Center the text */
+.total-sales .card-icon {
+  background-color: #e3f2fd;
+  color: #1976d2;
 }
 
-.add-product-btn:hover {
-background-color: #00b32dad; /* Darker on hover */
+.total-products .card-icon {
+  background-color: #e8f5e9;
+  color: #43a047;
+}
+
+.low-stock .card-icon {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.top-selling .card-icon {
+  background-color: #f3e5f5;
+  color: #8e24aa;
+}
+
+.card-content h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.amount {
+  margin: 5px 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.product-name {
+  margin: 5px 0;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: #888;
+}
+
+/* Recent Activity */
+.recent-activity {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.recent-activity h2 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #e3f2fd;
+  color: #1976d2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.activity-details {
+  flex-grow: 1;
+  margin-left: 15px;
+}
+
+.activity-title {
+  margin: 0;
+  font-weight: 500;
+  color: #333;
+}
+
+.activity-time {
+  margin: 0;
+  font-size: 12px;
+  color: #888;
+}
+
+.activity-status {
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.activity-status.completed {
+  background-color: #e8f5e9;
+  color: #43a047;
+}
+
+.activity-status.success {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.activity-status.warning {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.activity-status.pending {
+  background-color: #f3e5f5;
+  color: #8e24aa;
 }
 </style>
