@@ -1,4 +1,6 @@
 <template>
+        <SideBar />
+
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Reports List</h1>
@@ -67,7 +69,12 @@
 </template>
 
 <script>
+import SideBar from '@/components/ims/SideBar.vue';
+
 export default {
+  components: {
+    SideBar
+  },
   data() {
     return {
       searchTerm: '',
@@ -81,7 +88,7 @@ export default {
       this.showAddForm = !this.showAddForm;
     },
     goToReport(reportType) {
-    this.$router.push(`/reports/${reportType}`);
+    this.$router.push(`/reportsims/${reportType}`);
     },
     addItem(item) {
       // Handle adding the item
@@ -104,9 +111,9 @@ export default {
 .app-container {
   display: flex;
   flex-direction: column;
-  width: 80dvw;
-  max-width: 80dvw;
-  margin-left: 40px;
+  flex-grow: 1; /* Allow the container to take remaining space */
+  margin-left: 250px; /* Make space for sidebar, adjust as needed */
+  height: 100vh; /* Full height of the page */
 }
 
 .header-container {
@@ -131,11 +138,10 @@ export default {
 }
 
 .main-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  padding: 4px;
+  flex-grow: 1; /* Allow the content to take the remaining space */
+  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
+  height: calc(100vh - 60px); /* Account for header height */
+  overflow-y: auto; /* Enable scrolling if content overflows */
 }
 
 .report-cards {

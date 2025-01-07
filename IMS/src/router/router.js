@@ -1,28 +1,43 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '@/views/Home.vue';
-import Inventory from '@/views/Inventory.vue';
-import Stock from '@/views/Stock.vue';
-import Sales from '@/views/Sales.vue';
-import Suppliers from '@/views/Suppliers.vue';
-import Reports from '@/views/Reports.vue';
-import Category from '@/views/Category.vue';
-import SummaryReport from '@/views/reports/SummaryReport.vue';
-import LowStockReport from '@/views/reports/LowStockReport.vue';
-import SalesReport from '@/views/reports/SalesReport.vue';
+
+//ims
+import HomeIMS from '@/views/ims/HomeIMS.vue';
+import InventoryIMS from '@/views/ims/InventoryIMS.vue';
+import Stock from '@/views/ims/Stock.vue';
+import Sales from '@/views/ims/Sales.vue';
+import Suppliers from '@/views/ims/Suppliers.vue';
+import ReportsIMS from '@/views/ims/ReportsIMS.vue';
+import Category from '@/views/ims/Category.vue';
+import SummaryReport from '@/views/ims/reports/SummaryReport.vue';
+import LowStockReport from '@/views/ims/reports/LowStockReport.vue';
+import SalesReport from '@/views/ims/reports/SalesReport.vue';
+
+//sms
+import CreateOrder from '@/views/sms/CreateOrder.vue';
+import HomeSMS from '@/views/sms/HomeSMS.vue';
+import InventorySMS from '@/views/sms/InventorySMS.vue';
+import Order from '@/views/sms/Order.vue';
+import ReportsSMS from '@/views/sms/ReportsSMS.vue';
+
 import Welcome from '@/views/Welcome.vue'; // Import the Welcome page
 
 const routes = [
   { path: '/', component: Welcome }, // Set the root path to the Welcome page
-  { path: '/home', component: Home },
-  { path: '/inventory', component: Inventory },
+  { path: '/homeims', component: HomeIMS },
+  { path: '/inventoryims', component: InventoryIMS },
   { path: '/stock', component: Stock },
   { path: '/sales', component: Sales },
   { path: '/suppliers', component: Suppliers },
   { path: '/category', component: Category },
-  { path: '/reports', component: Reports },
-  { path: '/reports/summary', component: SummaryReport },
-  { path: '/reports/lowStock', component: LowStockReport },
-  { path: '/reports/sales', component: SalesReport },
+  { path: '/reportsims', component: ReportsIMS },
+  { path: '/reportsims/summary', component: SummaryReport },
+  { path: '/reportsims/lowStock', component: LowStockReport },
+  { path: '/reportsims/sales', component: SalesReport },
+  { path: '/homesms', component: HomeSMS },
+  { path: '/inventorysms', component: InventorySMS },
+  { path: '/createorder', component: CreateOrder },
+  { path: '/order', component: Order },
+  { path: '/reportssms', component: ReportsSMS },
 ];
 
 const router = createRouter({

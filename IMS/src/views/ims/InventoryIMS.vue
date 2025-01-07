@@ -1,8 +1,12 @@
 <template>
+      <SideBar />
+
   <div class="app-container">
+    <!-- Header Section -->
     <div class="header-container">
-      <h1 class="products-header">Stock List </h1>
+      <h1 class="products-header">Product List</h1>
       <div class="header-actions">
+        <!-- Search Bar -->
         <div class="search-container">
           <input
             type="text"
@@ -14,7 +18,7 @@
           <i class="fas fa-search search-icon"></i>
         </div>
 
-        <!-- Filter Button with dropdown for status -->
+        <!-- Filter Dropdown -->
         <div class="filter-container">
           <button class="filter-btn" @click="toggleFilterDropdown">
             <i class="fas fa-filter"></i>
@@ -34,37 +38,47 @@
       </div>
     </div>
 
+    <!-- Main Content Section -->
     <div class="main-content">
       <div class="inventory-container">
         <table class="stock-table">
           <thead>
             <tr>
+              <th v-if="isLowStockMode">Select</th>
               <th>Name</th>
               <th>Quantity</th>
-              <th>Cost Price</th>
+              <th>Unit Price</th>
+              <th>Category</th>
               <th>Supplier</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-  <tr v-for="ingredient in filteredItems" :key="ingredient.id">
-    <td>{{ ingredient.name }}</td>
-    <td>{{ ingredient.quantity }}</td>
-    <td>₱{{ ingredient.costPrice }}</td> <!-- Changed $ to ₱ -->
-    <td>{{ ingredient.supplier }}</td>
-    <td>{{ ingredient.status }}</td>
-    <td>
-      <!-- Action buttons -->
-      <button class="action-btn" @click="editItem(ingredient)">Edit</button>
-      <button class="action-btn" @click="removeItem(ingredient.id)">Remove</button>
-    </td>
-  </tr>
-</tbody>
-
+            <tr v-for="product in filteredItems" :key="product.id">
+              <td v-if="isLowStockMode">
+                <input
+                  type="checkbox"
+                  :value="product.id"
+                  v-model="selectedLowStockItems"
+                />
+              </td>
+              <td>{{ product.name }}</td>
+              <td>{{ product.quantity }}</td>
+              <td>₱{{ product.unitPrice }}</td>
+              <td>{{ product.category }}</td>
+              <td>{{ product.supplier }}</td>
+              <td>{{ product.status }}</td>
+              <td>
+                <button class="action-btn" @click="editItem(product)">Edit</button>
+                <button class="action-btn" @click="removeItem(product.id)">Remove</button>
+              </td>
+            </tr>
+          </tbody>
         </table>
-       <!-- Floating Button and Popout Options -->
-       <div class="floating-btn-container">
+
+        <!-- Floating Button and Popout Options -->
+        <div class="floating-btn-container">
           <button class="floating-btn" @click="togglePopoutOptions">+</button>
           <div v-if="showPopoutOptions" class="popout-options">
             <button class="popout-option" @click="addLowStock">Add Low Stock</button>
@@ -75,15 +89,15 @@
     </div>
 
     <!-- Add or Edit Item Form -->
-    <add-stock 
-      v-if="showAddForm" 
-      :isVisible="showAddForm" 
-      @close="toggleAddForm" 
+    <add-product
+      v-if="showAddForm"
+      :isVisible="showAddForm"
+      @close="toggleAddForm"
       @add="addItem"
     />
 
     <!-- Edit Item Form -->
-    <edit-stock
+    <edit-product
       v-if="showEditForm"
       :isVisible="showEditForm"
       :itemToEdit="selectedItem"
@@ -94,13 +108,15 @@
 </template>
 
 <script>
-import AddStock from '@/components/AddStock.vue';
-import EditStock from '@/components/EditStock.vue'; // Import the EditStock component
+import SideBar from '@/components/ims/SideBar.vue'; // Import Sidebar component
+import AddProduct from '@/components/ims/AddProduct.vue';
+import EditProduct from '@/components/ims/EditProduct.vue';
 
 export default {
   components: {
-    AddStock,
-    EditStock
+    AddProduct,
+    EditProduct,
+    SideBar
   },
   data() {
     return {
@@ -109,26 +125,20 @@ export default {
       showFilterDropdown: false,
       showAddForm: false,
       showEditForm: false,
-      showPopoutOptions: false, // Controls the visibility of popout options
-      selectedItem: null, // Store the item to be edited
-      stockItems: [
-        { id: 1, name: 'Coffee Beans', quantity: 50, costPrice: 5, status: 'In Stock', supplier: 'Coffee Co.' },
-        { id: 2, name: 'Milk', quantity: 30, costPrice: 1.5, status: 'In Stock', supplier: 'Dairy Corp.' },
-        { id: 3, name: 'Coffee Beans', quantity: 30, costPrice: 5, status: 'In Stock', supplier: 'Coffee Co.' },
-        { id: 4, name: 'Milk', quantity: 20, costPrice: 1.5, status: 'In Stock', supplier: 'Dairy Corp.' },
-        { id: 5, name: 'Foam Milk', quantity: 10, costPrice: 2, status: 'Low Stock', supplier: 'Dairy Corp.' },
-        { id: 6, name: 'Flour', quantity: 40, costPrice: 1, status: 'In Stock', supplier: 'Bakery Inc.' },
-        { id: 7, name: 'Butter', quantity: 15, costPrice: 4, status: 'Low Stock', supplier: 'Bakery Inc.' },
-        { id: 8, name: 'Flour', quantity: 25, costPrice: 1, status: 'In Stock', supplier: 'Bakery Inc.' },
-        { id: 9, name: 'Yeast', quantity: 5, costPrice: 2, status: 'In Stock', supplier: 'Bakery Inc.' },
-        { id: 10, name: 'Lemon', quantity: 50, costPrice: 0.5, status: 'In Stock', supplier: 'Fruit Co.' },
-        { id: 11, name: 'Sugar', quantity: 20, costPrice: 1, status: 'In Stock', supplier: 'Sugar Corp.' },
-        { id: 12, name: 'Water', quantity: 100, costPrice: 0.1, status: 'In Stock', supplier: 'Water Supply Co.' },
-        { id: 13, name: 'Cheese', quantity: 10, costPrice: 6, status: 'Out of Stock', supplier: 'Deli Foods' },
-        { id: 14, name: 'Bread', quantity: 40, costPrice: 2, status: 'In Stock', supplier: 'Bakery Inc.' },
-        { id: 15, name: 'Lettuce', quantity: 30, costPrice: 3, status: 'Low Stock', supplier: 'Green Farms' },
-        ],
-      filteredItems: []
+      showPopoutOptions: false,
+      selectedItem: null,
+      productItems: [
+        { id: 1, name: "Espresso", quantity: 50, unitPrice: 60, category: "Beverages", supplier: "Coffee Co.", status: "In Stock" },
+        { id: 2, name: "Cappuccino", quantity: 30, unitPrice: 50, category: "Beverages", supplier: "Coffee Co.", status: "In Stock" },
+        { id: 3, name: "Croissant", quantity: 20, unitPrice: 50, category: "Bakery", supplier: "Bakery Inc.", status: "Low Stock" },
+        { id: 4, name: "Bagel", quantity: 15, unitPrice: 20, category: "Bakery", supplier: "Bakery Inc.", status: "In Stock" },
+        { id: 5, name: "Lemonade", quantity: 25, unitPrice: 75, category: "Beverages", supplier: "Beverage Co.", status: "In Stock" },
+        { id: 6, name: "Cheese Sandwich", quantity: 10, unitPrice: 60, category: "Food", supplier: "Deli Foods", status: "Out of Stock" },
+        { id: 7, name: "Cheese Sandwich", quantity: 10, unitPrice: 60, category: "Food", supplier: "Deli Foods", status: "Out of Stock" },
+      ],
+      filteredItems: [],
+      selectedLowStockItems: [],
+      isLowStockMode: false,
     };
   },
   methods: {
@@ -145,7 +155,7 @@ export default {
       this.showPopoutOptions = !this.showPopoutOptions;
     },
     filterItems() {
-      let filtered = this.stockItems;
+      let filtered = this.productItems;
 
       if (this.searchTerm) {
         filtered = filtered.filter(item =>
@@ -161,33 +171,31 @@ export default {
     },
     editItem(item) {
       this.selectedItem = item;
-      this.showEditForm = true; // Show the Edit Form
+      this.showEditForm = true;
     },
     updateItem(updatedItem) {
-      const index = this.stockItems.findIndex(item => item.id === updatedItem.id);
+      const index = this.productItems.findIndex(item => item.id === updatedItem.id);
       if (index !== -1) {
-        this.stockItems.splice(index, 1, updatedItem); // Update the item
+        this.productItems.splice(index, 1, updatedItem);
       }
-      this.filterItems(); // Reapply filtering after update
-      this.toggleEditForm(); // Close the form after updating
+      this.filterItems();
+      this.toggleEditForm();
     },
     removeItem(itemId) {
-      this.stockItems = this.stockItems.filter(item => item.id !== itemId);
+      this.productItems = this.productItems.filter(item => item.id !== itemId);
       this.filterItems();
     },
     addItem(newItem) {
-      newItem.id = this.stockItems.length + 1;
-      this.stockItems.push(newItem);
+      newItem.id = this.productItems.length + 1;
+      this.productItems.push(newItem);
       this.filterItems();
-      this.toggleAddForm(); // Close the add form
+      this.toggleAddForm();
     },
     addLowStock() {
-      console.log("Add Low Stock clicked");
-      // Handle adding low stock logic
+      this.isLowStockMode = !this.isLowStockMode;
     },
     addSummary() {
       console.log("Add Summary clicked");
-      // Handle adding summary logic
     }
   },
   created() {
@@ -199,17 +207,19 @@ export default {
   }
 };
 </script>
-  
-  
-  <style scoped>
-  /* Use same styles as Inventory page */
-  .app-container {
+
+
+
+<style scoped>
+/* General Styling */
+.app-container {
   display: flex;
   flex-direction: column;
-  width: 80vw;
-  max-width: 80vw;
-  margin-left: 40px;
+  flex-grow: 1; /* Allow the container to take remaining space */
+  margin-left: 250px; /* Make space for sidebar, adjust as needed */
+  height: 100vh; /* Full height of the page */
 }
+
 .header-container {
   display: flex;
   align-items: center;
@@ -225,19 +235,21 @@ export default {
   font-weight: 900;
 }
 
-
 .header-actions {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
+/* Main Content */
 .main-content {
-    display: flex;
-    padding: 4px;
-  }
-  
-  .inventory-container {
+  flex-grow: 1; /* Allow the content to take the remaining space */
+  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
+  height: calc(100vh - 60px); /* Account for header height */
+  overflow-y: auto; /* Enable scrolling if content overflows */
+}
+
+.inventory-container {
   position: relative;
   flex-grow: 1;
   height: 40vw;
@@ -247,33 +259,41 @@ export default {
   margin-left: 5px;
   padding: 0;
 }
-  
-  /* Styling for the stock table */
-  .stock-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .stock-table th,
-  .stock-table td {
-    padding: 10px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-  }
-  .stock-table tbody{
-    font-family: 'Arial', sans-serif;
-  font-size: 15px;
-  }
 
-  .stock-table th {
-    background-color: #f4f4f4;
-    padding: 13px;
-    font-weight: bold;
-  }
- 
-  .search-container {
+/* Stock Table Styling */
+.stock-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stock-table th,
+.stock-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.stock-table tbody {
+  font-family: 'Arial', sans-serif;
+  font-size: 15px;
+}
+
+.stock-table th {
+  background-color: #f4f4f4;
+  padding: 13px;
+  font-weight: bold;
+}
+.stock-table input[type="checkbox"] {
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Modify header for low stock mode */
+/* Search Bar */
+.search-container {
   position: relative;
   margin-right: 3px;
 }
@@ -298,6 +318,7 @@ export default {
   background-color: #D9D9D9;
 }
 
+/* Filter Button */
 .filter-btn {
   padding: 8px;
   background-color: transparent;
@@ -333,6 +354,7 @@ export default {
   margin-bottom: 10px;
 }
 
+/* Add Product Button */
 .add-product-btn {
   padding: 8px 12px;
   background-color: #01A501;
@@ -348,7 +370,8 @@ export default {
 .add-product-btn:hover {
   background-color: #00b32dad;
 }
-/* Add a gap between the action buttons */
+
+/* Action Buttons */
 .action-btn {
   padding: 6px 9px;
   background-color: #007bff;
@@ -370,6 +393,7 @@ export default {
 .action-btn:active {
   background-color: #004080;
 }
+
 .floating-btn-container {
   position: fixed; /* Change from absolute to fixed */
   bottom: 20px;
@@ -429,5 +453,4 @@ export default {
 .popout-option:active {
   background-color: #004080;
 }
-  </style>
-  
+</style>

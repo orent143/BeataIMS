@@ -1,7 +1,7 @@
 <template>
   <div :class="['sidebar', { 'collapsed': isCollapsed }]">
     <h2 v-if="!isCollapsed" class="sidebar-title">
-      <img src="../assets/Cafe-Logo-Transparent-Background.png" class="sidebar-logo" />
+      <img src="@/assets/Cafe-Logo-Transparent-Background.png" class="sidebar-logo" />
       <span class="sidebar-title-text">Café Beata</span>
     </h2>
 
@@ -47,7 +47,7 @@
     </ul>
 
     <div class="sidebar-footer">
-      <router-link to="/login" class="sidebar-link" @click="logout">
+      <router-link to="/" class="sidebar-link" @click="logout">
         <i class="fas fa-sign-out-alt"></i> Logout
       </router-link>
     </div>
@@ -60,13 +60,13 @@ export default {
     return {
       isCollapsed: false,
       links: [
-        { name: 'Home', path: '/home', icon: 'fas fa-home' },
+        { name: 'Home', path: '/homeims', icon: 'fas fa-home' },
         {
           name: 'Manage Inventory',
           path: '#',
           icon: 'fas fa-box',
           submenu: [
-            { name: 'Products', path: '/inventory', icon: 'fas fa-cogs' },
+            { name: 'Products', path: '/inventoryims', icon: 'fas fa-cogs' },
             { name: 'Stocks', path: '/stock', icon: 'fas fa-cogs' }
           ],
           isOpen: false
@@ -74,7 +74,7 @@ export default {
         { name: 'Sales', path: '/sales', icon: 'fas fa-cash-register' },
         { name: 'Suppliers', path: '/suppliers', icon: 'fas fa-truck' },
         { name: 'Categories', path: '/category', icon: 'fas fa-th-list' },
-        { name: 'Reports', path: '/reports', icon: 'fas fa-chart-line' }
+        { name: 'Reports', path: '/reportsims', icon: 'fas fa-chart-line' }
       ]
     };
   },

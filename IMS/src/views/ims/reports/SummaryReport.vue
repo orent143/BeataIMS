@@ -1,4 +1,5 @@
 <template>
+  <SideBar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Summary Reports</h1>
@@ -27,6 +28,7 @@
         </div>
       </div>
     </div>
+    
 
     <div class="main-content">
       <div class="inventory-container">
@@ -77,10 +79,16 @@
       </div>
     </div>
   </div>
+  
 </template>
 
 <script>
+import SideBar from '@/components/ims/SideBar.vue';
+
 export default {
+  components: {
+    SideBar
+  },
   name: 'SummaryReport',
   data() {
     return {
@@ -161,9 +169,9 @@ export default {
 .app-container {
   display: flex;
   flex-direction: column;
-  width: 80vw;
-  max-width: 80vw;
-  margin-left: 40px;
+  flex-grow: 1; /* Allow the container to take remaining space */
+  margin-left: 250px; /* Make space for sidebar, adjust as needed */
+  height: 100vh; /* Full height of the page */
 }
 
 .header-container {
@@ -226,8 +234,10 @@ export default {
 
 /* Main Content */
 .main-content {
-  display: flex;
-  padding: 4px;
+  flex-grow: 1; /* Allow the content to take the remaining space */
+  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
+  height: calc(100vh - 60px); /* Account for header height */
+  overflow-y: auto; /* Enable scrolling if content overflows */
 }
 
 .inventory-container {

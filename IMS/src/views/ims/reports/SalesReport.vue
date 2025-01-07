@@ -1,13 +1,14 @@
 <template>
+  <SideBar />
   <div class="app-container">
     <div class="header-container">
-      <h1 class="products-header">Low Stock Report</h1>
+      <h1 class="products-header">Sales Report</h1>
       <div class="header-actions">
         <div class="search-container">
           <input
             type="text"
             v-model="searchTerm"
-            placeholder="Search products"
+            placeholder="Search sales"
             class="search-bar"
           />
           <i class="fas fa-search search-icon"></i>
@@ -20,22 +21,22 @@
         <table class="stock-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Quantity</th>
+              <th>Product</th>
+              <th>Quantity Sold</th>
               <th>Unit Price</th>
-              <th>Category</th>
-              <th>Supplier</th>
+              <th>Total Amount</th>
+              <th>Date</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="product in filteredProducts" :key="product.id">
-              <td>{{ product.name }}</td>
-              <td>{{ product.quantity }}</td>
-              <td>₱{{ product.unitPrice }}</td>
-              <td>{{ product.category }}</td>
-              <td>{{ product.supplier }}</td>
-              <td>{{ product.status }}</td>
+            <tr v-for="sale in filteredSales" :key="sale.id">
+              <td>{{ sale.product }}</td>
+              <td>{{ sale.quantity }}</td>
+              <td>₱{{ sale.unitPrice }}</td>
+              <td>₱{{ sale.totalAmount }}</td>
+              <td>{{ sale.date }}</td>
+              <td>{{ sale.status }}</td>
             </tr>
           </tbody>
         </table>
@@ -45,37 +46,57 @@
 </template>
 
 <script>
+import SideBar from '@/components/ims/SideBar.vue';
+
 export default {
-  name: 'LowStockReport',
+  components: {
+    SideBar
+  },
+  name: 'SalesReport',
   data() {
     return {
       searchTerm: '',
-      products: [
+      sales: [
         // This will be populated from your actual data source
       ]
     };
   },
   computed: {
-    filteredProducts() {
-      if (!this.searchTerm) return this.products;
+    filteredSales() {
+      if (!this.searchTerm) return this.sales;
       const term = this.searchTerm.toLowerCase();
-      return this.products.filter(product => 
-        product.name.toLowerCase().includes(term) ||
-        product.category.toLowerCase().includes(term) ||
-        product.supplier.toLowerCase().includes(term)
+      return this.sales.filter(sale => 
+        sale.product.toLowerCase().includes(term) ||
+        sale.status.toLowerCase().includes(term)
       );
     }
   },
   created() {
-    // Load low stock products
-    this.loadLowStockProducts();
+    // Load sales data
+    this.loadSalesData();
   },
   methods: {
-    loadLowStockProducts() {
+    loadSalesData() {
       // This will be replaced with actual data loading logic
-      this.products = [
-        { id: 1, name: "Croissant", quantity: 5, unitPrice: 50, category: "Bakery", supplier: "Bakery Inc.", status: "Low Stock" },
-        { id: 2, name: "Cheese Sandwich", quantity: 3, unitPrice: 60, category: "Food", supplier: "Deli Foods", status: "Low Stock" }
+      this.sales = [
+        { 
+          id: 1, 
+          product: "Espresso",
+          quantity: 10,
+          unitPrice: 60,
+          totalAmount: 600,
+          date: "2024-12-29",
+          status: "Completed"
+        },
+        { 
+          id: 2, 
+          product: "Cappuccino",
+          quantity: 5,
+          unitPrice: 50,
+          totalAmount: 250,
+          date: "2024-12-29",
+          status: "Completed"
+        }
       ];
     }
   }
@@ -87,9 +108,9 @@ export default {
 .app-container {
   display: flex;
   flex-direction: column;
-  width: 80vw;
-  max-width: 80vw;
-  margin-left: 40px;
+  flex-grow: 1; /* Allow the container to take remaining space */
+  margin-left: 250px; /* Make space for sidebar, adjust as needed */
+  height: 100vh; /* Full height of the page */
 }
 
 .header-container {
@@ -115,8 +136,10 @@ export default {
 
 /* Main Content */
 .main-content {
-  display: flex;
-  padding: 4px;
+  flex-grow: 1; /* Allow the content to take the remaining space */
+  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
+  height: calc(100vh - 60px); /* Account for header height */
+  overflow-y: auto; /* Enable scrolling if content overflows */
 }
 
 .inventory-container {
