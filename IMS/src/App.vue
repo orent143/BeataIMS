@@ -1,29 +1,22 @@
 <template>
   <div id="app">
-    <Sidebar />
-    <div class="main-content">
-      <router-view />
-    </div>
+    <router-view />  <!-- Renders the component based on the current route -->
   </div>
 </template>
 
-<script>
-import Sidebar from '@/components/SideBar.vue';
+<script setup>
+import { useRouter } from 'vue-router'; // Importing the router to programmatically navigate
+import { onMounted } from 'vue';
 
-export default {
-  components: {
-    Sidebar
-  }
-}
+// Automatically navigate to the welcome page when the app is mounted
+const router = useRouter();
+
+// Redirect to the Welcome page when the app is loaded
+onMounted(() => {
+  router.push('/');
+});
 </script>
 
 <style scoped>
-.main-content {
-  margin-left: 200px; /* Adjust based on sidebar width */
-  transition: margin-left 0.3s ease; /* Smooth transition for margin */
-}
 
-.sidebar.collapsed + .main-content {
-  margin-left: 50px; /* Adjust when sidebar is collapsed */
-}
 </style>

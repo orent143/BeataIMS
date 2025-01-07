@@ -33,7 +33,7 @@ button:hover {
   height: 100%; /* Full height */
   width: 100%; /* Full width */
   display: flex; /* Use flexbox for layout */
-  flex-direction: row; /* Change to row for sidebar and content */
+  flex-direction: row; /* Sidebar and content side by side */
   padding: 0; /* Remove padding */
   margin: 0; /* Remove margin */
 }

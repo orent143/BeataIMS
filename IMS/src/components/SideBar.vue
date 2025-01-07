@@ -60,7 +60,7 @@ export default {
     return {
       isCollapsed: false,
       links: [
-        { name: 'Home', path: '/', icon: 'fas fa-home' },
+        { name: 'Home', path: '/home', icon: 'fas fa-home' },
         {
           name: 'Manage Inventory',
           path: '#',

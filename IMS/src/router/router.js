@@ -9,9 +9,11 @@ import Category from '@/views/Category.vue';
 import SummaryReport from '@/views/reports/SummaryReport.vue';
 import LowStockReport from '@/views/reports/LowStockReport.vue';
 import SalesReport from '@/views/reports/SalesReport.vue';
+import Welcome from '@/views/Welcome.vue'; // Import the Welcome page
 
 const routes = [
-  { path: '/', component: Home },
+  { path: '/', component: Welcome }, // Set the root path to the Welcome page
+  { path: '/home', component: Home },
   { path: '/inventory', component: Inventory },
   { path: '/stock', component: Stock },
   { path: '/sales', component: Sales },
