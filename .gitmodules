@@ -1,0 +1,3 @@
+[submodule "demo_fastapi"]
+	path = demo_fastapi
+	url = https://github.com/orent143/BeataIMS
