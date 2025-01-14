@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 //ims
 import HomeIMS from '@/views/ims/HomeIMS.vue';
 import InventoryIMS from '@/views/ims/InventoryIMS.vue';
-import Stock from '@/views/ims/Stock.vue';
 import Sales from '@/views/ims/Sales.vue';
 import Suppliers from '@/views/ims/Suppliers.vue';
 import ReportsIMS from '@/views/ims/ReportsIMS.vue';
@@ -25,7 +24,6 @@ const routes = [
   { path: '/', component: Welcome }, // Set the root path to the Welcome page
   { path: '/homeims', component: HomeIMS },
   { path: '/inventoryims', component: InventoryIMS },
-  { path: '/stock', component: Stock },
   { path: '/sales', component: Sales },
   { path: '/suppliers', component: Suppliers },
   { path: '/category', component: Category },

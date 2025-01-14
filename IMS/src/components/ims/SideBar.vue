@@ -61,16 +61,7 @@ export default {
       isCollapsed: false,
       links: [
         { name: 'Home', path: '/homeims', icon: 'fas fa-home' },
-        {
-          name: 'Manage Inventory',
-          path: '#',
-          icon: 'fas fa-box',
-          submenu: [
-            { name: 'Products', path: '/inventoryims', icon: 'fas fa-cogs' },
-            { name: 'Stocks', path: '/stock', icon: 'fas fa-cogs' }
-          ],
-          isOpen: false
-        },
+        { name: 'Manage Inventory', path: '/inventoryims', icon: 'fas fa-box', },
         { name: 'Sales', path: '/sales', icon: 'fas fa-cash-register' },
         { name: 'Suppliers', path: '/suppliers', icon: 'fas fa-truck' },
         { name: 'Categories', path: '/category', icon: 'fas fa-th-list' },
@@ -79,9 +70,6 @@ export default {
     };
   },
   methods: {
-    toggleSubmenu(link) {
-      link.isOpen = !link.isOpen;
-    },
     logout() {
       console.log("Logging out...");
     }
