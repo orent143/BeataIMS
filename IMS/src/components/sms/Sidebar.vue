@@ -42,6 +42,7 @@
           { name: 'Dashboard', path: '/homesms', icon: 'fas fa-tachometer-alt' },
           { name: 'Orders', path: '/order', icon: 'fas fa-shopping-cart' },
           { name: 'Create Orders', path: '/createorder', icon: 'fas fa-plus-circle' },
+          { name: 'Sales', path: '/sales', icon: 'fas fa-cash-register' },
           { name: 'Inventory', path: '/inventorysms', icon: 'fas fa-box' },
           { name: 'Reports', path: '/reportssms', icon: 'fas fa-chart-bar' }
         ]

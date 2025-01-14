@@ -15,7 +15,7 @@ export default {
   name: "Welcome",
   methods: {
     goToIMS() {
-      this.$router.push("/inventoryims");  // or '/stock' if you want to start with stock page
+      this.$router.push("/homeims");  // or '/stock' if you want to start with stock page
     },
     goToSMS() {
       this.$router.push("/homesms");

@@ -219,22 +219,22 @@ export default {
 
 .total-sales .card-icon {
   background-color: #e3f2fd;
-  color: #1976d2;
+  color: #FF32BA;
 }
 
 .total-products .card-icon {
   background-color: #e8f5e9;
-  color: #43a047;
+  color: #FF32BA;
 }
 
 .low-stock .card-icon {
   background-color: #fff3e0;
-  color: #ef6c00;
+  color: #FF32BA;
 }
 
 .top-selling .card-icon {
   background-color: #f3e5f5;
-  color: #8e24aa;
+  color: #FF32BA;
 }
 
 .card-content h3 {
@@ -296,7 +296,7 @@ export default {
   height: 40px;
   border-radius: 10px;
   background: #e3f2fd;
-  color: #1976d2;
+  color: #FF32BA;
   display: flex;
   align-items: center;
   justify-content: center;

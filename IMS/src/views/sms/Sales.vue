@@ -1,5 +1,5 @@
 <template>
-        <SideBar />
+        <Sidebar />
 
   <div class="app-container">
     <div class="header-container">
@@ -77,11 +77,11 @@
 </template>
 
 <script>
-import SideBar from '@/components/ims/SideBar.vue';
-
+import Sidebar from '@/components/sms/Sidebar.vue';
 export default {
   components: {
-    SideBar
+    Sidebar
+    
   },
   data() {
     return {

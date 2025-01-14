@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 //ims
 import HomeIMS from '@/views/ims/HomeIMS.vue';
 import InventoryIMS from '@/views/ims/InventoryIMS.vue';
-import Sales from '@/views/ims/Sales.vue';
 import Suppliers from '@/views/ims/Suppliers.vue';
 import ReportsIMS from '@/views/ims/ReportsIMS.vue';
 import Category from '@/views/ims/Category.vue';
@@ -16,6 +15,7 @@ import CreateOrder from '@/views/sms/CreateOrder.vue';
 import HomeSMS from '@/views/sms/HomeSMS.vue';
 import InventorySMS from '@/views/sms/InventorySMS.vue';
 import Order from '@/views/sms/Order.vue';
+import Sales from '@/views/sms/Sales.vue';
 import ReportsSMS from '@/views/sms/ReportsSMS.vue';
 
 import Welcome from '@/views/Welcome.vue'; // Import the Welcome page

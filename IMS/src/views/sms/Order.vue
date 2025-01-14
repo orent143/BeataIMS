@@ -49,7 +49,7 @@
             </div>
   
             <div class="order-footer">
-              <p class="total-amount">Total: ${{ order.totalAmount }}</p>
+              <p class="total-amount">Total: ₱{{ order.totalAmount }}</p>
               <div class="action-buttons">
                 <button 
                   v-if="order.status === 'pending'" 
