@@ -18,6 +18,10 @@ import Order from '@/views/sms/Order.vue';
 import Sales from '@/views/sms/Sales.vue';
 import ReportsSMS from '@/views/sms/ReportsSMS.vue';
 
+// admin
+import AdminPage from '@/views/admin/AdminPage.vue';  // Import Admin Dashboard page
+import UserManagement from '@/views/admin/UserManagement.vue';
+
 import Welcome from '@/views/Welcome.vue'; // Import the Welcome page
 
 const routes = [
@@ -36,6 +40,9 @@ const routes = [
   { path: '/createorder', component: CreateOrder },
   { path: '/order', component: Order },
   { path: '/reportssms', component: ReportsSMS },
+  // Admin routes
+  { path: '/admin', component: AdminPage },          // Admin Dashboard route
+  { path: '/usermanagement', component: UserManagement },    
 ];
 
 const router = createRouter({
