@@ -44,8 +44,9 @@ const routes = [
   { path: '/createorder', component: CreateOrder },
   { path: '/order', component: Order },
   { path: '/reportssms', component: ReportsSMS },
-  { path: '/admin', component: AdminPage },          // Admin Dashboard route
-  { path: '/usermanagement', component: UserManagement },    
+  { path: '/admin', component: AdminPage},
+  { path: '/usermanagement', component: UserManagement},
+
 ];
 
 const router = createRouter({
