@@ -69,10 +69,11 @@ export default {
           icon: 'fas fa-box',
           submenu: [
             { name: 'Products', path: '/inventoryims', icon: 'fas fa-cogs' },
-            { name: 'Stock', path: '/suppliers', icon: 'fas fa-boxes' }
+            { name: 'Stock', path: '/stocks', icon: 'fas fa-boxes' }
           ],
           isOpen: false // Initially, the submenu is closed
         },
+        { name: 'Create Product', path: '/create', icon: 'fas fa-plus-circle' },
         { name: 'Suppliers', path: '/suppliers', icon: 'fas fa-truck' },
         { name: 'Categories', path: '/category', icon: 'fas fa-th-list' },
         { name: 'Reports', path: '/reportsims', icon: 'fas fa-chart-line' }
