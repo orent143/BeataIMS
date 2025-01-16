@@ -59,16 +59,16 @@
   <script>
   export default {
     data() {
-      return {
-        isCollapsed: false,
-        links: [
-          { name: 'Home', path: '/admin', icon: 'fas fa-home' },
-          { name: 'Users', path: '/usermanagement', icon: 'fas fa-truck' },
-          { name: 'Categories', path: '/category', icon: 'fas fa-th-list' },
-          { name: 'Reports', path: '/reportsims', icon: 'fas fa-chart-line' }
-        ]
-      };
-    },
+  return {
+    isCollapsed: false,
+    links: [
+      { name: 'Home', path: '/admin', icon: 'fas fa-home' },
+      { name: 'Users', path: '/usermanagement', icon: 'fas fa-users' },  
+      { name: 'Categories', path: '/category', icon: 'fas fa-th-list' },
+      { name: 'Reports', path: '/reportsims', icon: 'fas fa-chart-line' }
+    ]
+  };
+},
     mounted() {
       this.checkActiveSubmenu();
     },

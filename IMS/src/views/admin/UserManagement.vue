@@ -1,44 +1,53 @@
 <template>
-  <div class="admin-layout">
-    <sidebar />
-    <div class="main-content">
-      <div class="page-header">
-        <h1>User Management</h1>
-        <button @click="showCreateModal" class="btn-primary">
-          <i class="fas fa-user-plus"></i> Add New User
-        </button>
-      </div>
+  <sidebar />
 
-      <!-- Filters and Search -->
-      <div class="filters-section">
-        <div class="search-bar">
-          <i class="fas fa-search"></i>
-          <input 
-            type="text" 
-            v-model="searchQuery" 
+  <div class="app-container">
+    <!-- Header Section -->
+    <div class="header-container">
+      <h1 class="users-header">User Management</h1>
+      <div class="header-actions">
+        <!-- Search Bar -->
+        <div class="search-container">
+          <input
+            type="text"
+            v-model="searchQuery"
             placeholder="Search users..."
+            class="search-bar"
             @input="filterUsers"
-          >
+          />
+          <i class="fas fa-search search-icon"></i>
         </div>
-        <div class="filter-options">
-          <select v-model="roleFilter" @change="filterUsers">
-            <option value="">All Roles</option>
-            <option value="admin">Admin</option>
-            <option value="manager">Manager</option>
-            <option value="user">User</option>
-          </select>
-          <select v-model="statusFilter" @change="filterUsers">
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="suspended">Suspended</option>
-          </select>
-        </div>
-      </div>
 
-      <!-- Users Table -->
-      <div class="table-container">
-        <table v-if="filteredUsers.length">
+        <!-- Filter Dropdown -->
+        <div class="filter-container">
+          <button class="filter-btn" @click="toggleFilterDropdown">
+            <i class="fas fa-filter"></i>
+          </button>
+          <div v-if="showFilterDropdown" class="dropdown">
+            <select v-model="roleFilter" class="filter-select" @change="filterUsers">
+              <option value="">All Roles</option>
+              <option value="admin">Admin</option>
+              <option value="manager">Manager</option>
+              <option value="user">User</option>
+            </select>
+            <select v-model="statusFilter" class="filter-select" @change="filterUsers">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Add User Button -->
+        <button @click="toggleAddForm" class="add-user-btn">Add</button>
+      </div>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="main-content">
+      <div class="users-container">
+        <table class="users-table">
           <thead>
             <tr>
               <th>
@@ -83,7 +92,6 @@
               <td>{{ user.id }}</td>
               <td>
                 <div class="user-info">
-                  <img :src="user.avatar" :alt="user.name" class="user-avatar">
                   {{ user.name }}
                 </div>
               </td>
@@ -96,198 +104,108 @@
               </td>
               <td>{{ formatDate(user.lastLogin) }}</td>
               <td>
-                <div class="action-buttons">
-                  <button @click="editUser(user)" class="btn-icon" title="Edit">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button @click="showUserDetails(user)" class="btn-icon" title="View Details">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button @click="confirmDelete(user)" class="btn-icon delete" title="Delete">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
+                <button class="action-btn" @click="editUser(user)">Edit</button>
+                <button class="action-btn delete" @click="confirmDelete(user)">Remove</button>
               </td>
             </tr>
           </tbody>
         </table>
-        <div v-else class="no-results">
-          <i class="fas fa-search"></i>
-          <p>No users found matching your criteria</p>
-        </div>
       </div>
-
-      <!-- Pagination -->
-      <div class="pagination" v-if="filteredUsers.length">
-        <button 
-          @click="prevPage" 
-          :disabled="currentPage === 1"
-          class="btn-page"
-        >
-          <i class="fas fa-chevron-left"></i>
-        </button>
-        <span class="page-info">
-          Page {{ currentPage }} of {{ totalPages }}
-        </span>
-        <button 
-          @click="nextPage" 
-          :disabled="currentPage === totalPages"
-          class="btn-page"
-        >
-          <i class="fas fa-chevron-right"></i>
-        </button>
-        <select v-model="itemsPerPage" @change="updatePagination">
-          <option :value="10">10 per page</option>
-          <option :value="25">25 per page</option>
-          <option :value="50">50 per page</option>
-        </select>
-      </div>
-
-      <!-- Bulk Actions -->
-      <div class="bulk-actions" v-show="selectedUsers.length">
-        <span>{{ selectedUsers.length }} users selected</span>
-        <div class="bulk-buttons">
-          <button @click="bulkChangeStatus('active')" class="btn-success">
-            Activate
-          </button>
-          <button @click="bulkChangeStatus('inactive')" class="btn-warning">
-            Deactivate
-          </button>
-          <button @click="confirmBulkDelete" class="btn-danger">
-            Delete
-          </button>
-        </div>
-      </div>
-
-      <!-- Create/Edit User Modal -->
-      <modal v-if="showModal" @close="closeModal">
-        <template #header>
-          <h2>{{ isEditing ? 'Edit User' : 'Create New User' }}</h2>
-        </template>
-        
-        <template #body>
-          <form @submit.prevent="submitForm" class="user-form">
-            <div class="form-group">
-              <label for="name">Full Name</label>
-              <input 
-                type="text" 
-                id="name" 
-                v-model="formData.name"
-                required
-              >
-            </div>
-
-            <div class="form-group">
-              <label for="email">Email Address</label>
-              <input 
-                type="email" 
-                id="email" 
-                v-model="formData.email"
-                required
-              >
-            </div>
-
-            <div class="form-group">
-              <label for="role">Role</label>
-              <select id="role" v-model="formData.role" required>
-                <option value="admin">Admin</option>
-                <option value="manager">Manager</option>
-                <option value="user">User</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="status">Status</label>
-              <select id="status" v-model="formData.status" required>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="suspended">Suspended</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="password">
-                {{ isEditing ? 'New Password (leave blank to keep current)' : 'Password' }}
-              </label>
-              <input 
-                type="password" 
-                id="password" 
-                v-model="formData.password"
-                :required="!isEditing"
-              >
-            </div>
-          </form>
-        </template>
-
-        <template #footer>
-          <button @click="closeModal" class="btn-secondary">Cancel</button>
-          <button @click="submitForm" class="btn-primary">
-            {{ isEditing ? 'Update User' : 'Create User' }}
-          </button>
-        </template>
-      </modal>
-
-      <!-- Delete Confirmation Modal -->
-      <modal v-if="showDeleteModal" @close="closeDeleteModal">
-        <template #header>
-          <h2>Confirm Delete</h2>
-        </template>
-        
-        <template #body>
-          <p v-if="selectedUsers.length > 1">
-            Are you sure you want to delete {{ selectedUsers.length }} users? This action cannot be undone.
-          </p>
-          <p v-else>
-            Are you sure you want to delete {{ userToDelete?.name }}? This action cannot be undone.
-          </p>
-        </template>
-
-        <template #footer>
-          <button @click="closeDeleteModal" class="btn-secondary">Cancel</button>
-          <button @click="confirmDeleteAction" class="btn-danger">Delete</button>
-        </template>
-      </modal>
     </div>
+
+    <!-- Pagination -->
+    <div class="pagination" v-if="filteredUsers.length">
+      <button 
+        @click="prevPage" 
+        :disabled="currentPage === 1"
+        class="btn-page"
+      >
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <span class="page-info">
+        Page {{ currentPage }} of {{ totalPages }}
+      </span>
+      <button 
+        @click="nextPage" 
+        :disabled="currentPage === totalPages"
+        class="btn-page"
+      >
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      <select v-model="itemsPerPage" @change="updatePagination">
+        <option :value="10">10 per page</option>
+        <option :value="25">25 per page</option>
+        <option :value="50">50 per page</option>
+      </select>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="bulk-actions" v-show="selectedUsers.length">
+      <span>{{ selectedUsers.length }} users selected</span>
+      <div class="bulk-buttons">
+        <button @click="bulkChangeStatus('active')" class="btn-success">
+          Activate
+        </button>
+        <button @click="bulkChangeStatus('inactive')" class="btn-warning">
+          Deactivate
+        </button>
+        <button @click="confirmBulkDelete" class="btn-danger">
+          Delete
+        </button>
+      </div>
+    </div>
+
+    <!-- Add User Form -->
+    <add-user
+      v-if="showAddForm"
+      :isVisible="showAddForm"
+      @close="toggleAddForm"
+      @add="addUser"
+    />
+
+    <!-- Edit User Form -->
+    <edit-user
+      v-if="showEditForm"
+      :isVisible="showEditForm"
+      :userToEdit="selectedUser"
+      @close="toggleEditForm"
+      @update="updateUser"
+    />
   </div>
 </template>
 
 <script>
-import sidebar from '@/components/admin/sidebar.vue';
+import AddUser from '@/components/admin/AddUser.vue';
+import EditUser from '@/components/admin/EditUser.vue';
+import Sidebar from '@/components/admin/sidebar.vue';
 
 export default {
   name: 'UserManagement',
   components: {
-    sidebar
+    AddUser,
+    EditUser,
+    Sidebar
   },
   data() {
     return {
       users: [
-        { id: 1, name: 'John Doe', email: 'john.doe@example.com', role: 'admin', status: 'active', lastLogin: '2025-01-15T10:15:00', avatar: 'https://via.placeholder.com/40' },
-        { id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', role: 'manager', status: 'inactive', lastLogin: '2025-01-14T14:20:00', avatar: 'https://via.placeholder.com/40' },
-        { id: 3, name: 'Robert Brown', email: 'robert.brown@example.com', role: 'user', status: 'suspended', lastLogin: '2025-01-12T09:00:00', avatar: 'https://via.placeholder.com/40' },
-        { id: 4, name: 'Emily Clark', email: 'emily.clark@example.com', role: 'user', status: 'active', lastLogin: '2025-01-10T17:25:00', avatar: 'https://via.placeholder.com/40' },
-        { id: 5, name: 'Michael Johnson', email: 'michael.johnson@example.com', role: 'manager', status: 'active', lastLogin: '2025-01-13T12:00:00', avatar: 'https://via.placeholder.com/40' },
+        { id: 1, name: 'John Doe', email: 'john.doe@example.com', role: 'admin', status: 'active', lastLogin: '2025-01-15T10:15:00' },
+        { id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', role: 'manager', status: 'inactive', lastLogin: '2025-01-14T14:20:00' },
+        { id: 3, name: 'Robert Brown', email: 'robert.brown@example.com', role: 'user', status: 'suspended', lastLogin: '2025-01-12T09:00:00' },
       ],
       searchQuery: '',
       roleFilter: '',
       statusFilter: '',
+      showFilterDropdown: false,
+      showAddForm: false,
+      showEditForm: false,
+      selectedUser: null,
       selectedUsers: [],
       selectAll: false,
       currentPage: 1,
       itemsPerPage: 10,
       sortKey: 'id',
-      sortOrder: 'asc',
-      showModal: false,
-      showDeleteModal: false,
-      isEditing: false,
-      userToDelete: null,
-      formData: {
-        name: '',
-        email: '',
-        role: 'user',
-        status: 'active',
-        password: ''
-      }
+      sortOrder: 'asc'
     };
   },
   computed: {
@@ -321,6 +239,15 @@ export default {
     formatDate(date) {
       return new Date(date).toLocaleString();
     },
+    toggleFilterDropdown() {
+      this.showFilterDropdown = !this.showFilterDropdown;
+    },
+    toggleAddForm() {
+      this.showAddForm = !this.showAddForm;
+    },
+    toggleEditForm() {
+      this.showEditForm = !this.showEditForm;
+    },
     filterUsers() {
       this.currentPage = 1;
     },
@@ -345,92 +272,33 @@ export default {
         this.selectedUsers = [];
       }
     },
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
-    },
-    updatePagination() {
-      this.currentPage = 1;
-    },
-    showCreateModal() {
-      this.isEditing = false;
-      this.formData = {
-        name: '',
-        email: '',
-        role: 'user',
-        status: 'active',
-        password: ''
-      };
-      this.showModal = true;
-    },
     editUser(user) {
-      this.isEditing = true;
-      this.formData = {
-        ...user,
-        password: ''
-      };
-      this.showModal = true;
+      this.selectedUser = user;
+      this.showEditForm = true;
     },
-    closeModal() {
-      this.showModal = false;
-      this.formData = {
-        name: '',
-        email: '',
-        role: 'user',
-        status: 'active',
-        password: ''
-      };
-    },
-    submitForm() {
-      if (this.isEditing) {
-        const index = this.users.findIndex(u => u.id === this.formData.id);
-        if (index !== -1) {
-          this.users[index] = {
-            ...this.users[index],
-            ...this.formData,
-            password: this.formData.password || this.users[index].password
-          };
-        }
-      } else {
-        const newUser = {
-          ...this.formData,
-          id: this.users.length + 1,
-          lastLogin: null,
-          avatar: 'https://via.placeholder.com/40'
-        };
-        this.users.push(newUser);
+    updateUser(updatedUser) {
+      const index = this.users.findIndex(u => u.id === updatedUser.id);
+      if (index !== -1) {
+        this.users[index] = updatedUser;
       }
-      this.closeModal();
+      this.toggleEditForm();
     },
-    showUserDetails(user) {
-      console.log('Show details for user:', user);
+    addUser(newUser) {
+      newUser.id = this.users.length + 1;
+      newUser.avatar = 'https://via.placeholder.com/40';
+      this.users.push(newUser);
+      this.toggleAddForm();
     },
     confirmDelete(user) {
-      this.userToDelete = user;
-      this.showDeleteModal = true;
+      if (confirm(`Are you sure you want to delete ${user.name}?`)) {
+        this.users = this.users.filter(u => u.id !== user.id);
+      }
     },
     confirmBulkDelete() {
-      this.userToDelete = null;
-      this.showDeleteModal = true;
-    },
-    closeDeleteModal() {
-      this.showDeleteModal = false;
-      this.userToDelete = null;
-    },
-    confirmDeleteAction() {
-      if (this.userToDelete) {
-        this.users = this.users.filter(u => u.id !== this.userToDelete.id);
-      } else {
+      if (confirm(`Are you sure you want to delete ${this.selectedUsers.length} users?`)) {
         this.users = this.users.filter(u => !this.selectedUsers.includes(u.id));
         this.selectedUsers = [];
       }
-      this.closeDeleteModal();
     },
     bulkChangeStatus(status) {
       this.selectedUsers.forEach(id => {
@@ -440,167 +308,258 @@ export default {
         }
       });
       this.selectedUsers = [];
+    },
+    prevPage() {
+      if (this.currentPage > 1) this.currentPage--;
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) this.currentPage++;
+    },
+    updatePagination() {
+      this.currentPage = 1;
     }
   }
 };
 </script>
 
-
 <style scoped>
-.admin-layout {
+.app-container {
   display: flex;
-  min-height: 100vh;
-  background-color: #f5f6fa;
+  flex-direction: column;
+  flex-grow: 1;
+  margin-left: 250px;
+  height: 100vh;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-left: 18px;
+  width: 95%;
+}
+
+.users-header {
+  color: #000000;
+  font-size: 30px;
+  font-family: 'Arial', sans-serif;
+  font-weight: 900;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .main-content {
-  flex: 1;
-  margin-left: 250px;
-  padding: 2rem;
+  flex-grow: 1;
+  transition: margin-left 0.3s ease;
+  height: calc(100vh - 60px);
+  overflow-y: auto;
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.filters-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
-}
-
-.search-bar {
+.users-container {
   position: relative;
-  flex: 1;
+  flex-grow: 1;
+  height: 40vw;
+  background-color: #dfdfdf;
+  border-radius: 25px;
+  overflow-y: auto;
+  margin-left: 5px;
+  padding: 0;
 }
 
-.search-bar input {
-  width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.search-bar i {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #666;
-}
-
-.filter-options {
-  display: flex;
-  gap: 1rem;
-}
-
-.filter-options select {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: white;
-}
-
-.table-container {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  overflow-x: auto;
-}
-
-table {
+.users-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-th, td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid #eee;
+.users-table th,
+.users-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
 }
 
-th {
-  background: #f8f9fa;
-  font-weight: 600;
+.users-table td {
+  padding: 10px;
+  text-align: center; /* Ensure text is centered */
+  vertical-align: middle; /* Vertically align the content */
+}
+.users-table tbody {
+  font-family: 'Arial', sans-serif;
+  font-size: 15px;
 }
 
-.sortable {
+.users-table th {
+  background-color: #f4f4f4;
+  padding: 13px;
+  font-weight: bold;
+}
+
+.search-container {
+  position: relative;
+  margin-right: 3px;
+}
+
+.search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #333;
+  pointer-events: none;
+}
+
+.search-bar {
+  padding: 8px 30px 8px 8px;
+  border: 1px solid #94949400;
+  border-radius: 10px;
+  width: 130px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  background-color: #D9D9D9;
+}
+
+.filter-btn {
+  padding: 8px;
+  background-color: transparent;
+  border: none;
   cursor: pointer;
+  font-size: 19px;
+  color: #333;
+  transition: color 0.3s;
 }
 
-.sortable i {
-  margin-left: 0.5rem;
+.filter-container {
+  position: relative;
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+.dropdown {
+  position: absolute;
+  top: 35px;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 10;
+  width: 8dvw;
 }
 
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+.filter-select {
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 5px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.add-user-btn {
+  padding: 8px 12px;
+  background-color: #01A501;
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 10px;
+  width: 70px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.add-user-btn:hover {
+  background-color: #00b32dad;
+}
+
+.action-btn {
+  padding: 6px 9px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: 'Arial', sans-serif;
+  font-weight: 500;
+  transition: background-color 0.3s;
+  margin-right: 10px;
+}
+
+.action-btn:hover {
+  background-color: #0056b3;
+}
+
+.action-btn.delete {
+  background-color: #dc3545;
+}
+
+.action-btn.delete:hover {
+  background-color: #c82333;
 }
 
 .badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
 }
 
-.badge.admin { background: #e3f2fd; color: #1976d2; }
-.badge.manager { background: #e8f5e9; color: #388e3c; }
-.badge.user { background: #f3e5f5; color: #7b1fa2; }
+.badge.admin {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.badge.manager {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.badge.user {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
 
 .status-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
 }
 
-.status-badge.active { background: #e8f5e9; color: #388e3c; }
-.status-badge.inactive { background: #fafafa; color: #666; }
-.status-badge.suspended { background: #ffebee; color: #d32f2f; }
-
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
+.status-badge.active {
+  background-color: #e8f5e9;
+  color: #388e3c;
 }
 
-.btn-icon {
-  padding: 0.5rem;
-  border: none;
-  border-radius: 4px;
-  background: #f8f9fa;
-  cursor: pointer;
-  transition: background 0.2s;
+.status-badge.inactive {
+  background-color: #fafafa;
+  color: #666;
 }
 
-.btn-icon:hover {
-  background: #eee;
-}
-
-.btn-icon.delete:hover {
-  background: #ffebee;
+.status-badge.suspended {
+  background-color: #ffebee;
   color: #d32f2f;
+}
+
+.user-info {
+  display: inline-block; /* Ensure it behaves as inline content */
+  text-align: left; /* Align text to the left */
+  margin: 0; /* Remove any margin that may affect alignment */
+}
+
+.user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
 }
 
 .pagination {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin: 1rem 0;
 }
 
 .btn-page {
@@ -614,11 +573,6 @@ th {
 .btn-page:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.page-info {
-  font-size: 0.9rem;
-  color: #666;
 }
 
 .bulk-actions {
@@ -639,87 +593,22 @@ th {
   gap: 1rem;
 }
 
-.no-results {
-  text-align: center;
-  padding: 3rem;
-  color: #666;
-}
-
-.no-results i {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.user-form {
-  display: grid;
-  gap: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  font-weight: 500;
-}
-
-.form-group input,
-.form-group select {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.btn-primary {
-  background: #1976d2;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-secondary {
-  background: #f8f9fa;
-  border: 1px solid #ddd;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-danger {
-  background: #d32f2f;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
 .btn-success {
-  background: #388e3c;
+  background-color: #28a745;
   color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .btn-warning {
-  background: #f57c00;
+  background-color: #ffc107;
+  color: black;
+}
+
+.btn-danger {
+  background-color: #dc3545;
   color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 tr.selected {
-  background: #f8f9fa;
+  background-color: #f8f9fa;
 }
 </style>

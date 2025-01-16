@@ -9,10 +9,16 @@
           <span class="current-date">{{ currentDate }}</span>
         </div>
         <div class="header-right">
-          <div class="search-bar">
-            <input type="text" placeholder="Search..." v-model="searchQuery">
-            <i class="fas fa-search"></i>
-          </div>
+          <div class="search-container">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search users..."
+            class="search-bar"
+            @input="filterUsers"
+          />
+          <i class="fas fa-search search-icon"></i>
+        </div>
           <div class="admin-profile">
             <img :src="adminAvatar" alt="Admin" class="avatar">
             <div class="dropdown">
@@ -47,7 +53,7 @@
       <section class="quick-actions">
         <h2>Quick Actions</h2>
         <div class="action-buttons">
-          <button @click="navigateTo('createUser')" class="btn-primary">
+          <button @click="navigateTo('usermanagement')" class="btn-primary">
             <i class="fas fa-user-plus"></i> Add New User
           </button>
           <button @click="navigateTo('inventory')" class="btn-success">
@@ -207,7 +213,7 @@ export default {
   },
   methods: {
     navigateTo(route) {
-      this.$router.push(`/admin/${route}`);
+      this.$router.push(`${route}`);
     },
     viewProfile() {
       this.$router.push('/admin/profile');
@@ -268,8 +274,9 @@ export default {
   gap: 1.5rem;
 }
 
-.search-bar {
+.search-container {
   position: relative;
+  margin-right: 3px;
 }
 
 .search-bar input {
@@ -280,12 +287,25 @@ export default {
   width: 250px;
 }
 
-.search-bar i {
+
+.search-icon {
   position: absolute;
-  left: 1rem;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: #666;
+  color: #333;
+  pointer-events: none;
+}
+
+.search-bar {
+  padding: 8px 30px 8px 8px;
+  border: 1px solid #94949400;
+  border-radius: 10px;
+  width: 130px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  background-color: #D9D9D9;
 }
 
 .admin-profile {
