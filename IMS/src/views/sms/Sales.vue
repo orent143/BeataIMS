@@ -1,5 +1,5 @@
 <template>
-        <Sidebar />
+  <Sidebar />
 
   <div class="app-container">
     <div class="header-container">
@@ -38,6 +38,7 @@
           <table class="sales-table">
             <thead>
               <tr>
+                <th v-if="showCheckboxes">Select</th>
                 <th>Name</th>
                 <th>Quantity</th>
                 <th>Unit Price</th>
@@ -48,7 +49,10 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="sale in filteredItems" :key="sale.id">
+              <tr v-for="sale in filteredItems" :key="sale.id" @click="toggleItemSelection(sale)" :class="{ selected: selectedItems.includes(sale) }">
+                <td v-if="showCheckboxes">
+                  <input type="checkbox" v-model="selectedItems" :value="sale" />
+                </td>
                 <td>{{ sale.name }}</td>
                 <td>{{ sale.quantity }}</td>
                 <td>₱{{ sale.unitPrice.toFixed(2) }}</td>
@@ -73,6 +77,8 @@
         </div>
       </div>
     </div>
+
+    <button class="add-to-reports-btn" @click="addToReports">+</button>
   </div>
 </template>
 
@@ -81,24 +87,19 @@ import Sidebar from '@/components/sms/Sidebar.vue';
 export default {
   components: {
     Sidebar
-    
   },
   data() {
     return {
       searchTerm: '',
       selectedStatus: '',
       showFilterDropdown: false,
+      showCheckboxes: false, // New property to control checkbox visibility
+      selectedItems: [], // Track selected items for reporting
       salesItems: [
         { id: 1, name: 'Lemonade', quantity: 100, unitPrice: 50, itemsSold: 20, remitted: 1000, itemLeft: 80, status: 'Completed' },
         { id: 2, name: 'Cappuccino', quantity: 150, unitPrice: 40, itemsSold: 50, remitted: 2000, itemLeft: 100, status: 'Pending' },
         { id: 3, name: 'Espresso', quantity: 200, unitPrice: 30, itemsSold: 100, remitted: 3000, itemLeft: 100, status: 'Completed' },
-        { id: 4, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' },
-        { id: 1, name: 'Lemonade', quantity: 100, unitPrice: 50, itemsSold: 20, remitted: 1000, itemLeft: 80, status: 'Completed' },
-        { id: 2, name: 'Cappuccino', quantity: 150, unitPrice: 40, itemsSold: 50, remitted: 2000, itemLeft: 100, status: 'Pending' },
-        { id: 3, name: 'Espresso', quantity: 200, unitPrice: 30, itemsSold: 100, remitted: 3000, itemLeft: 100, status: 'Completed' },
-        { id: 1, name: 'Lemonade', quantity: 100, unitPrice: 50, itemsSold: 20, remitted: 1000, itemLeft: 80, status: 'Completed' },
-        { id: 2, name: 'Cappuccino', quantity: 150, unitPrice: 40, itemsSold: 50, remitted: 2000, itemLeft: 100, status: 'Pending' },
-        { id: 3, name: 'Espresso', quantity: 200, unitPrice: 30, itemsSold: 100, remitted: 3000, itemLeft: 100, status: 'Completed' }
+        { id: 4, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' }
       ],
       filteredItems: []
     };
@@ -127,6 +128,25 @@ export default {
       }
 
       this.filteredItems = filtered;
+    },
+    addToReports() {
+    this.showCheckboxes = !this.showCheckboxes; // Toggle checkbox visibility
+    if (this.selectedItems.length > 0) {
+      // Logic to add selected items to reports
+      console.log('Adding to reports:', this.selectedItems);
+      this.selectedItems = []; // Clear selected items after adding
+      alert('Selected items added to reports!');
+    } else {
+      alert('Please select items to add to reports.');
+    }
+  },
+    toggleItemSelection(sale) {
+      const index = this.selectedItems.indexOf(sale);
+      if (index > -1) {
+        this.selectedItems.splice(index, 1); // Remove if already selected
+      } else {
+        this.selectedItems.push(sale); // Add to selected items
+      }
     }
   },
   created() {
@@ -273,7 +293,7 @@ export default {
 
 .totals-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Space between items */
   margin-top: auto;
   padding: 15px;
   background-color: #f4f4f4;
@@ -284,11 +304,39 @@ export default {
 
 .totals-item {
   display: flex;
-  justify-content: space-between;
-  width: 45%;
+  justify-content: flex-start; /* Align items to the left */
+  align-items: center; /* Center vertically */
+  width: 45%; /* Adjust width as needed */
+  margin-right: 15px; /* Add margin between items */
+
 }
 
 .totals-item span {
   font-weight: bold;
+  margin-right: 5px;
+}
+
+.add-to-reports-btn {
+  width: 35px;
+    height: 35px;
+    background-color: #4CAF50;
+    color: #0000009d;
+    border: none;
+    border-radius: 50%;
+    font-size: 19px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center; /* Center vertically */
+  justify-content: center; /* Center horizontally */
+  position: fixed; /* Fixed position */
+  bottom: 20px; /* Distance from the bottom */
+  right: 20px; /* Distance from the right */
+  z-index: 10; 
+}
+
+.add-to-reports-btn:hover {
+  background-color: #218838; /* Darker green on hover */
 }
 </style>

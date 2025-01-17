@@ -53,35 +53,17 @@
               <th>
                 <input type="checkbox" v-model="selectAll" @change="toggleSelectAll">
               </th>
-              <th @click="sortBy('id')" class="sortable">
-                ID
-                <i class="fas" :class="getSortIcon('id')"></i>
-              </th>
-              <th @click="sortBy('name')" class="sortable">
-                Name
-                <i class="fas" :class="getSortIcon('name')"></i>
-              </th>
-              <th @click="sortBy('email')" class="sortable">
-                Email
-                <i class="fas" :class="getSortIcon('email')"></i>
-              </th>
-              <th @click="sortBy('role')" class="sortable">
-                Role
-                <i class="fas" :class="getSortIcon('role')"></i>
-              </th>
-              <th @click="sortBy('status')" class="sortable">
-                Status
-                <i class="fas" :class="getSortIcon('status')"></i>
-              </th>
-              <th @click="sortBy('lastLogin')" class="sortable">
-                Last Login
-                <i class="fas" :class="getSortIcon('lastLogin')"></i>
-              </th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Last Login</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="user in paginatedUsers" :key="user.id" :class="{ 'selected': selectedUsers.includes(user.id) }">
+            <tr v-for="user in filteredUsers" :key="user.id" :class="{ 'selected': selectedUsers.includes(user.id) }">
               <td>
                 <input 
                   type="checkbox" 
@@ -90,11 +72,7 @@
                 >
               </td>
               <td>{{ user.id }}</td>
-              <td>
-                <div class="user-info">
-                  {{ user.name }}
-                </div>
-              </td>
+              <td>{{ user.name }}</td>
               <td>{{ user.email }}</td>
               <td>
                 <span class="badge" :class="user.role">{{ user.role }}</span>
@@ -111,32 +89,6 @@
           </tbody>
         </table>
       </div>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination" v-if="filteredUsers.length">
-      <button 
-        @click="prevPage" 
-        :disabled="currentPage === 1"
-        class="btn-page"
-      >
-        <i class="fas fa-chevron-left"></i>
-      </button>
-      <span class="page-info">
-        Page {{ currentPage }} of {{ totalPages }}
-      </span>
-      <button 
-        @click="nextPage" 
-        :disabled="currentPage === totalPages"
-        class="btn-page"
-      >
-        <i class="fas fa-chevron-right"></i>
-      </button>
-      <select v-model="itemsPerPage" @change="updatePagination">
-        <option :value="10">10 per page</option>
-        <option :value="25">25 per page</option>
-        <option :value="50">50 per page</option>
-      </select>
     </div>
 
     <!-- Bulk Actions -->
@@ -174,6 +126,7 @@
   </div>
 </template>
 
+
 <script>
 import AddUser from '@/components/admin/AddUser.vue';
 import EditUser from '@/components/admin/EditUser.vue';
@@ -192,6 +145,7 @@ export default {
         { id: 1, name: 'John Doe', email: 'john.doe@example.com', role: 'admin', status: 'active', lastLogin: '2025-01-15T10:15:00' },
         { id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', role: 'manager', status: 'inactive', lastLogin: '2025-01-14T14:20:00' },
         { id: 3, name: 'Robert Brown', email: 'robert.brown@example.com', role: 'user', status: 'suspended', lastLogin: '2025-01-12T09:00:00' },
+        
       ],
       searchQuery: '',
       roleFilter: '',
@@ -202,10 +156,6 @@ export default {
       selectedUser: null,
       selectedUsers: [],
       selectAll: false,
-      currentPage: 1,
-      itemsPerPage: 10,
-      sortKey: 'id',
-      sortOrder: 'asc'
     };
   },
   computed: {
@@ -219,20 +169,7 @@ export default {
         const matchesStatus = !this.statusFilter || user.status === this.statusFilter;
         
         return matchesSearch && matchesRole && matchesStatus;
-      }).sort((a, b) => {
-        const modifier = this.sortOrder === 'asc' ? 1 : -1;
-        if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
-        if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
-        return 0;
       });
-    },
-    paginatedUsers() {
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      return this.filteredUsers.slice(start, end);
-    },
-    totalPages() {
-      return Math.ceil(this.filteredUsers.length / this.itemsPerPage);
     }
   },
   methods: {
@@ -249,25 +186,11 @@ export default {
       this.showEditForm = !this.showEditForm;
     },
     filterUsers() {
-      this.currentPage = 1;
-    },
-    sortBy(key) {
-      if (this.sortKey === key) {
-        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-      } else {
-        this.sortKey = key;
-        this.sortOrder = 'asc';
-      }
-    },
-    getSortIcon(key) {
-      if (this.sortKey === key) {
-        return this.sortOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
-      }
-      return 'fa-sort';
+      // Just triggers re-filtering
     },
     toggleSelectAll() {
       if (this.selectAll) {
-        this.selectedUsers = this.paginatedUsers.map(user => user.id);
+        this.selectedUsers = this.filteredUsers.map(user => user.id);
       } else {
         this.selectedUsers = [];
       }
@@ -308,19 +231,11 @@ export default {
         }
       });
       this.selectedUsers = [];
-    },
-    prevPage() {
-      if (this.currentPage > 1) this.currentPage--;
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) this.currentPage++;
-    },
-    updatePagination() {
-      this.currentPage = 1;
     }
   }
 };
 </script>
+
 
 <style scoped>
 .app-container {
@@ -362,12 +277,12 @@ export default {
 .users-container {
   position: relative;
   flex-grow: 1;
-  height: 40vw;
   background-color: #dfdfdf;
   border-radius: 25px;
-  overflow-y: auto;
+  overflow-y: auto; /* Enable scrolling if content overflows */
   margin-left: 5px;
   padding: 0;
+  height: 500px;  /* Fixed height for scrolling */
 }
 
 .users-table {
