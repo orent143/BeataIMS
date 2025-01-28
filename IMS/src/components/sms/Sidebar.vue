@@ -44,7 +44,8 @@
           { name: 'Create Orders', path: '/createorder', icon: 'fas fa-plus-circle' },
           { name: 'Sales', path: '/sales', icon: 'fas fa-cash-register' },
           { name: 'Inventory', path: '/inventorysms', icon: 'fas fa-box' },
-          { name: 'Reports', path: '/reportssms', icon: 'fas fa-chart-bar' }
+          { name: 'Orders History', path: '/ordershistory',   icon: 'fas fa-clock'},
+          { name: 'Reports', path: '/reportssms', icon: 'fas fa-file-alt' }
         ]
       };
     },

@@ -131,24 +131,47 @@ export default {
     },
     addToReports() {
     this.showCheckboxes = !this.showCheckboxes; // Toggle checkbox visibility
+    
     if (this.selectedItems.length > 0) {
-      // Logic to add selected items to reports
-      console.log('Adding to reports:', this.selectedItems);
-      this.selectedItems = []; // Clear selected items after adding
+      // Get existing reports or initialize empty array
+      const existingReports = JSON.parse(localStorage.getItem('salesReports') || '[]');
+      
+      // Add dateAdded to selected items
+      const newReports = this.selectedItems.map(item => ({
+        ...item,
+        dateAdded: new Date().toISOString()
+      }));
+
+      // Combine existing and new reports
+      const updatedReports = [...existingReports, ...newReports];
+      
+      // Save to localStorage
+      localStorage.setItem('salesReports', JSON.stringify(updatedReports));
+      
+      // Clear selection
+      this.selectedItems = [];
+      this.showCheckboxes = false;
+      
       alert('Selected items added to reports!');
+    } else if (this.showCheckboxes) {
+      // If just toggling checkboxes, don't show alert
+      return;
     } else {
       alert('Please select items to add to reports.');
     }
   },
-    toggleItemSelection(sale) {
-      const index = this.selectedItems.indexOf(sale);
-      if (index > -1) {
-        this.selectedItems.splice(index, 1); // Remove if already selected
-      } else {
-        this.selectedItems.push(sale); // Add to selected items
-      }
+
+  toggleItemSelection(sale) {
+    if (!this.showCheckboxes) return; // Only allow selection when checkboxes are shown
+    
+    const index = this.selectedItems.indexOf(sale);
+    if (index > -1) {
+      this.selectedItems.splice(index, 1);
+    } else {
+      this.selectedItems.push(sale);
     }
-  },
+  }
+},
   created() {
     this.filterItems();
   },
@@ -338,5 +361,18 @@ export default {
 
 .add-to-reports-btn:hover {
   background-color: #218838; /* Darker green on hover */
+}
+.selected {
+  background-color: #e3f2fd;
+}
+
+tr {
+  cursor: pointer;
+}
+
+input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
 }
 </style>

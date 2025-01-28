@@ -4,6 +4,7 @@
     <div class="header-container">
       <h1 class="products-header">Summary Reports</h1>
       <div class="header-actions">
+        <button class="export-btn" @click="exportSummary">Export CSV</button>
         <div class="search-container">
           <input
             type="text"
@@ -28,7 +29,6 @@
         </div>
       </div>
     </div>
-    
 
     <div class="main-content">
       <div class="inventory-container">
@@ -65,21 +65,20 @@
         <div class="totals-container">
           <div class="totals-item">
             <span>Report Date:</span>
-            <span>{{ formatDate(selectedDate) }}</span>
+            <span>{{ formatDate(selectedDate) || 'All Dates' }}</span>
           </div>
           <div class="totals-item">
             <span>Total Items:</span>
-            <span>{{ filteredSummaries.reduce((sum, summary) => sum + summary.totalItems, 0) }}</span>
+            <span>{{ totalItems }}</span>
           </div>
           <div class="totals-item">
             <span>Total Value:</span>
-            <span>₱{{ filteredSummaries.reduce((sum, summary) => sum + summary.totalValue, 0).toFixed(2) }}</span>
+            <span>₱{{ totalValue.toFixed(2) }}</span>
           </div>
         </div>
       </div>
     </div>
   </div>
-  
 </template>
 
 <script>
@@ -93,35 +92,12 @@ export default {
   data() {
     return {
       searchTerm: '',
-      selectedDate: new Date().toISOString().split('T')[0], // Current date by default
+      selectedDate: '', // Empty by default for 'All Dates'
       showFilterDropdown: false,
       summaries: [
-        {
-          id: 1,
-          date: '2024-12-29',
-          totalItems: 165,
-          totalValue: 9450,
-          products: [
-            { id: 1, name: "Espresso", quantity: 50, unitPrice: 60, category: "Beverages", supplier: "Coffee Co.", status: "In Stock" },
-            { id: 2, name: "Cappuccino", quantity: 30, unitPrice: 50, category: "Beverages", supplier: "Coffee Co.", status: "In Stock" },
-            { id: 3, name: "Croissant", quantity: 20, unitPrice: 50, category: "Bakery", supplier: "Bakery Inc.", status: "Low Stock" },
-            { id: 4, name: "Bagel", quantity: 15, unitPrice: 20, category: "Bakery", supplier: "Bakery Inc.", status: "In Stock" },
-            { id: 5, name: "Lemonade", quantity: 25, unitPrice: 75, category: "Beverages", supplier: "Beverage Co.", status: "In Stock" }
-          ]
-        },
-        {
-          id: 2,
-          date: '2024-12-28',
-          totalItems: 145,
-          totalValue: 8750,
-          products: [
-            { id: 1, name: "Espresso", quantity: 45, unitPrice: 60, category: "Beverages", supplier: "Coffee Co.", status: "In Stock" },
-            { id: 2, name: "Cappuccino", quantity: 25, unitPrice: 50, category: "Beverages", supplier: "Coffee Co.", status: "In Stock" },
-            { id: 3, name: "Croissant", quantity: 15, unitPrice: 50, category: "Bakery", supplier: "Bakery Inc.", status: "Low Stock" },
-            { id: 4, name: "Bagel", quantity: 35, unitPrice: 20, category: "Bakery", supplier: "Bakery Inc.", status: "In Stock" },
-            { id: 5, name: "Lemonade", quantity: 25, unitPrice: 75, category: "Beverages", supplier: "Beverage Co.", status: "In Stock" }
-          ]
-        }
+        // Sample summaries data here
+        // { id: 1, date: '2025-01-01', totalItems: 100, totalValue: 5000, products: [...] },
+        // Add real data or make an API call to fetch it
       ]
     };
   },
@@ -130,26 +106,21 @@ export default {
       return [...new Set(this.summaries.map(summary => summary.date))].sort().reverse();
     },
     filteredSummaries() {
-      let filtered = this.summaries;
-      
-      // Filter by date if selected
-      if (this.selectedDate) {
-        filtered = filtered.filter(summary => summary.date === this.selectedDate);
-      }
-
-      // Filter by search term
-      if (this.searchTerm) {
-        const term = this.searchTerm.toLowerCase();
-        filtered = filtered.filter(summary => 
-          summary.products.some(product => 
-            product.name.toLowerCase().includes(term) ||
-            product.category.toLowerCase().includes(term) ||
-            product.supplier.toLowerCase().includes(term)
-          )
-        );
-      }
-
-      return filtered;
+      return this.summaries.filter(summary => {
+        const matchesDate = this.selectedDate ? summary.date === this.selectedDate : true;
+        const matchesSearchTerm = this.searchTerm ? summary.products.some(product => 
+          product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          product.category.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          product.supplier.toLowerCase().includes(this.searchTerm.toLowerCase())
+        ) : true;
+        return matchesDate && matchesSearchTerm;
+      });
+    },
+    totalItems() {
+      return this.filteredSummaries.reduce((sum, summary) => sum + summary.totalItems, 0);
+    },
+    totalValue() {
+      return this.filteredSummaries.reduce((sum, summary) => sum + summary.totalValue, 0);
     }
   },
   methods: {
@@ -157,8 +128,42 @@ export default {
       this.showFilterDropdown = !this.showFilterDropdown;
     },
     formatDate(dateString) {
+      if (!dateString) return '';
       const options = { year: 'numeric', month: 'long', day: 'numeric' };
       return new Date(dateString).toLocaleDateString(undefined, options);
+    },
+    exportSummary() {
+      if (!this.filteredSummaries.length) return;
+      
+      const headers = ['Name', 'Quantity', 'Unit Price', 'Category', 'Supplier', 'Status'];
+      const data = this.filteredSummaries.flatMap(summary => 
+        summary.products.map(product => [
+          product.name,
+          product.quantity,
+          product.unitPrice,
+          product.category,
+          product.supplier,
+          product.status
+        ])
+      );
+      
+      const csvContent = [
+        headers.join(','),
+        ...data.map(row => row.join(','))
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `inventory-summary-${this.selectedDate || 'all'}.csv`;
+      a.click();
+    }
+  },
+  created() {
+    const savedSummaries = localStorage.getItem('inventorySummaries');
+    if (savedSummaries) {
+      this.summaries = JSON.parse(savedSummaries);
     }
   }
 };
@@ -169,9 +174,9 @@ export default {
 .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 250px; /* Make space for sidebar, adjust as needed */
-  height: 100vh; /* Full height of the page */
+  flex-grow: 1;
+  margin-left: 250px;
+  height: 100vh;
 }
 
 .header-container {
@@ -183,7 +188,7 @@ export default {
 }
 
 .products-header {
-  color: #000000;
+  color: #000;
   font-size: 30px;
   font-family: 'Arial', sans-serif;
   font-weight: 900;
@@ -201,13 +206,10 @@ export default {
 }
 
 .filter-btn {
-  padding: 8px;
-  background-color: transparent;
+  background: none;
   border: none;
-  cursor: pointer;
   font-size: 19px;
-  color: #333;
-  transition: color 0.3s;
+  cursor: pointer;
 }
 
 .dropdown {
@@ -216,43 +218,16 @@ export default {
   right: 0;
   background-color: white;
   border: 1px solid #ccc;
-  border-radius: 5px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   padding: 10px;
-  z-index: 10;
   width: 200px;
 }
 
 .filter-select {
-  padding: 8px;
   width: 100%;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  color: #333;
+  padding: 8px;
 }
 
-/* Main Content */
-.main-content {
-  flex-grow: 1; /* Allow the content to take the remaining space */
-  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
-  height: calc(100vh - 60px); /* Account for header height */
-  overflow-y: auto; /* Enable scrolling if content overflows */
-}
-
-.inventory-container {
-  position: relative;
-  flex-grow: 1;
-  background-color: #dfdfdf;
-  border-radius: 25px;
-  overflow: hidden;
-  margin-left: 5px;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Stock Table Styling */
+/* Table Styles */
 .stock-table {
   width: 100%;
   border-collapse: collapse;
@@ -276,17 +251,62 @@ export default {
   font-weight: bold;
 }
 
+/* Main Content */
+.main-content {
+  flex-grow: 1;
+  transition: margin-left 0.3s ease;
+  height: calc(100vh - 60px);
+  overflow-y: auto;
+}
 
+.inventory-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  background-color: #dfdfdf;
+  border-radius: 25px;
+  margin-left: 5px;
+  padding: 0;
+}
 
-/* Summary Specific Styling */
-.summary-spacer {
-  height: 0px;
+/* Table Container takes available space */
+.table-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  border-radius: 25px;
+}
+
+/* Totals Container Positioned at the Bottom */
+.totals-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  background-color: #f4f4f4;
+  margin-top: auto; /* Pushes it to the bottom */
+  border-bottom-right-radius: 25px;
+  border-bottom-left-radius: 25px;
+
+}
+
+.totals-item {
+  width: 30%;
+  font-weight: bold;
+}
+
+/* Button Styles */
+.export-btn {
+  background-color: #FF32BA;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 /* Search Bar */
 .search-container {
   position: relative;
-  margin-right: 3px;
 }
 
 .search-icon {
@@ -309,30 +329,7 @@ export default {
   background-color: #D9D9D9;
 }
 
-.table-container {
-  overflow-y: auto;
-  flex-grow: 1;
-  max-height: calc(100vh - 150px);
-}
-
-.totals-container {
-  display: flex;
-  justify-content: space-between;
-  margin-top: auto;
-  padding: 15px;
-  background-color: #f4f4f4;
-  border-bottom: 10px;
-  font-family: 'Arial', sans-serif;
-  font-size: 16px;
-}
-
-.totals-item {
-  display: flex;
-  justify-content: space-between;
-  width: 30%;
-}
-
-.totals-item span {
-  font-weight: bold;
+.summary-spacer {
+  height: 5px;
 }
 </style>

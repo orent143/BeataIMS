@@ -1,6 +1,5 @@
 <template>
-          <SideBar />
-
+  <SideBar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Stock List </h1>
@@ -50,27 +49,35 @@
             </tr>
           </thead>
           <tbody>
-  <tr v-for="ingredient in filteredItems" :key="ingredient.id">
-    <td>{{ ingredient.name }}</td>
-    <td>{{ ingredient.quantity }}</td>
-    <td>₱{{ ingredient.costPrice }}</td> <!-- Changed $ to ₱ -->
-    <td>{{ ingredient.supplier }}</td>
-    <td>{{ ingredient.status }}</td>
-    <td>
-      <!-- Action buttons -->
-      <button class="action-btn" @click="editItem(ingredient)">Edit</button>
-      <button class="action-btn" @click="removeItem(ingredient.id)">Remove</button>
-    </td>
-  </tr>
-</tbody>
-
+            <tr v-for="ingredient in filteredItems" :key="ingredient.id">
+              <td>
+                <div class="name-with-checkbox">
+                  <input type="checkbox" v-model="ingredient.selected" />
+                  {{ ingredient.name }}
+                </div>
+              </td>
+              <td>{{ ingredient.quantity }}</td>
+              <td>₱{{ ingredient.costPrice }}</td>
+              <td>{{ ingredient.supplier }}</td>
+              <td>{{ ingredient.status }}</td>
+              <td>
+                <!-- Action buttons -->
+                <button class="action-btn" @click="editItem(ingredient)">Edit</button>
+                <button class="action-btn" @click="removeItem(ingredient.id)">Remove</button>
+              </td>
+            </tr>
+          </tbody>
         </table>
-       <!-- Floating Button and Popout Options -->
-       <div class="floating-btn-container">
+
+        <!-- Floating Button and Popout Options -->
+        <div class="floating-btn-container">
           <button class="floating-btn" @click="togglePopoutOptions">+</button>
           <div v-if="showPopoutOptions" class="popout-options">
-            <button class="popout-option" @click="addLowStock">Add Low Stock</button>
             <button class="popout-option" @click="addSummary">Add Summary</button>
+            <label class="popout-option">
+              <input type="checkbox" v-model="showLowStock" @change="filterLowStock" />
+              Low Stock
+            </label>
           </div>
         </div>
       </div>
@@ -95,9 +102,10 @@
   </div>
 </template>
 
+
 <script>
 import AddStock from '@/components/ims/AddStock.vue';
-import EditStock from '@/components/ims/EditStock.vue'; // Import the EditStock component
+import EditStock from '@/components/ims/EditStock.vue';
 import SideBar from '@/components/ims/SideBar.vue';
 
 export default {
@@ -113,8 +121,9 @@ export default {
       showFilterDropdown: false,
       showAddForm: false,
       showEditForm: false,
-      showPopoutOptions: false, // Controls the visibility of popout options
-      selectedItem: null, // Store the item to be edited
+      showPopoutOptions: false,
+      selectedItem: null,
+      showLowStock: false, // State to track Low Stock checkbox
       stockItems: [
         { id: 1, name: 'Coffee Beans', quantity: 50, costPrice: 5, status: 'In Stock', supplier: 'Coffee Co.' },
         { id: 2, name: 'Milk', quantity: 30, costPrice: 1.5, status: 'In Stock', supplier: 'Dairy Corp.' },
@@ -131,7 +140,7 @@ export default {
         { id: 13, name: 'Cheese', quantity: 10, costPrice: 6, status: 'Out of Stock', supplier: 'Deli Foods' },
         { id: 14, name: 'Bread', quantity: 40, costPrice: 2, status: 'In Stock', supplier: 'Bakery Inc.' },
         { id: 15, name: 'Lettuce', quantity: 30, costPrice: 3, status: 'Low Stock', supplier: 'Green Farms' },
-        ],
+      ],
       filteredItems: []
     };
   },
@@ -163,17 +172,24 @@ export default {
 
       this.filteredItems = filtered;
     },
+    filterLowStock() {
+      if (this.showLowStock) {
+        this.filteredItems = this.stockItems.filter(item => item.quantity < 10 && item.status !== "Out of Stock");
+      } else {
+        this.filterItems(); // Show all items when Low Stock is unchecked
+      }
+    },
     editItem(item) {
       this.selectedItem = item;
-      this.showEditForm = true; // Show the Edit Form
+      this.showEditForm = true;
     },
     updateItem(updatedItem) {
       const index = this.stockItems.findIndex(item => item.id === updatedItem.id);
       if (index !== -1) {
-        this.stockItems.splice(index, 1, updatedItem); // Update the item
+        this.stockItems.splice(index, 1, updatedItem);
       }
-      this.filterItems(); // Reapply filtering after update
-      this.toggleEditForm(); // Close the form after updating
+      this.filterItems();
+      this.toggleEditForm();
     },
     removeItem(itemId) {
       this.stockItems = this.stockItems.filter(item => item.id !== itemId);
@@ -183,11 +199,7 @@ export default {
       newItem.id = this.stockItems.length + 1;
       this.stockItems.push(newItem);
       this.filterItems();
-      this.toggleAddForm(); // Close the add form
-    },
-    addLowStock() {
-      console.log("Add Low Stock clicked");
-      // Handle adding low stock logic
+      this.toggleAddForm();
     },
     addSummary() {
       console.log("Add Summary clicked");
@@ -199,11 +211,11 @@ export default {
   },
   watch: {
     searchTerm: 'filterItems',
-    selectedStatus: 'filterItems'
+    selectedStatus: 'filterItems',
+    showLowStock: 'filterLowStock'
   }
 };
 </script>
-  
   
   <style scoped>
   /* Use same styles as Inventory page */
@@ -338,7 +350,14 @@ export default {
   width: 100%;
   margin-bottom: 10px;
 }
+.name-with-checkbox {
+  display: flex;
+  align-items: center;
+}
 
+.name-with-checkbox input[type="checkbox"] {
+  margin-right: 10px; /* Add space between checkbox and name */
+}
 .add-product-btn {
   padding: 8px 12px;
   background-color: #01A501;
@@ -415,25 +434,34 @@ export default {
   bottom: 0;
   right: 40px;
 }
-
 .popout-option {
-  background-color: #FFFFFF;
-  color: rgb(34, 34, 34);
-  padding: 10px;
-  margin: 5px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 10px;
-  width: 100px;
-}
+    display: flex;
+    align-items: center;
+    background-color: #FFFFFF;
+    color: rgb(34, 34, 34);
+    padding: 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 10px;
+    width: 100px;
+  }
 
-.popout-option:hover {
-  background-color: #FF32BA;
-}
+  .popout-option input[type="checkbox"] {
+    margin-right: 10px; /* Add space between checkbox and label */
+  }
 
-.popout-option:active {
-  background-color: #004080;
-}
-  </style>
-  
+  .checkbox-label {
+    font-size: 14px; /* Adjust font size */
+    color: #333;
+  }
+
+  .popout-option:hover {
+    background-color: #FF32BA;
+  }
+
+  .popout-option:active {
+    background-color: #004080;
+  }
+</style>

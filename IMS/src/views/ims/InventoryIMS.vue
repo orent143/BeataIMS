@@ -113,11 +113,7 @@ import AddProduct from '@/components/ims/AddProduct.vue';
 import EditProduct from '@/components/ims/EditProduct.vue';
 
 export default {
-  components: {
-    AddProduct,
-    EditProduct,
-    SideBar
-  },
+  components: { AddProduct, EditProduct, SideBar },
   data() {
     return {
       searchTerm: '',
@@ -135,14 +131,33 @@ export default {
         { id: 5, name: "Lemonade", quantity: 25, unitPrice: 75, category: "Beverages", supplier: "Beverage Co.", status: "In Stock" },
         { id: 6, name: "Cheese Sandwich", quantity: 10, unitPrice: 60, category: "Food", supplier: "Deli Foods", status: "Out of Stock" },
         { id: 7, name: "Cheese Sandwich", quantity: 10, unitPrice: 60, category: "Food", supplier: "Deli Foods", status: "Out of Stock" },
-        
       ],
       filteredItems: [],
       selectedLowStockItems: [],
       isLowStockMode: false,
+      // New properties for summary functionality
+      inventorySummaries: [],
+      currentDate: new Date().toISOString().split('T')[0]
     };
   },
+  
+  computed: {
+    totalInventoryValue() {
+      return this.productItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+    },
+    totalItems() {
+      return this.productItems.reduce((sum, item) => sum + item.quantity, 0);
+    },
+    lowStockItems() {
+      return this.productItems.filter(item => item.status === "Low Stock");
+    },
+    outOfStockItems() {
+      return this.productItems.filter(item => item.status === "Out of Stock");
+    }
+  },
+
   methods: {
+    // Existing methods
     toggleFilterDropdown() {
       this.showFilterDropdown = !this.showFilterDropdown;
     },
@@ -157,59 +172,124 @@ export default {
     },
     filterItems() {
       let filtered = this.productItems;
-
       if (this.searchTerm) {
-        filtered = filtered.filter(item =>
+        filtered = filtered.filter(item => 
           item.name.toLowerCase().includes(this.searchTerm.toLowerCase())
         );
       }
-
       if (this.selectedStatus) {
         filtered = filtered.filter(item => item.status === this.selectedStatus);
       }
-
       this.filteredItems = filtered;
     },
-    editItem(item) {
-      this.selectedItem = item;
-      this.showEditForm = true;
-    },
+
+    // Updated methods with summary integration
     updateItem(updatedItem) {
       const index = this.productItems.findIndex(item => item.id === updatedItem.id);
       if (index !== -1) {
+        // Update status based on quantity
+        if (updatedItem.quantity <= 10) {
+          updatedItem.status = 'Low Stock';
+        } else if (updatedItem.quantity === 0) {
+          updatedItem.status = 'Out of Stock';
+        } else {
+          updatedItem.status = 'In Stock';
+        }
+        
         this.productItems.splice(index, 1, updatedItem);
+        this.createInventorySummary();
       }
       this.filterItems();
       this.toggleEditForm();
     },
-    removeItem(itemId) {
-      this.productItems = this.productItems.filter(item => item.id !== itemId);
-      this.filterItems();
-    },
+
     addItem(newItem) {
       newItem.id = this.productItems.length + 1;
+      // Set initial status based on quantity
+      if (newItem.quantity <= 10) {
+        newItem.status = 'Low Stock';
+      } else if (newItem.quantity === 0) {
+        newItem.status = 'Out of Stock';
+      } else {
+        newItem.status = 'In Stock';
+      }
+      
       this.productItems.push(newItem);
       this.filterItems();
       this.toggleAddForm();
+      this.createInventorySummary();
     },
+
+    removeItem(itemId) {
+      this.productItems = this.productItems.filter(item => item.id !== itemId);
+      this.filterItems();
+      this.createInventorySummary();
+    },
+
+    // New summary methods
+    createInventorySummary() {
+      const summary = {
+        id: Date.now(),
+        date: this.currentDate,
+        products: [...this.productItems],
+        totalItems: this.totalItems,
+        totalValue: this.totalInventoryValue,
+        lowStockCount: this.lowStockItems.length,
+        outOfStockCount: this.outOfStockItems.length
+      };
+
+      this.inventorySummaries.push(summary);
+      this.saveToLocalStorage();
+    },
+
+    saveToLocalStorage() {
+      localStorage.setItem('inventorySummaries', JSON.stringify(this.inventorySummaries));
+      localStorage.setItem('productItems', JSON.stringify(this.productItems));
+    },
+
+    loadFromLocalStorage() {
+      const savedSummaries = localStorage.getItem('inventorySummaries');
+      const savedProducts = localStorage.getItem('productItems');
+      
+      if (savedSummaries) {
+        this.inventorySummaries = JSON.parse(savedSummaries);
+      }
+      if (savedProducts) {
+        this.productItems = JSON.parse(savedProducts);
+        this.filterItems();
+      }
+    },
+
     addLowStock() {
       this.isLowStockMode = !this.isLowStockMode;
     },
+
     addSummary() {
-      console.log("Add Summary clicked");
+      this.createInventorySummary();
+      alert('Inventory summary has been created successfully!');
     }
   },
+
   created() {
-    this.filterItems();
+    this.loadFromLocalStorage();
+    if (this.inventorySummaries.length === 0) {
+      this.createInventorySummary();
+    }
   },
+
   watch: {
     searchTerm: 'filterItems',
-    selectedStatus: 'filterItems'
+    selectedStatus: 'filterItems',
+    productItems: {
+      deep: true,
+      handler() {
+        this.saveToLocalStorage();
+      }
+    }
   }
 };
 </script>
-
-
+s
 
 <style scoped>
 /* General Styling */

@@ -1,41 +1,27 @@
 <template>
-        <SideBar />
-
+  <SideBar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Reports List</h1>
       <div class="header-actions">
         <div class="search-container">
-          <input
-            type="text"
-            v-model="searchTerm"
-            placeholder="Search"
-            class="search-bar"
-          />
+          <input type="text" v-model="searchTerm" placeholder="Search" class="search-bar" />
           <i class="fas fa-search search-icon"></i>
         </div>
-        <button @click="toggleAddForm" class="add-product-btn">Add</button>
       </div>
     </div>
-
     <div class="main-content">
       <div class="report-cards">
-        <div 
-          class="report-card"
-          @click="goToReport('summary')"
-        >
+        <div class="report-card" @click="goToReport('summary')">
           <div class="report-card-header">
             <h3>Summary Report</h3>
           </div>
           <div class="report-card-body">
-            <p>Overview of all reports and metrics.</p>
+            <p>Overview of all inventory reports and metrics.</p>
           </div>
         </div>
-
-        <div 
-          class="report-card"
-          @click="goToReport('lowStock')"
-        >
+        
+        <div class="report-card" @click="goToReport('lowStock')">
           <div class="report-card-header">
             <h3>Low Stock Report</h3>
           </div>
@@ -43,27 +29,7 @@
             <p>Displays items with low stock levels.</p>
           </div>
         </div>
-
-        <div 
-          class="report-card"
-          @click="goToReport('sales')"
-        >
-          <div class="report-card-header">
-            <h3>Sales Report</h3>
-          </div>
-          <div class="report-card-body">
-            <p>Summary of sales activities and figures.</p>
-          </div>
-        </div>
       </div>
-
-      <AddItem v-if="showAddForm" @add="addItem" :isVisible="showAddForm" @close="toggleAddForm" />
-      <InventoryList
-        :items="filteredItems"
-        @edit="setEditItem"
-        @remove="removeItem"
-      />
-      <EditItem v-if="editingItem" :item="editingItem" @save="saveItem" />
     </div>
   </div>
 </template>
@@ -72,40 +38,19 @@
 import SideBar from '@/components/ims/SideBar.vue';
 
 export default {
-  components: {
-    SideBar
-  },
+  components: { SideBar },
   data() {
     return {
       searchTerm: '',
-      showAddForm: false,
-      editingItem: null,
-      filteredItems: [], // Assuming you have the items to filter
     };
   },
   methods: {
-    toggleAddForm() {
-      this.showAddForm = !this.showAddForm;
-    },
     goToReport(reportType) {
-    this.$router.push(`/reportsims/${reportType}`);
-    },
-    addItem(item) {
-      // Handle adding the item
-    },
-    setEditItem(item) {
-      this.editingItem = item;
-    },
-    removeItem(itemId) {
-      // Handle item removal
-    },
-    saveItem(updatedItem) {
-      // Handle saving the updated item
+      this.$router.push(`/reportsims/${reportType}`);
     }
   },
 };
 </script>
-
 
 <style scoped>
 .app-container {
