@@ -3,7 +3,7 @@
     <SideBar />
     <div class="main-container">
       <div class="header-container">
-        <h1 class="header">Create Product</h1>
+        <h1 class="header">Create Inventory Product</h1>
       </div>
 
       <div class="content-wrapper">
@@ -17,6 +17,16 @@
             </div>
 
             <div class="form-group">
+              <label>Product Quantity</label>
+              <input v-model.number="product.quantity" type="number" min="1" class="form-input" />
+            </div>
+
+            <div class="form-group">
+              <label>Unit Price (₱)</label>
+              <input v-model.number="product.unitPrice" type="number" min="0" step="0.01" class="form-input" />
+            </div>
+
+            <div class="form-group">
               <label>Category</label>
               <select v-model="product.category" class="form-input">
                 <option value="">Select Category</option>
@@ -25,32 +35,27 @@
                 <option value="DESSERT">Dessert</option>
               </select>
             </div>
-
-            <div class="form-group">
-              <label>Labor Cost</label>
-              <input v-model.number="product.laborCost" type="number" min="0" step="0.01" class="form-input" />
-            </div>
           </div>
 
-          <!-- Raw Materials/Stocks Selection -->
+          <!-- Raw Materials / Stock Selector -->
           <ProductItemSelector 
-            :items="product.materials"
+            :items="product.items"
             :stockItems="stockItems"
-            @update:items="updateMaterials"
+            @update:items="updateItems"
           />
         </div>
 
         <!-- Product Summary -->
         <div class="summary-section">
           <ProductSummary 
-            :productItems="product.materials"
+            :productItems="product.items"
             :stockItems="stockItems"
-            :laborCost="product.laborCost"
+            :laborCost="product.unitPrice * product.quantity"
           />
 
           <div class="form-actions">
             <button type="button" @click="resetForm" class="reset-btn">Reset</button>
-            <button type="submit" @click.prevent="submitProduct" class="submit-btn">Create Product</button>
+            <button type="button" @click="submitProduct" class="submit-btn">Create Product</button>
           </div>
         </div>
       </div>
@@ -60,24 +65,24 @@
 
 <script>
 import SideBar from '@/components/ims/SideBar.vue';
-import ProductItemSelector from '@/components/ims/ProductItemSelector.vue'
-import ProductSummary from '@/components/ims/ProductSummary.vue'
+import ProductSummary from '@/components/ims/ProductSummary.vue';
+import ProductItemSelector from '@/components/ims/ProductItemSelector.vue';
 
 export default {
   name: 'CreateProduct',
   components: {
-    ProductItemSelector,
     ProductSummary,
-    SideBar
+    SideBar,
+    ProductItemSelector
   },
   data() {
     return {
       product: {
         name: '',
-        description: '',
+        quantity: 1,
+        unitPrice: 0,
         category: '',
-        laborCost: 0,
-        materials: [{ stockId: '', quantity: 1 }]
+        items: [{ stockId: '', quantity: 1 }]  // Default to one empty item
       },
       stockItems: [
         { id: 1, name: 'Coffee Beans', price: 500.00, quantity: 1000 },
@@ -89,51 +94,61 @@ export default {
         { id: 7, name: 'Eggs', price: 8.00, quantity: 300 },
         { id: 8, name: 'Vanilla Extract', price: 150.00, quantity: 100 }
       ]
-    }
+    };
   },
   methods: {
-    updateMaterials(newMaterials) {
-      this.product.materials = newMaterials.length > 0 ? newMaterials : [{ stockId: '', quantity: 1 }]
+    updateItems(updatedItems) {
+      this.product.items = updatedItems;
     },
+
     submitProduct() {
       // Validate product details
       if (!this.product.name) {
-        alert('Please enter product name')
-        return
+        alert('Please enter product name');
+        return;
       }
       if (!this.product.category) {
-        alert('Please select product category')
-        return
+        alert('Please select product category');
+        return;
       }
 
-      // Validate materials
-      const validMaterials = this.product.materials.filter(item => item.stockId)
-      if (validMaterials.length === 0) {
-        alert('Please add at least one raw material')
-        return
+      // Validate that all items have a valid stockId and quantity
+      const invalidItem = this.product.items.find(item => !item.stockId || item.quantity < 1);
+      if (invalidItem) {
+        alert('Please ensure all stock items have been selected with valid quantities');
+        return;
       }
 
-      // Create a clean product object
+      // Calculate total price
+      const totalPrice = this.product.unitPrice * this.product.quantity;
+
+      // Prepare the product object for submission
       const productToSubmit = {
         ...this.product,
-        materials: validMaterials
-      }
+        totalPrice
+      };
 
-      // TODO: Implement product submission to backend
-      console.log('Product submitted:', productToSubmit)
-      this.$router.push('/inventoryims')
+      // Simulate product submission (e.g., API call)
+      console.log('Product submitted:', productToSubmit);
+
+      // Reset form after submission
+      this.resetForm();
+
+      // Optionally navigate to another page or display a success message
+      this.$router.push('/inventoryims');
     },
+
     resetForm() {
       this.product = {
         name: '',
-        description: '',
+        quantity: 1,
+        unitPrice: 0,
         category: '',
-        laborCost: 0,
-        materials: [{ stockId: '', quantity: 1 }]
-      }
+        items: [{ stockId: '', quantity: 1 }]  // Reset items
+      };
     }
   }
-}
+};
 </script>
 
 <style scoped>

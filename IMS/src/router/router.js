@@ -38,7 +38,7 @@ const routes = [
   { path: '/category', component: Category },
   { path: '/reportsims', component: ReportsIMS },
   { path: '/reportsims/summary', component: SummaryReport },
-  { path: '/reportsims/lowStock', component: LowStockReport },
+  { path: '/reportsims/lowStock', component: LowStockReport, name: 'lowStock' },
   { path: '/homesms', component: HomeSMS },
   { path: '/inventorysms', component: InventorySMS },
   { path: '/createorder', component: CreateOrder },

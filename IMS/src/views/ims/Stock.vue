@@ -2,7 +2,7 @@
   <SideBar />
   <div class="app-container">
     <div class="header-container">
-      <h1 class="products-header">Stock List </h1>
+      <h1 class="products-header">Stock List</h1>
       <div class="header-actions">
         <div class="search-container">
           <input
@@ -15,7 +15,6 @@
           <i class="fas fa-search search-icon"></i>
         </div>
 
-        <!-- Filter Button with dropdown for status -->
         <div class="filter-container">
           <button class="filter-btn" @click="toggleFilterDropdown">
             <i class="fas fa-filter"></i>
@@ -30,7 +29,6 @@
           </div>
         </div>
 
-        <!-- Add Stock Button -->
         <button @click="toggleAddForm" class="add-product-btn">Add</button>
       </div>
     </div>
@@ -50,18 +48,12 @@
           </thead>
           <tbody>
             <tr v-for="ingredient in filteredItems" :key="ingredient.id">
-              <td>
-                <div class="name-with-checkbox">
-                  <input type="checkbox" v-model="ingredient.selected" />
-                  {{ ingredient.name }}
-                </div>
-              </td>
+              <td>{{ ingredient.name }}</td>
               <td>{{ ingredient.quantity }}</td>
               <td>₱{{ ingredient.costPrice }}</td>
               <td>{{ ingredient.supplier }}</td>
               <td>{{ ingredient.status }}</td>
               <td>
-                <!-- Action buttons -->
                 <button class="action-btn" @click="editItem(ingredient)">Edit</button>
                 <button class="action-btn" @click="removeItem(ingredient.id)">Remove</button>
               </td>
@@ -69,21 +61,16 @@
           </tbody>
         </table>
 
-        <!-- Floating Button and Popout Options -->
         <div class="floating-btn-container">
           <button class="floating-btn" @click="togglePopoutOptions">+</button>
           <div v-if="showPopoutOptions" class="popout-options">
             <button class="popout-option" @click="addSummary">Add Summary</button>
-            <label class="popout-option">
-              <input type="checkbox" v-model="showLowStock" @change="filterLowStock" />
-              Low Stock
-            </label>
+            <button class="popout-option" @click="filterLowStock">Low Stock</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Add or Edit Item Form -->
     <add-stock 
       v-if="showAddForm" 
       :isVisible="showAddForm" 
@@ -91,7 +78,6 @@
       @add="addItem"
     />
 
-    <!-- Edit Item Form -->
     <edit-stock
       v-if="showEditForm"
       :isVisible="showEditForm"
@@ -102,17 +88,14 @@
   </div>
 </template>
 
-
 <script>
-import AddStock from '@/components/ims/AddStock.vue';
-import EditStock from '@/components/ims/EditStock.vue';
 import SideBar from '@/components/ims/SideBar.vue';
+import LowStockReport from '@/views/ims/reports/LowStockReport.vue';
 
 export default {
   components: {
-    AddStock,
-    EditStock,
-    SideBar
+    SideBar,
+    LowStockReport
   },
   data() {
     return {
@@ -123,7 +106,7 @@ export default {
       showEditForm: false,
       showPopoutOptions: false,
       selectedItem: null,
-      showLowStock: false, // State to track Low Stock checkbox
+      lowStockFiltered: false,
       stockItems: [
         { id: 1, name: 'Coffee Beans', quantity: 50, costPrice: 5, status: 'In Stock', supplier: 'Coffee Co.' },
         { id: 2, name: 'Milk', quantity: 30, costPrice: 1.5, status: 'In Stock', supplier: 'Dairy Corp.' },
@@ -140,8 +123,10 @@ export default {
         { id: 13, name: 'Cheese', quantity: 10, costPrice: 6, status: 'Out of Stock', supplier: 'Deli Foods' },
         { id: 14, name: 'Bread', quantity: 40, costPrice: 2, status: 'In Stock', supplier: 'Bakery Inc.' },
         { id: 15, name: 'Lettuce', quantity: 30, costPrice: 3, status: 'Low Stock', supplier: 'Green Farms' },
-      ],
-      filteredItems: []
+        ],
+      filteredItems: [],
+      inventorySummaries: [],
+      currentDate: new Date().toISOString().split('T')[0],
     };
   },
   methods: {
@@ -172,17 +157,58 @@ export default {
 
       this.filteredItems = filtered;
     },
+
     filterLowStock() {
-      if (this.showLowStock) {
-        this.filteredItems = this.stockItems.filter(item => item.quantity < 10 && item.status !== "Out of Stock");
+      this.selectedStatus = 'Low Stock';
+      this.lowStockFiltered = true;
+      this.filterItems();
+    },
+
+    addSummary() {
+      if (this.lowStockFiltered) {
+        const lowStockItems = this.filteredItems;
+        this.createLowStockReport(lowStockItems);
+        this.$router.push({
+          name: 'lowStockReport',
+          state: { lowStockItems }  // Pass data via state
+        });
       } else {
-        this.filterItems(); // Show all items when Low Stock is unchecked
+        this.createGeneralInventorySummary();
       }
     },
+
+    createGeneralInventorySummary() {
+      const summary = {
+        id: Date.now(),
+        date: this.currentDate,
+        products: [...this.stockItems],
+        totalItems: this.stockItems.length,
+        totalValue: this.stockItems.reduce((sum, item) => sum + (item.quantity * item.costPrice), 0),
+      };
+
+      this.inventorySummaries.push(summary);
+      localStorage.setItem('inventorySummaries', JSON.stringify(this.inventorySummaries));
+      alert('General inventory summary has been created!');
+    },
+
+    createLowStockReport(lowStockItems) {
+      const lowStockSummary = {
+        id: Date.now(),
+        date: this.currentDate,
+        products: lowStockItems,
+        totalLowStock: lowStockItems.length,
+      };
+
+      this.inventorySummaries.push(lowStockSummary);
+      localStorage.setItem('inventorySummaries', JSON.stringify(this.inventorySummaries));
+      alert(`Low stock report created! Total items: ${lowStockItems.length}`);
+    },
+
     editItem(item) {
       this.selectedItem = item;
       this.showEditForm = true;
     },
+
     updateItem(updatedItem) {
       const index = this.stockItems.findIndex(item => item.id === updatedItem.id);
       if (index !== -1) {
@@ -191,28 +217,31 @@ export default {
       this.filterItems();
       this.toggleEditForm();
     },
+
     removeItem(itemId) {
       this.stockItems = this.stockItems.filter(item => item.id !== itemId);
       this.filterItems();
     },
+
     addItem(newItem) {
       newItem.id = this.stockItems.length + 1;
       this.stockItems.push(newItem);
       this.filterItems();
       this.toggleAddForm();
     },
-    addSummary() {
-      console.log("Add Summary clicked");
-      // Handle adding summary logic
-    }
   },
+
   created() {
+    const savedSummaries = localStorage.getItem('inventorySummaries');
+    if (savedSummaries) {
+      this.inventorySummaries = JSON.parse(savedSummaries);
+    }
     this.filterItems();
   },
+
   watch: {
     searchTerm: 'filterItems',
     selectedStatus: 'filterItems',
-    showLowStock: 'filterLowStock'
   }
 };
 </script>
