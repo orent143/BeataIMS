@@ -21,9 +21,6 @@ import OrdersHistory from '@/views/sms/OrderHistory.vue';
 import ReportsSms from '@/views/sms/ReportsSMS.vue';
 import SalesReportSMS from '@/views/sms/reports/salesreport.vue';
 import HistoryReportSMS from '@/views/sms/reports/historyreport.vue';
-// admin
-import AdminPage from '@/views/admin/AdminPage.vue';  // Import Admin Dashboard page
-import UserManagement from '@/views/admin/UserManagement.vue';
 
 import Welcome from '@/views/Welcome.vue'; // Import the Welcome page
 
@@ -38,7 +35,7 @@ const routes = [
   { path: '/category', component: Category },
   { path: '/reportsims', component: ReportsIMS },
   { path: '/reportsims/summary', component: SummaryReport },
-  { path: '/reportsims/lowStock', component: LowStockReport, name: 'lowStock' },
+  { path: '/reportsims/lowStock', component: LowStockReport },
   { path: '/homesms', component: HomeSMS },
   { path: '/inventorysms', component: InventorySMS },
   { path: '/createorder', component: CreateOrder },
@@ -47,8 +44,6 @@ const routes = [
   { path: '/reportssms', component: ReportsSms },
   { path: '/reportssms/sales', component: SalesReportSMS },
   { path: '/reportssms/history', component: HistoryReportSMS },
-  { path: '/admin', component: AdminPage},
-  { path: '/usermanagement', component: UserManagement},
 
 ];
 

@@ -11,26 +11,9 @@
             v-model="searchTerm"
             placeholder="Search products"
             class="search-bar"
+            @input="filterLowStockItems"
           />
           <i class="fas fa-search search-icon"></i>
-        </div>
-        <div class="filter-container">
-          <button class="filter-btn" @click="toggleFilterDropdown">
-            <i class="fas fa-filter"></i>
-          </button>
-          <div v-if="showFilterDropdown" class="dropdown">
-            <select v-model="selectedCategory" class="filter-select">
-              <option value="">All Categories</option>
-              <option v-for="category in categories" :key="category" :value="category">
-                {{ category }}
-              </option>
-            </select>
-          </div>
-        </div>
-        <!-- Checkbox to Toggle Low Stock Report -->
-        <div class="checkbox-container">
-          <input type="checkbox" v-model="showLowStock" @change="toggleLowStock" />
-          <label>Show Low Stock Only</label>
         </div>
       </div>
     </div>
@@ -43,26 +26,23 @@
               <tr>
                 <th>Name</th>
                 <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Category</th>
+                <th>Cost Price</th>
                 <th>Supplier</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="product in filteredProducts" :key="product.id">
-                <td>{{ product.name }}</td>
-                <td>{{ product.quantity }}</td>
-                <td>₱{{ product.unitPrice }}</td>
-                <td>{{ product.category }}</td>
-                <td>{{ product.supplier }}</td>
-                <td>{{ product.status }}</td>
+              <tr v-for="ingredient in filteredLowStockItems" :key="ingredient.id">
+                <td>{{ ingredient.name }}</td>
+                <td>{{ ingredient.quantity }}</td>
+                <td>₱{{ ingredient.costPrice }}</td>
+                <td>{{ ingredient.supplier }}</td>
+                <td>{{ ingredient.status }}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <!-- Totals Container Positioned at the Bottom -->
         <div class="totals-container">
           <div class="totals-item">
             <span>Low Stock Items:</span>
@@ -82,103 +62,44 @@
 import SideBar from '@/components/ims/SideBar.vue';
 
 export default {
-  components: { SideBar },
-  name: 'LowStockReport',
+  components: {
+    SideBar,
+  },
   data() {
     return {
+      lowStockItems: this.$route.state?.lowStockItems || [],
       searchTerm: '',
-      lowStockThreshold: 10, // Configurable threshold
-      products: [], // Store all products
-      showFilterDropdown: false,
-      selectedCategory: '',
-      categories: ['All', 'Beverages', 'Bakery', 'Food'],
-      showLowStock: false, // This will control whether to show low stock only
+      filteredLowStockItems: [],
     };
   },
   computed: {
-    filteredProducts() {
-      return this.products.filter((product) => {
-        const matchesSearch =
-          product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          product.category.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          product.supplier.toLowerCase().includes(this.searchTerm.toLowerCase());
-
-        const matchesCategory =
-          !this.selectedCategory ||
-          this.selectedCategory === 'All' ||
-          product.category === this.selectedCategory;
-
-        const matchesLowStock = !this.showLowStock || product.quantity <= this.lowStockThreshold;
-
-        return matchesSearch && matchesCategory && matchesLowStock;
-      });
-    },
     totalLowStockItems() {
-      return this.filteredProducts.length;
+      return this.filteredLowStockItems.length;
     },
     totalValue() {
-      return this.filteredProducts
-        .reduce((sum, product) => sum + product.quantity * product.unitPrice, 0)
-        .toFixed(2);
+      return this.filteredLowStockItems.reduce((sum, item) => sum + (item.quantity * item.costPrice), 0);
     },
   },
   methods: {
-    loadLowStockProducts() {
-      const allProducts = [
-        {
-          id: 1,
-          name: 'Espresso Beans',
-          quantity: 5,
-          unitPrice: 60,
-          category: 'Beverages',
-          supplier: 'Coffee Co.',
-          status: 'Low Stock',
-        },
-        {
-          id: 2,
-          name: 'Cheese Sandwich',
-          quantity: 3,
-          unitPrice: 60,
-          category: 'Food',
-          supplier: 'Deli Foods',
-          status: 'Low Stock',
-        },
-        {
-          id: 3,
-          name: 'Milk',
-          quantity: 20,
-          unitPrice: 50,
-          category: 'Food',
-          supplier: 'Dairy Corp.',
-          status: 'In Stock',
-        },
-        {
-          id: 4,
-          name: 'Butter',
-          quantity: 8,
-          unitPrice: 100,
-          category: 'Bakery',
-          supplier: 'Bakery Co.',
-          status: 'Low Stock',
-        },
-      ];
-      this.products = allProducts; // Load all products initially
+    filterLowStockItems() {
+      if (this.searchTerm) {
+        this.filteredLowStockItems = this.lowStockItems.filter(item =>
+          item.name.toLowerCase().includes(this.searchTerm.toLowerCase()) &&
+          item.status === 'Low Stock'
+        );
+      } else {
+        this.filteredLowStockItems = this.lowStockItems.filter(item => item.status === 'Low Stock');
+      }
     },
-    toggleFilterDropdown() {
-      this.showFilterDropdown = !this.showFilterDropdown;
-    },
-    toggleLowStock() {
-      this.showLowStock = !this.showLowStock; // Toggle low stock filter
-    },
+
     exportToCSV() {
-      const headers = ['Name', 'Quantity', 'Unit Price', 'Category', 'Supplier', 'Status'];
-      const data = this.filteredProducts.map((product) => [
-        product.name,
-        product.quantity,
-        product.unitPrice,
-        product.category,
-        product.supplier,
-        product.status,
+      const headers = ['Name', 'Quantity', 'Cost Price', 'Supplier', 'Status'];
+      const data = this.filteredLowStockItems.map((ingredient) => [
+        ingredient.name,
+        ingredient.quantity,
+        ingredient.costPrice,
+        ingredient.supplier,
+        ingredient.status,
       ]);
 
       const csvContent = [
@@ -195,10 +116,22 @@ export default {
     },
   },
   created() {
-    this.loadLowStockProducts(); // Load the products when the component is created
+    if (this.lowStockItems.length === 0) {
+      const lowStockReports = JSON.parse(localStorage.getItem('lowStockReports')) || [];
+      if (lowStockReports.length > 0) {
+        // Assuming you're storing low stock items in a similar structure
+        this.lowStockItems = lowStockReports[lowStockReports.length - 1].products; 
+      } else {
+        alert('No low stock reports available.');
+      }
+    }
+    this.filterLowStockItems();
   },
 };
 </script>
+
+
+
 
 <style scoped>
 /* General Styling */

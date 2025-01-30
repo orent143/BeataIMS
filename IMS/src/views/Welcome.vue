@@ -6,7 +6,6 @@
     <div class="options">
       <button @click="goToIMS">Go to Inventory Management System (IMS)</button>
       <button @click="goToSMS">Go to Sales Management System (SMS)</button>
-      <button @click="goToADMIN">Sign ADMIN</button>
     </div>
   </div>
 </template>
@@ -20,9 +19,6 @@ export default {
     },
     goToSMS() {
       this.$router.push("/homesms");
-    },
-    goToADMIN() {
-      this.$router.push("/admin");
     },
   },
 };

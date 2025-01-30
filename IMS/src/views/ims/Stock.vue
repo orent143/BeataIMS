@@ -64,7 +64,7 @@
         <div class="floating-btn-container">
           <button class="floating-btn" @click="togglePopoutOptions">+</button>
           <div v-if="showPopoutOptions" class="popout-options">
-            <button class="popout-option" @click="addSummary">Add Summary</button>
+            <button class="popout-option" @click="addLowStock">Add Low Stock</button>
             <button class="popout-option" @click="filterLowStock">Low Stock</button>
           </div>
         </div>
@@ -89,13 +89,15 @@
 </template>
 
 <script>
+import AddStock from '@/components/ims/AddStock.vue';
+import EditStock from '@/components/ims/EditStock.vue';
 import SideBar from '@/components/ims/SideBar.vue';
-import LowStockReport from '@/views/ims/reports/LowStockReport.vue';
 
 export default {
   components: {
     SideBar,
-    LowStockReport
+    AddStock,
+    EditStock,
   },
   data() {
     return {
@@ -123,7 +125,7 @@ export default {
         { id: 13, name: 'Cheese', quantity: 10, costPrice: 6, status: 'Out of Stock', supplier: 'Deli Foods' },
         { id: 14, name: 'Bread', quantity: 40, costPrice: 2, status: 'In Stock', supplier: 'Bakery Inc.' },
         { id: 15, name: 'Lettuce', quantity: 30, costPrice: 3, status: 'Low Stock', supplier: 'Green Farms' },
-        ],
+      ],
       filteredItems: [],
       inventorySummaries: [],
       currentDate: new Date().toISOString().split('T')[0],
@@ -157,58 +159,38 @@ export default {
 
       this.filteredItems = filtered;
     },
-
     filterLowStock() {
       this.selectedStatus = 'Low Stock';
       this.lowStockFiltered = true;
       this.filterItems();
     },
-
-    addSummary() {
-      if (this.lowStockFiltered) {
+    addLowStock() {
+      if (this.lowStockFiltered && this.filteredItems.length > 0) {
         const lowStockItems = this.filteredItems;
-        this.createLowStockReport(lowStockItems);
-        this.$router.push({
-          name: 'lowStockReport',
-          state: { lowStockItems }  // Pass data via state
-        });
+
+        const lowStockSummary = {
+          id: Date.now(),
+          date: this.currentDate,
+          products: lowStockItems,
+          totalLowStock: lowStockItems.length,
+          totalValue: lowStockItems.reduce((sum, item) => sum + (item.quantity * item.costPrice), 0),
+        };
+
+        let lowStockReports = JSON.parse(localStorage.getItem('lowStockReports')) || [];
+
+        lowStockReports.push(lowStockSummary);
+
+        localStorage.setItem('lowStockReports', JSON.stringify(lowStockReports));
+
+        alert(`Low stock report created! Total low stock items: ${lowStockItems.length}`);
       } else {
-        this.createGeneralInventorySummary();
+        alert('No low stock items to report.');
       }
     },
-
-    createGeneralInventorySummary() {
-      const summary = {
-        id: Date.now(),
-        date: this.currentDate,
-        products: [...this.stockItems],
-        totalItems: this.stockItems.length,
-        totalValue: this.stockItems.reduce((sum, item) => sum + (item.quantity * item.costPrice), 0),
-      };
-
-      this.inventorySummaries.push(summary);
-      localStorage.setItem('inventorySummaries', JSON.stringify(this.inventorySummaries));
-      alert('General inventory summary has been created!');
-    },
-
-    createLowStockReport(lowStockItems) {
-      const lowStockSummary = {
-        id: Date.now(),
-        date: this.currentDate,
-        products: lowStockItems,
-        totalLowStock: lowStockItems.length,
-      };
-
-      this.inventorySummaries.push(lowStockSummary);
-      localStorage.setItem('inventorySummaries', JSON.stringify(this.inventorySummaries));
-      alert(`Low stock report created! Total items: ${lowStockItems.length}`);
-    },
-
     editItem(item) {
       this.selectedItem = item;
       this.showEditForm = true;
     },
-
     updateItem(updatedItem) {
       const index = this.stockItems.findIndex(item => item.id === updatedItem.id);
       if (index !== -1) {
@@ -217,12 +199,10 @@ export default {
       this.filterItems();
       this.toggleEditForm();
     },
-
     removeItem(itemId) {
       this.stockItems = this.stockItems.filter(item => item.id !== itemId);
       this.filterItems();
     },
-
     addItem(newItem) {
       newItem.id = this.stockItems.length + 1;
       this.stockItems.push(newItem);
@@ -230,7 +210,6 @@ export default {
       this.toggleAddForm();
     },
   },
-
   created() {
     const savedSummaries = localStorage.getItem('inventorySummaries');
     if (savedSummaries) {
@@ -238,13 +217,13 @@ export default {
     }
     this.filterItems();
   },
-
   watch: {
     searchTerm: 'filterItems',
     selectedStatus: 'filterItems',
-  }
+  },
 };
 </script>
+
   
   <style scoped>
   /* Use same styles as Inventory page */
