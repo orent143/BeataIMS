@@ -105,7 +105,7 @@
   }
   
   .add-btn {
-    background: #28a745;
+    background: #FF32BA;
     color: white;
     border: none;
     border-radius: 4px;
@@ -114,7 +114,7 @@
   }
   
   button:hover {
-    opacity: 0.9;
+    background-color: #fc62c9;
   }
   </style>
   

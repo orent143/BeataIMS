@@ -122,7 +122,7 @@
   
   .add-btn {
     flex: 1;
-    background: #4CAF50;
+    background: #FF32BA;
     color: white;
     border: none;
     border-radius: 4px;

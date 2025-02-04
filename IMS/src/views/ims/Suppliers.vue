@@ -303,8 +303,8 @@ export default {
 
 .add-product-btn {
   padding: 8px 12px;
-  background-color: #01A501;
-  color: rgb(0, 0, 0);
+  background-color: #FF32BA;
+  color: #dbdbdb;
   border: none;
   border-radius: 10px;
   width: 70px;
@@ -314,7 +314,7 @@ export default {
 }
 
 .add-product-btn:hover {
-  background-color: #00b32dad;
+  background-color: #fc62c9;
 }
 
 .action-btn {

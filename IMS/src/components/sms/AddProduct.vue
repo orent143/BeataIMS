@@ -182,7 +182,7 @@
   
   .add-item-btn {
     padding: 10px 10px;
-    background-color: #01a501f8;
+    background-color: #FF32BA;
     color: rgb(0, 0, 0);
     border: none;
     border-radius: 10px;

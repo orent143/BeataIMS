@@ -115,8 +115,8 @@ input {
 
 .add-category-btn {
   padding: 10px 20px;
-  background-color: #01a501;
-  color: white;
+  background-color: #FF32BA;
+  color: #dbdbdb;
   border: none;
   border-radius: 10px;
   font-size: 14px;
@@ -126,7 +126,7 @@ input {
 }
 
 .add-category-btn:hover {
-  background-color: #00b32d;
+  background-color: #fc62c9;
 }
 
 .add-category-btn:focus {

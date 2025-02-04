@@ -29,7 +29,7 @@
             <i class="fas fa-dollar-sign stat-icon"></i>
             <div class="stat-info">
               <h3>Total Revenue</h3>
-              <p class="stat-value">${{ totalRevenue }}</p>
+              <p class="stat-value">₱{{ totalRevenue }}</p>
             </div>
           </div>
   
@@ -86,7 +86,7 @@
                 <td>#{{ order.id }}</td>
                 <td>{{ order.customerName }}</td>
                 <td>{{ order.itemCount }} items</td>
-                <td>${{ order.total }}</td>
+                <td>₱{{ order.total }}</td>
                 <td>{{ formatDate(order.date) }}</td>
                 <td>
                   <span :class="['status-badge', order.status]">

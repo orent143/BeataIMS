@@ -142,8 +142,8 @@ export default {
   
   .add-item-btn {
     padding: 10px 20px;
-    background-color: #01a501f8;
-    color: rgb(0, 0, 0);
+    background-color: #FF32BA;
+    color: #dbdbdb;
     border: none;
     border-radius: 10px;
     font-size: 14px;
@@ -153,7 +153,7 @@ export default {
   }
   
   .add-item-btn:hover {
-    background-color: #00b32d;
+    background-color: #fc62c9;
   }
   
   .add-item-btn:focus {
