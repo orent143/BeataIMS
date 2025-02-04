@@ -22,6 +22,10 @@
             <i class="fas fa-chart-line"></i>
             Sales Management
           </button>
+          <button @click="goToADMIN" class="third-btn">
+            <i class="fas fa-chart-line"></i>
+            Admin
+          </button>
         </div>
       </div>
     </header>
@@ -63,6 +67,9 @@ export default {
     },
     goToSMS() {
       this.$router.push("/homesms");
+    },
+    goToADMIN() {
+      this.$router.push("/dashboard");
     },
   },
 };
@@ -166,11 +173,14 @@ export default {
   background-color: #FF32BA;
 }
 
-.primary-btn:hover, .secondary-btn:hover {
+.primary-btn:hover, .secondary-btn:hover, .third-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
-
+.third-btn{
+  color: white;
+  background-color: #FF32BA;
+}
 .features {
   padding: 5rem 5%;
   background: white;
