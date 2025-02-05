@@ -1,20 +1,13 @@
 <template>
+  <!-- Import Header component -->
+  <Header />
+
   <Sidebar />
 
   <div class="app-container">
     <div class="header-container">
       <h1 class="sales-header">Sales Report</h1>
       <div class="header-actions">
-        <div class="search-container">
-          <input
-            type="text"
-            v-model="searchTerm"
-            placeholder="Search"
-            class="search-bar"
-            @input="filterItems"
-          />
-          <i class="fas fa-search search-icon"></i>
-        </div>
 
         <div class="filter-container">
           <button class="filter-btn" @click="toggleFilterDropdown">
@@ -32,7 +25,6 @@
       </div>
     </div>
 
-    <div class="main-content">
       <div class="sales-container">
         <div class="sales-table-container">
           <table class="sales-table">
@@ -76,7 +68,6 @@
           </div>
         </div>
       </div>
-    </div>
 
     <button class="add-to-reports-btn" @click="addToReports">+</button>
   </div>
@@ -84,9 +75,12 @@
 
 <script>
 import Sidebar from '@/components/sms/Sidebar.vue';
+import Header from '@/components/Header.vue';
+
 export default {
   components: {
-    Sidebar
+    Sidebar,
+    Header
   },
   data() {
     return {
@@ -99,7 +93,18 @@ export default {
         { id: 1, name: 'Lemonade', quantity: 100, unitPrice: 50, itemsSold: 20, remitted: 1000, itemLeft: 80, status: 'Completed' },
         { id: 2, name: 'Cappuccino', quantity: 150, unitPrice: 40, itemsSold: 50, remitted: 2000, itemLeft: 100, status: 'Pending' },
         { id: 3, name: 'Espresso', quantity: 200, unitPrice: 30, itemsSold: 100, remitted: 3000, itemLeft: 100, status: 'Completed' },
-        { id: 4, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' }
+        { id: 4, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' },
+        { id: 5, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' },
+        { id: 1, name: 'Lemonade', quantity: 100, unitPrice: 50, itemsSold: 20, remitted: 1000, itemLeft: 80, status: 'Completed' },
+        { id: 2, name: 'Cappuccino', quantity: 150, unitPrice: 40, itemsSold: 50, remitted: 2000, itemLeft: 100, status: 'Pending' },
+        { id: 3, name: 'Espresso', quantity: 200, unitPrice: 30, itemsSold: 100, remitted: 3000, itemLeft: 100, status: 'Completed' },
+        { id: 4, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' },
+        { id: 5, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' },
+        { id: 1, name: 'Lemonade', quantity: 100, unitPrice: 50, itemsSold: 20, remitted: 1000, itemLeft: 80, status: 'Completed' },
+        { id: 2, name: 'Cappuccino', quantity: 150, unitPrice: 40, itemsSold: 50, remitted: 2000, itemLeft: 100, status: 'Pending' },
+        { id: 3, name: 'Espresso', quantity: 200, unitPrice: 30, itemsSold: 100, remitted: 3000, itemLeft: 100, status: 'Completed' },
+        { id: 4, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' },
+        { id: 5, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' }
       ],
       filteredItems: []
     };
@@ -187,8 +192,8 @@ export default {
   display: flex;
   flex-direction: column;
   flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 250px; /* Make space for sidebar, adjust as needed */
-  height: 100vh; /* Full height of the page */
+  margin-left: 230px; /* Make space for sidebar, adjust as needed */
+  height: 100%; /* Full height of the page */
 }
 
 .header-container {
@@ -212,22 +217,17 @@ export default {
   gap: 10px;
 }
 
-.main-content {
-  flex-grow: 1; /* Allow the content to take the remaining space */
-  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
-  height: calc(100vh - 60px); /* Account for header height */
-  overflow-y: auto; /* Enable scrolling if content overflows */
-}
 
 .sales-container {
+  position: relative;
   flex-grow: 1;
-  background-color: #dfdfdf;
+  height: 100%;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
   border-radius: 25px;
-  overflow: hidden;
+  overflow-y: auto;
   margin-left: 5px;
   padding: 0;
-  display: flex;
-  flex-direction: column;
 }
 
 .sales-table-container {

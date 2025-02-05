@@ -1,13 +1,16 @@
-<template>
+<template>  <!-- Import Header component -->
+  <Header />
+
+  <SideBar />
   <div class="app-container">
-    <SideBar />
+
+    
     <div class="main-container">
       <div class="header-container">
         <h1 class="header">Create Inventory Product</h1>
       </div>
 
       <div class="content-wrapper">
-        <div class="main-content">
           <!-- Product Details -->
           <div class="product-details">
             <h2>Product Details</h2>
@@ -35,7 +38,6 @@
                 <option value="DESSERT">Dessert</option>
               </select>
             </div>
-          </div>
 
           <!-- Raw Materials / Stock Selector -->
           <ProductItemSelector 
@@ -67,13 +69,15 @@
 import SideBar from '@/components/ims/SideBar.vue';
 import ProductSummary from '@/components/ims/ProductSummary.vue';
 import ProductItemSelector from '@/components/ims/ProductItemSelector.vue';
+import Header from '@/components/Header.vue'; // Import Header component
 
 export default {
   name: 'CreateProduct',
   components: {
     ProductSummary,
     SideBar,
-    ProductItemSelector
+    ProductItemSelector,
+    Header
   },
   data() {
     return {
@@ -154,62 +158,67 @@ export default {
 <style scoped>
 .app-container {
   display: flex;
-  height: 100vh;
+  height: 100%;
+  background-color: #f8f9fa; /* Light background for the whole container */
 }
 
 .main-container {
   flex-grow: 1;
-  margin-left: 250px;
-  padding: 20px;
-  background: #f5f5f5;
-}
-
-.header-container {
-  margin-bottom: 30px;
+  margin-left: 230px;
+  padding: 0px 20px;
 }
 
 .content-wrapper {
   display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 20px;
-}
-
-.main-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  grid-template-columns: 1fr 380px;
+  gap: 30px;
 }
 
 .product-details {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .summary-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 30px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #555;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
 }
 
 .form-input {
   width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  font-size: 1rem;
+  color: #333;
+  transition: all 0.3s ease;
   box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: #FF32BA; /* Bold focus color */
+  box-shadow: 0 0 5px rgba(255, 50, 186, 0.5); /* Focus shadow */
+  outline: none;
 }
 
 textarea.form-input {
@@ -218,31 +227,99 @@ textarea.form-input {
 
 .form-actions {
   display: flex;
-  gap: 10px;
+  gap: 15px;
   justify-content: flex-end;
-  margin-top: 20px;
+  margin-top: 25px;
 }
 
 .submit-btn {
   background: #FF32BA;
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
+  border-radius: 8px;
+  padding: 12px 24px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #e02c9b; /* Darker hover color */
 }
 
 .reset-btn {
   background: #6c757d;
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
+  border-radius: 8px;
+  padding: 12px 24px;
   cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
 }
 
-button:hover {
-  opacity: 0.9;
+.reset-btn:hover {
+  background-color: #5a6268; /* Darker reset button hover */
+}
+
+button:focus {
+  outline: none;
+}
+
+.header-container h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.product-details h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 20px;
+}
+
+.select-category {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  padding: 12px;
+  font-size: 1rem;
+  color: #333;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.select-category:focus {
+  border-color: #FF32BA;
+  box-shadow: 0 0 5px rgba(255, 50, 186, 0.5);
+  outline: none;
+}
+
+.product-details select {
+  font-size: 1rem;
+  color: #333;
+  padding: 12px;
+  width: 100%;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  border: 2px solid #ddd;
+  transition: all 0.3s ease;
+}
+
+.product-details select:focus {
+  border-color: #FF32BA;
+  box-shadow: 0 0 5px rgba(255, 50, 186, 0.5);
+  outline: none;
+}
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    grid-template-columns: 1fr;
+  }
+  
+  .main-container {
+    margin-left: 0;
+  }
 }
 </style>

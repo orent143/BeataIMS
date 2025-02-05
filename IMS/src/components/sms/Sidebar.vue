@@ -1,174 +1,176 @@
 <template>
-    <div :class="['sidebar', { 'collapsed': isCollapsed }]">
-      <h2 v-if="!isCollapsed" class="sidebar-title">
-        <img src="@/assets/Cafe-Logo-Transparent-Background.png" class="sidebar-logo" />
-        <span class="sidebar-title-text">Café Beata</span>
-      </h2>
-  
-      <ul v-if="!isCollapsed" class="sidebar-list">
-        <li v-for="(link, index) in links" :key="index">
-          <router-link
-            :to="link.path"
-            class="sidebar-link"
-            active-class="active-link"
-          >
-            <i :class="link.icon"></i> {{ link.name }}
-          </router-link>
-        </li>
-      </ul>
+  <div :class="['sidebar', { 'collapsed': isCollapsed }]">
 
-      <ul v-else class="sidebar-list">
-        <li v-for="(link, index) in links" :key="index">
-          <router-link :to="link.path" class="sidebar-link" active-class="active-link">
-            <i :class="link.icon"></i>
-          </router-link>
-        </li>
-      </ul>
-  
-      <div class="sidebar-footer">
-        <router-link to="/" class="sidebar-link" @click="logout">
-          <i class="fas fa-sign-out-alt"></i> Logout
+    <ul v-if="!isCollapsed" class="sidebar-list">
+      <li v-for="(link, index) in links" :key="index">
+        <router-link
+          :to="link.path"
+          class="sidebar-link"
+          active-class="active-link"
+        >
+          <i :class="['pi', link.icon]"></i> {{ link.name }}
         </router-link>
-      </div>
+      </li>
+    </ul>
+
+    <ul v-else class="sidebar-list">
+      <li v-for="(link, index) in links" :key="index">
+        <router-link :to="link.path" class="sidebar-link" active-class="active-link">
+          <i :class="['pi', link.icon]"></i>
+        </router-link>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <router-link to="/" class="sidebar-link" @click="logout">
+        <i class="pi pi-sign-out"></i> Logout
+      </router-link>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        isCollapsed: false,
-        links: [
-          { name: 'Dashboard', path: '/homesms', icon: 'fas fa-tachometer-alt' },
-          { name: 'Orders', path: '/order', icon: 'fas fa-shopping-cart' },
-          { name: 'Create Orders', path: '/createorder', icon: 'fas fa-plus-circle' },
-          { name: 'Sales', path: '/sales', icon: 'fas fa-cash-register' },
-          { name: 'Inventory', path: '/inventorysms', icon: 'fas fa-box' },
-          { name: 'Orders History', path: '/ordershistory',   icon: 'fas fa-clock'},
-          { name: 'Reports', path: '/reportssms', icon: 'fas fa-file-alt' }
-        ]
-      };
-    },
-    methods: {
-      logout() {
-        console.log("Logging out...");
-      }
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      isCollapsed: false,
+      links: [
+        { name: 'Dashboard', path: '/homesms', icon: 'pi-home' }, // pi-dashboard for "Dashboard"
+        { name: 'Orders', path: '/order', icon: 'pi pi-shopping-cart' }, // pi-shopping-cart for "Orders"
+        { name: 'Create Orders', path: '/createorder', icon: 'pi pi-plus-circle' }, // pi-plus-circle for "Create Orders"
+        { name: 'Sales', path: '/sales', icon: 'pi pi-dollar' }, // pi-dollar for "Sales"
+        { name: 'Inventory', path: '/inventorysms', icon: 'pi pi-box' }, // pi-box for "Inventory"
+        { name: 'Orders History', path: '/ordershistory', icon: 'pi pi-history' }, // pi-history for "Orders History"
+        { name: 'Reports', path: '/reportssms', icon: 'pi pi-file' } // pi-file for "Reports"
+      ]
+    };
+  },
+  methods: {
+    logout() {
+      console.log("Logging out...");
     }
-  };
-  </script>
-  
-  <style scoped>
+  }
+};
+</script>
+
+<style scoped>
 .sidebar {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 200px;
+  width: 180px;
   padding: 20px;
-  background-color: #FF32BA;
+  background-color:rgb(255, 255, 255);
   height: 100vh;
+  box-shadow: 0 8px 8px rgba(0, 0, 0, 0.1);
+
   position: fixed;
   transition: width 0.3s ease;
-  box-shadow: 2px 0 10px #FF00A9;
+
 }
-  
-  .sidebar-logo {
-    width: 42%;
-    height: auto;
-    margin: 0 auto;
-    display: block;
-  }
-  
-  .sidebar-title {
-    text-align: center;
-    margin-top: 5px;
-    margin-bottom: 30px;
-  }
-  
-  .collapsed {
-    width: 50px;
-  }
-  
-  .toggle-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 20px;
-    color: #fff;
-  }
-  
-  .sidebar-title-text {
-    color: #fff;
-    font-size: 25px;
-    font-family: 'Verdana', sans-serif;
-    margin-top: 10px;
-    display: block;
-  }
-  
-  .sidebar-list {
-    list-style-type: none;
-    padding: 0;
-    margin-bottom: auto;
-  }
-  
-  .sidebar-link {
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: 0;
-    font-size: 17px;
-    font-family: 'Arial', sans-serif;
-    display: flex;
-    align-items: center;
-    padding: 5px 10px;
-    margin: 15px 0;
-    transition: color 0.3s, border-color 0.3s;
-  }
-  
-  .sidebar-link i {
-    margin-right: 20px;
-    font-size: 18px;
-    vertical-align: middle;
-  }
-  
-  .sidebar-link:hover {
-    color: #000000;
-    border-color: #000000;
-  }
-  
-  .active-link {
-    color: #000000;
-    font-weight: bold;
-    background-color: #ffffff !important;
-    padding: 8px 5px !important;
-    width: 100%;
-    box-sizing: content-box;
-    border: 2px solid #ffffff;
-    border-radius: 4px;
-  }
-  
-  .sidebar-footer {
-    width: 100%;
-    display: flex;
-    justify-content: left;
-    padding: 0;
-    margin-top: auto;
-  }
-  
-  .sidebar-footer .sidebar-link {
-    color: white;
-    font-size: 17px;
-    font-family: 'Arial', sans-serif;
-    padding: 10px 20px;
-    border-radius: 25px;
-    margin-top: 15px;
-    display: flex;
-    align-items: left;
-  }
-  
-  .sidebar-footer .sidebar-link i {
-    margin-right: 18px;
-  }
-  
-  .sidebar-footer .sidebar-link:hover {
-    color: #000000;
-  }
-  </style>
+
+.sidebar-logo {
+  width: 42%;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+
+.sidebar-title {
+  text-align: center;
+  margin-top: 5px;
+  margin-bottom: 30px;
+}
+
+.collapsed {
+  width: 50px;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: rgb(165, 165, 165);
+}
+
+
+.sidebar-list {
+  list-style-type: none;
+  padding: 0;
+  margin-bottom: auto;
+}
+
+.sidebar-link {
+  color:rgba(14, 14, 14, 0.54);
+  text-decoration: none;
+  font-weight: 450;
+  font-size: 15px;
+  font-family: 'Arial', sans-serif;
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  margin: 15px 0;
+  transition: color 0.3s, border-color 0.3s;
+}
+
+.sidebar-link i {
+  margin-right: 20px;
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+.sidebar-link:hover {
+  color: #000000;
+  border-color: #ed9598;
+}
+
+.active-link {
+  color: #000000;
+  font-weight: bold;
+  background-color:#ed9598 !important;
+  padding: 8px 5px !important;
+  width: 100%;
+  box-sizing: content-box;
+  border: 2px solidrgb(0, 0, 0);
+  border-radius: 10px;
+}
+
+.submenu {
+  list-style-type: none;
+  padding-left: 0;
+  margin-left: 20px;
+}
+
+.collapsed .sidebar-link {
+  justify-content: center;
+}
+
+.sidebar-footer {
+  width: 100%;
+  display: flex;
+  justify-content: left;
+  padding: 0;
+  margin-top: auto; /* Ensures the logout stays at the bottom */
+  margin-bottom: auto; /* Adds space from the bottom */
+}
+
+.sidebar-footer .sidebar-link {
+  color:rgba(14, 14, 14, 0.54);
+    font-size: 15px;
+  font-family: 'Arial', sans-serif;
+  padding: 10px 20px;
+  border-radius: 25px;
+  display: flex;
+  align-items: left;
+}
+
+.sidebar-footer .sidebar-link i {
+  margin-right: 18px;
+}
+
+.sidebar-footer .sidebar-link:hover {
+  color: rgb(0, 0, 0);
+}
+
+</style>

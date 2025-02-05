@@ -1,4 +1,7 @@
 <template>
+  <!-- Import Header component -->
+  <Header />
+
   <SideBar />
   <div class="app-container">
     <div class="header-container">
@@ -30,7 +33,6 @@
       </div>
     </div>
 
-    <div class="main-content">
       <div class="inventory-container">
         <div class="table-container">
           <table class="stock-table">
@@ -78,15 +80,16 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
-import SideBar from '@/components/ims/SideBar.vue';
+import SideBar from '@/components/ims/SideBar.vue'; // Import Sidebar component
+import Header from '@/components/Header.vue'; // Import Header component
 
 export default {
   components: {
-    SideBar
+    SideBar,
+    Header
   },
   name: 'SummaryReport',
   data() {
@@ -175,8 +178,8 @@ export default {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  margin-left: 250px;
-  height: 100vh;
+  margin-left: 230px;
+  height: 100%;
 }
 
 .header-container {
@@ -252,20 +255,17 @@ export default {
 }
 
 /* Main Content */
-.main-content {
-  flex-grow: 1;
-  transition: margin-left 0.3s ease;
-  height: calc(100vh - 60px);
-  overflow-y: auto;
-}
+
 
 .inventory-container {
   position: relative;
-  display: flex;
-  flex-direction: column;
   flex-grow: 1;
-  background-color: #dfdfdf;
+  height: 37dvw;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+
+  background-color: #ffffff;
   border-radius: 25px;
+  overflow-y: auto;
   margin-left: 5px;
   padding: 0;
 }
@@ -296,7 +296,7 @@ export default {
 
 /* Button Styles */
 .export-btn {
-  background-color: #FF32BA;
+  background-color: #E54F70;
   color: white;
   padding: 8px 15px;
   border: none;

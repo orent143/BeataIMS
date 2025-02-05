@@ -1,19 +1,13 @@
 <template>
-    <Sidebar />
+  <!-- Import Header component -->
+  <Header />
+
+  <Sidebar />
     <div class="app-container">
       <div class="header-container">
         <h1 class="sales-header">Order History Reports</h1>
         <div class="header-actions">
-          <div class="search-container">
-            <input 
-              type="text" 
-              v-model="searchTerm" 
-              placeholder="Search" 
-              class="search-bar"
-              @input="filterReports" 
-            />
-            <i class="fas fa-search search-icon"></i>
-          </div>
+          
           <div class="filter-container">
             <button class="filter-btn" @click="toggleFilterDropdown">
               <i class="fas fa-filter"></i>
@@ -36,7 +30,6 @@
           </div>
         </div>
       </div>
-      <div class="main-content">
         <div class="sales-container">
           <div class="sales-table-container">
             <table class="sales-table">
@@ -87,16 +80,16 @@
             </div>
           </div>
         </div>
-      </div>
     </div>
   </template>
   
   <script>
   import Sidebar from '@/components/sms/Sidebar.vue';
-  
+  import Header from '@/components/Header.vue';
+
   export default {
     name: 'HistoryReportSMS',
-    components: { Sidebar },
+    components: { Sidebar, Header },
     data() {
       return {
         searchTerm: '',
@@ -164,8 +157,8 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  margin-left: 250px;
-  height: 100vh;
+  margin-left: 230px;
+  height: 100%;
 }
 
 .header-container {
@@ -200,13 +193,14 @@
 .sales-container {
   position: relative;
   flex-grow: 1;
-  background-color: #dfdfdf;
+  height: auto;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+
+  background-color: #ffffff;
   border-radius: 25px;
-  overflow: hidden;
+  overflow-y: auto;
   margin-left: 5px;
   padding: 0;
-  display: flex;
-  flex-direction: column;
 }
 
 /* Table Styling */

@@ -1,25 +1,27 @@
 <template>
-        <SideBar />
+  <!-- Import Header component -->
+  <Header />
+
+  <SideBar />
 
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Dashboard</h1>
       <div class="header-actions">
         <div class="date-display">
-          <i class="fas fa-calendar"></i>
-          <span>{{ currentDate }}</span>
-        </div>
+    <i class="pi pi-calendar"></i>
+    <span>{{ currentDate }}</span>
+  </div>
       </div>
     </div>
 
-    <div class="main-content">
       <div class="dashboard-container">
         <!-- Summary Cards -->
         <div class="summary-cards">
           <div class="card total-sales">
-            <div class="card-icon">
-              <i class="fas fa-chart-line"></i>
-            </div>
+    <div class="card-icon">
+      <i class="pi pi-chart-line"></i>
+    </div>
             <div class="card-content">
               <h3>Total Sales</h3>
               <p class="amount">₱{{ totalSales.toFixed(2) }}</p>
@@ -28,9 +30,9 @@
           </div>
 
           <div class="card total-products">
-            <div class="card-icon">
-              <i class="fas fa-box"></i>
-            </div>
+    <div class="card-icon">
+      <i class="pi pi-box"></i>
+    </div>
             <div class="card-content">
               <h3>Total Products</h3>
               <p class="amount">{{ totalProducts }}</p>
@@ -39,9 +41,9 @@
           </div>
 
           <div class="card low-stock">
-            <div class="card-icon">
-              <i class="fas fa-exclamation-triangle"></i>
-            </div>
+    <div class="card-icon">
+      <i class="pi pi-exclamation-triangle"></i>
+    </div>
             <div class="card-content">
               <h3>Low Stock</h3>
               <p class="amount">{{ lowStockCount }}</p>
@@ -50,9 +52,9 @@
           </div>
 
           <div class="card top-selling">
-            <div class="card-icon">
-              <i class="fas fa-star"></i>
-            </div>
+    <div class="card-icon">
+      <i class="pi pi-star-fill"></i>
+    </div>
             <div class="card-content">
               <h3>Top Selling</h3>
               <p class="product-name">{{ topSellingProduct }}</p>
@@ -80,16 +82,18 @@
           </div>
         </div>
       </div>
-    </div>
   </div>
 </template>
 
 <script>
+// Import Header and Sidebar components
 import SideBar from '@/components/ims/SideBar.vue'; // Import Sidebar component
+import Header from '@/components/Header.vue'; // Import Header component
 
 export default {
   components: {
-    SideBar
+    SideBar,
+    Header, // Register Header component
   },
   name: 'Home',
   data() {
@@ -105,30 +109,30 @@ export default {
       lowStockCount: 8,
       topSellingProduct: 'Espresso',
       recentActivities: [
-        {
+      {
           id: 1,
-          icon: 'fas fa-shopping-cart',
+          icon: 'pi pi-shopping-cart',
           title: 'New sale recorded',
           time: '5 minutes ago',
           status: 'Completed'
         },
         {
           id: 2,
-          icon: 'fas fa-box',
+          icon: 'pi pi-box',
           title: 'Inventory updated',
           time: '15 minutes ago',
           status: 'Success'
         },
         {
           id: 3,
-          icon: 'fas fa-exclamation-circle',
+          icon: 'pi pi-exclamation-circle',
           title: 'Low stock alert',
           time: '1 hour ago',
           status: 'Warning'
         },
         {
           id: 4,
-          icon: 'fas fa-truck',
+          icon: 'pi pi-truck',
           title: 'New supplier order',
           time: '2 hours ago',
           status: 'Pending'
@@ -144,8 +148,8 @@ export default {
   display: flex;
   flex-direction: column;
   flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 250px; /* Make space for sidebar, adjust as needed */
-  height: 100vh; /* Full height of the page */
+  margin-left: 230px; /* Make space for sidebar, adjust as needed */
+  height: 100%; /* Full height of the page */
 }
 
 .header-container {
@@ -154,7 +158,6 @@ export default {
   justify-content: space-between;
   margin-left: 18px;
   width: 95%;
-  margin-bottom: 20px;
 }
 
 .products-header {
@@ -173,16 +176,10 @@ export default {
   font-weight: 500;
 }
 
-.main-content {
-  flex-grow: 1; /* Allow the content to take the remaining space */
-  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
-  height: calc(100vh - 60px); /* Account for header height */
-  overflow-y: auto; /* Enable scrolling if content overflows */
-}
 
 .dashboard-container {
   flex-grow: 1;
-  background-color: #dfdfdf;
+  background-color: #EFEFEF;
   border-radius: 25px;
   overflow-y: auto;
   margin-left: 5px;

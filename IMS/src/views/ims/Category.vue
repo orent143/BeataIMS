@@ -1,27 +1,19 @@
 <template>
-          <SideBar />
+  <!-- Import Header component -->
+  <Header />
 
+  <SideBar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Categories</h1>
       <div class="header-actions">
-        <!-- Search Bar -->
-        <div class="search-container">
-          <input
-            type="text"
-            v-model="searchTerm"
-            placeholder="Search"
-            class="search-bar"
-          />
-          <i class="fas fa-search search-icon"></i>
-        </div>
+
 
         <!-- Add Category Button -->
         <button @click="toggleAddForm" class="add-product-btn">Add</button>
       </div>
     </div>
 
-    <div class="main-content">
       <!-- Add Category Form -->
       <AddCategory 
         v-if="showAddForm" 
@@ -39,10 +31,10 @@
           <!-- Action Buttons -->
           <div class="category-actions">
             <button @click="setEditCategory(category)" class="action-btn edit-btn">
-              <i class="fas fa-pencil-alt"></i> <!-- Pencil icon for edit -->
+              <i class="pi pi-pencil"></i>
             </button>
             <button @click="removeCategory(category.id)" class="action-btn remove-btn">
-              <i class="fas fa-trash"></i> <!-- Trash icon for remove -->
+              <i class="pi pi-trash"></i>
             </button>
           </div>
         </div>
@@ -51,19 +43,20 @@
       <!-- Edit Category Form -->
       <EditCategory v-if="editingCategory" :category="editingCategory" @save="saveCategory" @close="toggleEditForm" />
     </div>
-  </div>
 </template>
 
 <script>
 import SideBar from '@/components/ims/SideBar.vue';
 import AddCategory from '@/components/ims/AddCategory.vue';
 import EditCategory from '@/components/ims/EditCategory.vue';
+import Header from '@/components/Header.vue'; // Import Header component
 
 export default {
   components: {
     AddCategory,
     EditCategory,
-    SideBar
+    SideBar,
+    Header
   },
   data() {
     return {
@@ -117,8 +110,8 @@ export default {
   display: flex;
   flex-direction: column;
   flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 250px; /* Make space for sidebar, adjust as needed */
-  height: 100vh; /* Full height of the page */
+  margin-left: 230px; /* Make space for sidebar, adjust as needed */
+  height: 100%; /* Full height of the page */
 }
 
 .header-container {
@@ -195,7 +188,7 @@ export default {
 }
 
 .edit-btn i, .remove-btn i {
-  font-size: 20px;
+  font-size: 15px;
 }
 
 .search-container {
@@ -225,7 +218,7 @@ export default {
 
 .add-product-btn {
   padding: 8px 12px;
-  background-color: #FF32BA;
+  background-color: #E54F70;
   color: #dbdbdb;
   border: none;
   border-radius: 10px;
@@ -236,7 +229,7 @@ export default {
 }
 
 .add-product-btn:hover {
-  background-color: #fc62c9;
+  background-color: #ed9598;
 }
 
 

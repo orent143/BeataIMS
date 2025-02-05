@@ -1,10 +1,5 @@
 <template>
   <div :class="['sidebar', { 'collapsed': isCollapsed }]">
-    <h2 v-if="!isCollapsed" class="sidebar-title">
-      <img src="@/assets/Cafe-Logo-Transparent-Background.png" class="sidebar-logo" />
-      <span class="sidebar-title-text">Café Beata</span>
-    </h2>
-
     <ul v-if="!isCollapsed" class="sidebar-list">
       <li v-for="(link, index) in links" :key="index">
         <router-link
@@ -13,7 +8,7 @@
           class="sidebar-link"
           @click.prevent="toggleSubmenu(link)"  
         >
-          <i :class="link.icon"></i> {{ link.name }}
+          <i :class="['pi', link.icon]"></i> {{ link.name }}
         </router-link>
         <router-link
           v-else
@@ -21,7 +16,7 @@
           class="sidebar-link"
           active-class="active-link"
         >
-          <i :class="link.icon"></i> {{ link.name }}
+          <i :class="['pi', link.icon]"></i> {{ link.name }}
         </router-link>
 
         <!-- Submenu that stays open when toggled -->
@@ -33,7 +28,7 @@
               active-class="active-link"
               @click.stop="stayOpen" 
             >
-              <i :class="subLink.icon"></i> {{ subLink.name }}
+              <i :class="['pi', subLink.icon]"></i> {{ subLink.name }}
             </router-link>
           </li>
         </ul>
@@ -43,14 +38,15 @@
     <ul v-else class="sidebar-list">
       <li v-for="(link, index) in links" :key="index">
         <router-link :to="link.path" class="sidebar-link" active-class="active-link">
-          <i :class="link.icon"></i>
+          <i :class="['pi', link.icon]"></i>
         </router-link>
       </li>
     </ul>
 
+    <!-- Logout at the bottom with margin -->
     <div class="sidebar-footer">
       <router-link to="/" class="sidebar-link" @click="logout">
-        <i class="fas fa-sign-out-alt"></i> Logout
+        <i class="pi pi-sign-out"></i> Logout
       </router-link>
     </div>
   </div>
@@ -62,21 +58,21 @@ export default {
     return {
       isCollapsed: false,
       links: [
-        { name: 'Home', path: '/homeims', icon: 'fas fa-home' },
+        { name: 'Home', path: '/homeims', icon: 'pi-home' },
         {
           name: 'Manage Inventory',
           path: '#',
-          icon: 'fas fa-box',
+          icon: 'pi-box',
           submenu: [
-            { name: 'Products', path: '/inventoryims', icon: 'fas fa-cogs' },
-            { name: 'Stock', path: '/stocks', icon: 'fas fa-boxes' }
+            { name: 'Products', path: '/inventoryims', icon: 'pi-box' },
+            { name: 'Stock', path: '/stocks', icon: 'pi-box' }
           ],
           isOpen: false // Initially, the submenu is closed
         },
-        { name: 'Create Product', path: '/create', icon: 'fas fa-plus-circle' },
-        { name: 'Suppliers', path: '/suppliers', icon: 'fas fa-truck' },
-        { name: 'Categories', path: '/category', icon: 'fas fa-th-list' },
-        { name: 'Reports', path: '/reportsims', icon: 'fas fa-chart-line' }
+        { name: 'Create Product', path: '/create', icon: 'pi-plus-circle' },
+        { name: 'Suppliers', path: '/suppliers', icon: 'pi-truck' },
+        { name: 'Categories', path: '/category', icon: 'pi-list' },
+        { name: 'Reports', path: '/reportsims', icon: 'pi-chart-line' }
       ]
     };
   },
@@ -86,7 +82,7 @@ export default {
   methods: {
     toggleSubmenu(link) {
       if (link.submenu) {
-        link.isOpen = !link.isOpen; // Toggle the submenu open/close
+        link.isOpen = !link.isOpen; 
       }
     },
     stayOpen() {
@@ -111,13 +107,15 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 200px;
+  width: 180px;
   padding: 20px;
-  background-color: #FF32BA;
+  background-color:rgb(255, 255, 255);
   height: 100vh;
+  box-shadow: 0 8px 8px rgba(0, 0, 0, 0.1);
+
   position: fixed;
   transition: width 0.3s ease;
-  box-shadow: 2px 0 10px #FF00A9;
+
 }
 
 .sidebar-logo {
@@ -142,16 +140,9 @@ export default {
   border: none;
   cursor: pointer;
   font-size: 20px;
-  color: #fff;
+  color: rgb(165, 165, 165);
 }
 
-.sidebar-title-text {
-  color: #fff;
-  font-size: 25px;
-  font-family: 'Verdana', sans-serif;
-  margin-top: 10px;
-  display: block;
-}
 
 .sidebar-list {
   list-style-type: none;
@@ -160,10 +151,10 @@ export default {
 }
 
 .sidebar-link {
-  color: #ffffff;
+  color:rgba(14, 14, 14, 0.54);
   text-decoration: none;
-  font-weight: 0;
-  font-size: 17px;
+  font-weight: 450;
+  font-size: 15px;
   font-family: 'Arial', sans-serif;
   display: flex;
   align-items: center;
@@ -180,18 +171,18 @@ export default {
 
 .sidebar-link:hover {
   color: #000000;
-  border-color: #000000;
+  border-color: #ed9598;
 }
 
 .active-link {
   color: #000000;
   font-weight: bold;
-  background-color: #ffffff !important;
+  background-color:#ed9598 !important;
   padding: 8px 5px !important;
   width: 100%;
   box-sizing: content-box;
-  border: 2px solid #ffffff;
-  border-radius: 4px;
+  border: 2px solidrgb(0, 0, 0);
+  border-radius: 10px;
 }
 
 .submenu {
@@ -209,16 +200,16 @@ export default {
   display: flex;
   justify-content: left;
   padding: 0;
-  margin-top: auto;
+  margin-top: auto; /* Ensures the logout stays at the bottom */
+  margin-bottom: auto; /* Adds space from the bottom */
 }
 
 .sidebar-footer .sidebar-link {
-  color: white;
-  font-size: 17px;
+  color:rgba(14, 14, 14, 0.54);
+    font-size: 15px;
   font-family: 'Arial', sans-serif;
   padding: 10px 20px;
   border-radius: 25px;
-  margin-top: 15px;
   display: flex;
   align-items: left;
 }
@@ -228,6 +219,7 @@ export default {
 }
 
 .sidebar-footer .sidebar-link:hover {
-  color: #000000;
+  color: rgb(0, 0, 0);
 }
+
 </style>

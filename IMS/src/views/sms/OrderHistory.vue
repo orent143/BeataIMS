@@ -1,13 +1,13 @@
 <template>
+  <!-- Import Header component -->
+  <Header />
+
   <Sidebar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="sales-header">Order History</h1>
       <div class="header-actions">
-        <div class="search-container">
-          <input type="text" v-model="searchTerm" placeholder="Search" class="search-bar" @input="filterOrders"/>
-          <i class="fas fa-search search-icon"></i>
-        </div>
+        
         <div class="filter-container">
           <button class="filter-btn" @click="toggleFilterDropdown">
             <i class="fas fa-filter"></i>
@@ -22,7 +22,6 @@
         </div>
       </div>
     </div>
-    <div class="main-content">
       <div class="sales-container">
         <div class="sales-table-container">
           <table class="sales-table">
@@ -82,16 +81,16 @@
           </div>
         </div>
       </div>
-    </div>
     <button class="add-to-reports-btn" @click="addToReports">+</button>
   </div>
 </template>
 
 <script>
 import Sidebar from '@/components/sms/Sidebar.vue';
+import Header from '@/components/Header.vue';
 
 export default {
-  components: { Sidebar },
+  components: { Sidebar, Header },
   data() {
     return {
       searchTerm: '',
@@ -100,6 +99,18 @@ export default {
       showCheckboxes: false,
       selectedItems: [],
       orders: [
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
         {
           id: 1001,
           customerName: 'John Doe',
@@ -182,8 +193,8 @@ export default {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  margin-left: 250px;
-  height: 100vh;
+  margin-left: 230px;
+  height: 100%;
 }
 
 .header-container {
@@ -207,22 +218,19 @@ export default {
   gap: 10px;
 }
 
-.main-content {
-  flex-grow: 1;
-  transition: margin-left 0.3s ease;
-  height: calc(100vh - 60px);
-  overflow-y: auto;
-}
+
 
 .sales-container {
+  position: relative;
   flex-grow: 1;
-  background-color: #dfdfdf;
+  height: auto;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+
+  background-color: #ffffff;
   border-radius: 25px;
-  overflow: hidden;
+  overflow-y: auto;
   margin-left: 5px;
   padding: 0;
-  display: flex;
-  flex-direction: column;
 }
 
 .sales-table-container {

@@ -1,4 +1,7 @@
 <template>
+  <!-- Import Header component -->
+  <Header />
+
   <SideBar />
   <div class="app-container">
     <div class="header-container">
@@ -11,7 +14,6 @@
       </div>
     </div>
     
-    <div class="main-content">
       <div class="report-cards">
         <!-- Summary Report Card -->
         <div class="report-card" @click="goToReport('summary')">
@@ -43,15 +45,15 @@
           </div>
         </div>
       </div>
-    </div>
   </div>
 </template>
 
 <script>
 import SideBar from '@/components/ims/SideBar.vue';
+import Header from '@/components/Header.vue'; // Import Header component
 
 export default {
-  components: { SideBar },
+  components: { SideBar, Header },
   data() {
     return {
       searchTerm: '',
@@ -90,7 +92,7 @@ export default {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  margin-left: 250px;
+  margin-left: 230px;
   height: 100vh;
 }
 

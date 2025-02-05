@@ -1,5 +1,9 @@
 <template>
+  <!-- Import Header component -->
+  <Header />
+
   <Sidebar />
+
     <div class="app-container">
       <div class="header-container">
         <h1 class="header">Create Order</h1>
@@ -60,13 +64,15 @@
   import OrderItemSelector from '@/components/sms/OrderItemSelector.vue'
   import OrderSummary from '@/components/sms/OrderSummary.vue'
   import Sidebar from '@/components/sms/Sidebar.vue';
-  
+  import Header from '@/components/Header.vue';
+
   export default {
     name: 'CreateOrder',
     components: {
       OrderItemSelector,
       OrderSummary,
-      Sidebar
+      Sidebar,
+      Header
     },
     data() {
       return {
@@ -139,8 +145,8 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 250px; /* Make space for sidebar, adjust as needed */
-  height: 100vh; /* Full height of the page */
+  margin-left: 230px; /* Make space for sidebar, adjust as needed */
+  height: 100%; /* Full height of the page */
 }
   
 .header-container {
@@ -159,6 +165,7 @@
   }
   
   .main-content {
+  background-color: transparent;
   flex-grow: 1; /* Allow the content to take the remaining space */
   transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
   height: calc(100vh - 60px); /* Account for header height */
@@ -166,7 +173,6 @@
 }
   
   .order-details-section {
-    background: white;
     border-radius: 8px;
     padding: 0px;
     top: 0;

@@ -1,5 +1,9 @@
 <template>
+  <!-- Import Header component -->
+  <Header />
+
   <Sidebar />
+
     <div class="app-container">
       <div class="header-container">
         <h1 class="header">Reports</h1>
@@ -15,7 +19,6 @@
         </div>
       </div>
   
-      <div class="main-content">
         <div class="stats-grid">
           <div class="stat-card">
             <i class="fas fa-shopping-cart stat-icon"></i>
@@ -97,16 +100,17 @@
             </tbody>
           </table>
         </div>
-      </div>
     </div>
   </template>
   
   <script>
 import Sidebar from '@/components/sms/Sidebar.vue';
+import Header from '@/components/Header.vue';
 
   export default {
     components: {
-    Sidebar
+    Sidebar,
+    Header
   },
     data() {
       return {
@@ -153,8 +157,8 @@ import Sidebar from '@/components/sms/Sidebar.vue';
   display: flex;
   flex-direction: column;
   flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 250px; /* Make space for sidebar, adjust as needed */
-  height: 100vh; /* Full height of the page */
+  margin-left: 230px; /* Make space for sidebar, adjust as needed */
+  height: 100%; /* Full height of the page */
 }
   
 .header-container {

@@ -1,5 +1,8 @@
 <template>
-    <SideBar />
+  <!-- Import Header component -->
+  <Header />
+
+  <Sidebar />
     <div class="app-container">
       <div class="header-container">
         <h1 class="products-header">Reports</h1>
@@ -11,7 +14,6 @@
         </div>
       </div>
       
-      <div class="main-content">
         <div class="report-cards">
           <!-- Sales Reports Card -->
           <div class="report-card" @click="goToReport('sales')">
@@ -43,16 +45,17 @@
             </div>
           </div>
         </div>
-      </div>
     </div>
   </template>
   
   <script>
-  import SideBar from '@/components/sms/Sidebar.vue';
-  
+  import Sidebar from '@/components/sms/Sidebar.vue';
+  import Header from '@/components/Header.vue';
+
   export default {
     components: {
-      SideBar
+      Sidebar,
+      Header
     },
     data() {
       return {
@@ -96,8 +99,8 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    margin-left: 250px;
-    height: 100vh;
+    margin-left: 230px;
+    height: 100%;
   }
   
   .header-container {
@@ -120,13 +123,7 @@
     align-items: center;
     gap: 10px;
   }
-  
-  .main-content {
-    flex-grow: 1;
-    transition: margin-left 0.3s ease;
-    height: calc(100vh - 60px);
-    overflow-y: auto;
-  }
+
   
   .report-cards {
     display: flex;

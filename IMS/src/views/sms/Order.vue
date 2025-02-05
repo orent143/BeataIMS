@@ -1,18 +1,12 @@
 <template>
-<Sidebar />
+  <!-- Import Header component -->
+  <Header />
+
+  <Sidebar />
     <div class="app-container">
       <div class="header-container">
         <h1 class="header">Orders</h1>
         <div class="header-actions">
-          <div class="search-container">
-            <input
-              type="text"
-              v-model="searchTerm"
-              placeholder="Search orders..."
-              class="search-bar"
-            />
-            <i class="fas fa-search search-icon"></i>
-          </div>
           <div class="filter-container">
             <select v-model="statusFilter" class="filter-select">
               <option value="all">All Status</option>
@@ -25,7 +19,6 @@
         </div>
       </div>
   
-      <div class="main-content">
         <div class="orders-grid">
           <div v-for="order in filteredOrders" :key="order.id" class="order-card">
             <div class="order-header">
@@ -75,17 +68,18 @@
               </div>
             </div>
           </div>
-        </div>
       </div>
     </div>
   </template>
   
   <script>
 import Sidebar from '@/components/sms/Sidebar.vue';
+import Header from '@/components/Header.vue';
 
   export default {
     components: {
-    Sidebar
+    Sidebar,
+    Header
   },
     data() {
       return {
@@ -196,8 +190,8 @@ import Sidebar from '@/components/sms/Sidebar.vue';
   display: flex;
   flex-direction: column;
   flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 250px; /* Make space for sidebar, adjust as needed */
-  height: 100vh; /* Full height of the page */
+  margin-left: 230px; /* Make space for sidebar, adjust as needed */
+  height: 100%; /* Full height of the page */
 }
   
 .header-container {

@@ -1,20 +1,13 @@
 <template>
-          <SideBar />
+  <!-- Import Header component -->
+  <Header />
+
+  <SideBar />
 
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Suppliers List </h1>
       <div class="header-actions">
-        <div class="search-container">
-          <input
-            type="text"
-            v-model="searchTerm"
-            placeholder="Search"
-            class="search-bar"
-            @input="filterItems"
-          />
-          <i class="fas fa-search search-icon"></i>
-        </div>
 
         <div class="filter-container">
           <button class="filter-btn" @click="toggleFilterDropdown">
@@ -34,7 +27,6 @@
       </div>
     </div>
 
-    <div class="main-content">
       <div class="inventory-container">
         <table class="supplier-table">
           <thead>
@@ -53,14 +45,17 @@
               <td>${{ supplier.contacts }}</td>
               <td>{{ supplier.email }}</td>
               <td>
-                <button class="action-btn" @click="editItem(supplier)">Edit</button>
-                <button class="action-btn" @click="removeItem(supplier.id)">Remove</button>
-              </td>
+  <button class="action-btn edit" @click="editItem(product)">
+    <i class="pi pi-pencil"></i>
+  </button>
+  <button class="action-btn delete" @click="removeItem(product.id)">
+    <i class="pi pi-trash"></i>
+  </button>
+</td>
             </tr>
           </tbody>
         </table>
       </div>
-    </div>
 
     <add-supplier 
       v-if="showAddForm" 
@@ -82,13 +77,15 @@
 <script>
 import AddSupplier from '@/components/ims/AddSupplier.vue';
 import EditSupplier from '@/components/ims/EditSupplier.vue';
-import SideBar from '@/components/ims/SideBar.vue';
+import SideBar from '@/components/ims/SideBar.vue'; // Import Sidebar component
+import Header from '@/components/Header.vue'; // Import Header component
 
 export default {
   components: {
     AddSupplier,
     EditSupplier,
-    SideBar
+    SideBar,
+    Header
   },
   data() {
     return {
@@ -174,8 +171,8 @@ export default {
   display: flex;
   flex-direction: column;
   flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 250px; /* Make space for sidebar, adjust as needed */
-  height: 100vh; /* Full height of the page */
+  margin-left: 230px; /* Make space for sidebar, adjust as needed */
+  height: 100%; /* Full height of the page */
 }
 
 .header-container {
@@ -199,17 +196,15 @@ export default {
   gap: 10px;
 }
 
-.main-content {
-  flex-grow: 1; /* Allow the content to take the remaining space */
-  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
-  height: calc(100vh - 60px); /* Account for header height */
-  overflow-y: auto; /* Enable scrolling if content overflows */
-}
+
 
 .inventory-container {
+  position: relative;
   flex-grow: 1;
-  height: 40vw;
-  background-color: #dfdfdf;
+  height: 37dvw;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+
+  background-color: #ffffff;
   border-radius: 25px;
   overflow-y: auto;
   margin-left: 5px;
@@ -303,7 +298,7 @@ export default {
 
 .add-product-btn {
   padding: 8px 12px;
-  background-color: #FF32BA;
+  background-color: #E54F70;
   color: #dbdbdb;
   border: none;
   border-radius: 10px;
@@ -314,28 +309,37 @@ export default {
 }
 
 .add-product-btn:hover {
-  background-color: #fc62c9;
+  background-color: #ed9598;
 }
 
 .action-btn {
-  padding: 6px 9px;
-  background-color: #007bff;
-  color: white;
+  padding: 8px;
+  background-color: transparent;
   border: none;
-  border-radius: 10px;
+  border-radius: 50%;
   cursor: pointer;
-  font-size: 13px;
-  font-family: 'Arial', sans-serif;
-  font-weight: 500;
+  font-size: 16px;
   transition: background-color 0.3s;
   margin-right: 10px;
+  width: 35px;
+  height: 35px;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn.edit {
+  color: #1976d2;
+}
+
+.action-btn.delete {
+  color: #dc3545;
 }
 
 .action-btn:hover {
-  background-color: #0056b3;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .action-btn:active {
-  background-color: #004080;
+  background-color: rgba(0, 0, 0, 0.2);
 }
 </style>

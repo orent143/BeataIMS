@@ -1,4 +1,7 @@
 <template>
+  <!-- Import Header component -->
+  <Header />
+
   <Sidebar />
     <div class="app-container">
       <!-- Header Section -->
@@ -6,16 +9,7 @@
         <h1 class="products-header">Product List</h1>
         <div class="header-actions">
           <!-- Search Bar -->
-          <div class="search-container">
-            <input
-              type="text"
-              v-model="searchTerm"
-              placeholder="Search"
-              class="search-bar"
-              @input="filterItems"
-            />
-            <i class="fas fa-search search-icon"></i>
-          </div>
+
   
           <!-- Filter Dropdown -->
           <div class="filter-container">
@@ -38,7 +32,6 @@
       </div>
   
       <!-- Main Content Section -->
-      <div class="main-content">
         <div class="inventory-container">
           <table class="stock-table">
             <thead>
@@ -61,9 +54,13 @@
                 <td>{{ product.supplier }}</td>
                 <td>{{ product.status }}</td>
                 <td>
-                  <button class="action-btn" @click="editItem(product)">Edit</button>
-                  <button class="action-btn" @click="removeItem(product.id)">Remove</button>
-                </td>
+  <button class="action-btn edit" @click="editItem(product)">
+    <i class="pi pi-pencil"></i>
+  </button>
+  <button class="action-btn delete" @click="removeItem(product.id)">
+    <i class="pi pi-trash"></i>
+  </button>
+</td>
               </tr>
             </tbody>
           </table>
@@ -77,7 +74,6 @@
             </div>
           </div>
         </div>
-      </div>
   
       <!-- Add or Edit Item Form -->
       <add-product
@@ -103,12 +99,14 @@
   import AddProduct from '@/components/sms/AddProduct.vue';
   import EditProduct from '@/components/sms/EditProduct.vue';
 import Sidebar from '@/components/sms/Sidebar.vue';
-  
+import Header from '@/components/Header.vue';
+
   export default {
     components: {
       AddProduct,
       EditProduct,
-      Sidebar
+      Sidebar,
+      Header
     },
     data() {
       return {
@@ -202,241 +200,256 @@ import Sidebar from '@/components/sms/Sidebar.vue';
   </script>
   
   <style scoped>
-  /* General Styling */
-  .app-container {
+/* General Styling */
+.app-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 250px; /* Make space for sidebar, adjust as needed */
-  height: 100vh; /* Full height of the page */
+  margin-left: 230px; /* Make space for sidebar, adjust as needed */
+  height: 100%; /* Full height of the page */
 }
-  
-  .header-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-left: 18px;
-    width: 95%;
-  }
-  
-  .products-header {
-    color: #000000;
-    font-size: 30px;
-    font-family: 'Arial', sans-serif;
-    font-weight: 900;
-  }
-  
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  /* Main Content */
-  .main-content {
-  flex-grow: 1; /* Allow the content to take the remaining space */
-  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
-  height: calc(100vh - 60px); /* Account for header height */
-  overflow-y: auto; /* Enable scrolling if content overflows */
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-left: 18px;
+  width: 95%;
 }
-  
-  .inventory-container {
-    position: relative;
-    flex-grow: 1;
-    height: 40vw;
-    background-color: #dfdfdf;
-    border-radius: 25px;
-    overflow-y: auto;
-    margin-left: 5px;
-    padding: 0;
-  }
-  
-  /* Stock Table Styling */
-  .stock-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .stock-table th,
-  .stock-table td {
-    padding: 10px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .stock-table tbody {
-    font-family: 'Arial', sans-serif;
-    font-size: 15px;
-  }
-  
-  .stock-table th {
-    background-color: #f4f4f4;
-    padding: 13px;
-    font-weight: bold;
-  }
-  
-  /* Search Bar */
-  .search-container {
-    position: relative;
-    margin-right: 3px;
-  }
-  
-  .search-icon {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #333;
-    pointer-events: none;
-  }
-  
-  .search-bar {
-    padding: 8px 30px 8px 8px;
-    border: 1px solid #94949400;
-    border-radius: 10px;
-    width: 130px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #333;
-    background-color: #D9D9D9;
-  }
-  
-  /* Filter Button */
-  .filter-btn {
-    padding: 8px;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 19px;
-    color: #333;
-    transition: color 0.3s;
-  }
-  
-  .filter-container {
-    position: relative;
-  }
-  
-  .dropdown {
-    position: absolute;
-    top: 35px;
-    left: 0;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    z-index: 10;
-    width: 8dvw;
-  }
-  
-  .filter-select {
-    padding: 8px;
-    font-size: 14px;
-    border-radius: 5px;
-    width: 100%;
-    margin-bottom: 10px;
-  }
-  
-  /* Add Product Button */
-  .add-product-btn {
-    padding: 8px 12px;
-    background-color: #01A501;
-    color: rgb(0, 0, 0);
-    border: none;
-    border-radius: 10px;
-    width: 70px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-  }
-  
-  .add-product-btn:hover {
-    background-color: #00b32dad;
-  }
-  
-  /* Action Buttons */
-  .action-btn {
-    padding: 6px 9px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 13px;
-    font-family: 'Arial', sans-serif;
-    font-weight: 500;
-    transition: background-color 0.3s;
-    margin-right: 10px;
-  }
-  
-  .action-btn:hover {
-    background-color: #0056b3;
-  }
-  
-  .action-btn:active {
-    background-color: #004080;
-  }
-  
-  .floating-btn-container {
-    position: fixed; /* Change from absolute to fixed */
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    z-index: 10; /* Ensure it's above other content */
-  }
-  
-  .floating-btn {
-    width: 35px;
-    height: 35px;
-    background-color: #4CAF50;
-    color: #0000009d;
-    border: none;
-    border-radius: 50%;
-    font-size: 19px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .floating-btn:hover {
-    background-color: #FF32BA;
-  }
-  
-  /* Popout Options */
-  .popout-options {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    position: absolute;
-    bottom: 0;
-    right: 40px;
-  }
-  
-  .popout-option {
-    background-color: #FFFFFF;
-    color: rgb(34, 34, 34);
-    padding: 10px;
-    margin: 5px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 10px;
-    width: 100px;
-  }
-  
-  .popout-option:hover {
-    background-color: #FF32BA;
-  }
-  
-  .popout-option:active {
-    background-color: #004080;
-  }
-  </style>
-  
+
+.products-header {
+  color: #000000;
+  font-size: 30px;
+  font-family: 'Arial', sans-serif;
+  font-weight: 900;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Main Content */
+
+
+.inventory-container {
+  position: relative;
+  flex-grow: 1;
+  height: 37dvw;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+
+  background-color: #ffffff;
+  border-radius: 25px;
+  overflow-y: auto;
+  margin-left: 5px;
+  padding: 0;
+}
+
+/* Stock Table Styling */
+.stock-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stock-table th,
+.stock-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.stock-table tbody {
+  font-family: 'Arial', sans-serif;
+  font-size: 15px;
+}
+
+.stock-table th {
+  background-color: #f4f4f4;
+  padding: 13px;
+  font-weight: bold;
+}
+.stock-table input[type="checkbox"] {
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Modify header for low stock mode */
+/* Search Bar */
+.search-container {
+  position: relative;
+  margin-right: 3px;
+}
+
+.search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #333;
+  pointer-events: none;
+}
+
+.search-bar {
+  padding: 8px 30px 8px 8px;
+  border: 1px solid #94949400;
+  border-radius: 10px;
+  width: 130px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  background-color: #D9D9D9;
+}
+
+/* Filter Button */
+.filter-btn {
+  padding: 8px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 19px;
+  color: #333;
+  transition: color 0.3s;
+}
+
+.filter-container {
+  position: relative;
+}
+
+.dropdown {
+  position: absolute;
+  top: 35px;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 10;
+  width: 8dvw;
+}
+
+.filter-select {
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 5px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* Add Product Button */
+.add-product-btn {
+  padding: 8px 12px;
+  background-color: #E54F70;
+  color: #dbdbdb;
+  border: none;
+  border-radius: 10px;
+  width: 70px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.add-product-btn:hover {
+  background-color: #ed9598;
+}
+
+/* Action Buttons */
+.action-btn {
+  padding: 8px;
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+  margin-right: 10px;
+  width: 35px;
+  height: 35px;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn.edit {
+  color: #1976d2;
+}
+
+.action-btn.delete {
+  color: #dc3545;
+}
+
+.action-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.action-btn:active {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.action-btn:active {
+  background-color: #004080;
+}
+
+.floating-btn-container {
+  position: fixed; /* Change from absolute to fixed */
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 10; /* Ensure it's above other content */
+}
+
+.floating-btn {
+  width: 35px;
+  height: 35px;
+  background-color: #4CAF50;
+  color: #0000009d;
+  border: none;
+  border-radius: 50%;
+  font-size: 19px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-btn:hover {
+  background-color: #FF32BA;
+}
+
+/* Popout Options */
+.popout-options {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  position: absolute;
+  bottom: 0;
+  right: 40px;
+}
+
+.popout-option {
+  background-color: #FFFFFF;
+  color: rgb(34, 34, 34);
+  padding: 10px;
+  margin: 5px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 10px;
+  width: 100px;
+}
+
+.popout-option:hover {
+  background-color: #FF32BA;
+}
+
+.popout-option:active {
+  background-color: #004080;
+}
+</style>
