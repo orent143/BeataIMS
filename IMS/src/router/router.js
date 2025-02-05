@@ -25,6 +25,7 @@ import HistoryReportSMS from '@/views/sms/reports/historyreport.vue';
 
 //admin
 import Dashboard from '@/views/admin/Dashboard.vue';
+import Users from '@/views/admin/Users.vue';
 
 import Welcome from '@/views/Welcome.vue'; // Import the Welcome page
 
@@ -48,7 +49,8 @@ const routes = [
   { path: '/reportssms', component: ReportsSms },
   { path: '/reportssms/sales', component: SalesReportSMS },
   { path: '/reportssms/history', component: HistoryReportSMS },
-  { path: '/dashboard', component: Dashboard }
+  { path: '/dashboard', component: Dashboard },
+  { path: '/users', component: Users }
 ];
 
 const router = createRouter({

@@ -123,6 +123,151 @@ export default {
           ],
           totalAmount: '12.50'
         },
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
+        {
+          id: 1001,
+          customerName: 'John Doe',
+          tableNumber: 5,
+          timestamp: new Date(),
+          status: 'completed',
+          items: [
+            { name: 'Cappuccino', quantity: 2 },
+            { name: 'Croissant', quantity: 1 }
+          ],
+          totalAmount: '12.50'
+        },
+        
         // ... your other orders
       ]
     };
