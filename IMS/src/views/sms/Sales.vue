@@ -51,7 +51,11 @@
                 <td>{{ sale.itemsSold }}</td>
                 <td>₱{{ sale.remitted.toFixed(2) }}</td>
                 <td>{{ sale.itemLeft }}</td>
-                <td>{{ sale.status }}</td>
+                <td>
+                  <span :class="'status status-' + sale.status.toLowerCase().replace(/ /g, '-')">
+                    {{ sale.status }}
+                  </span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -374,5 +378,28 @@ input[type="checkbox"] {
   cursor: pointer;
   width: 16px;
   height: 16px;
+}
+/* General Status Styles */
+.status {
+  padding: 4px 8px;
+  border-radius: 15px;
+  font-size: 12px;
+  display: inline-block; /* Ensure it behaves like a block element */
+}
+
+/* Specific Status Styles */
+.status-completed {
+  background: #E8F5E9; /* Light green */
+  color: #4CAF50; /* Dark green */
+}
+
+.status-pending {
+  background: #FFF3E0; /* Light yellow */
+  color: #FF9800; /* Dark yellow */
+}
+
+.status-cancelled {
+  background: #F8D7DA; /* Light red */
+  color: #721c24; /* Dark red */
 }
 </style>

@@ -39,7 +39,11 @@
                 <td>{{ ingredient.quantity }}</td>
                 <td>₱{{ ingredient.costPrice }}</td>
                 <td>{{ ingredient.supplier }}</td>
-                <td>{{ ingredient.status }}</td>
+                <td>
+  <span :class="'status status-' + ingredient.status.toLowerCase().replace(/ /g, '-')">
+    {{ ingredient.status }}
+  </span>
+</td>
               </tr>
             </tbody>
           </table>
@@ -304,5 +308,28 @@ export default {
   font-weight: bold;
   color: #333;
   background-color: #d9d9d9;
+}
+/* General Status Styles */
+.status {
+  padding: 4px 8px;
+  border-radius: 15px;
+  font-size: 12px;
+  display: inline-block; /* Ensure it behaves like a block element */
+}
+
+/* Specific Status Styles */
+.status-in-stock {
+  background: #E8F5E9; /* Light green */
+  color: #4CAF50; /* Dark green */
+}
+
+.status-low-stock {
+  background: #FFF3E0; /* Light yellow */
+  color: #FF9800; /* Dark yellow */
+}
+
+.status-out-of-stock {
+  background: #F8D7DA; /* Light red */
+  color: #721c24; /* Dark red */
 }
 </style>

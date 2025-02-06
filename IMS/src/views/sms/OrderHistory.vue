@@ -62,7 +62,7 @@
                 <td>₱{{ order.totalAmount }}</td>
                 <td>{{ formatTime(order.timestamp) }}</td>
                 <td>
-                  <span :class="['status-badge', order.status]">
+                  <span :class="'status status-' + order.status.toLowerCase().replace(/ /g, '-')">
                     {{ order.status }}
                   </span>
                 </td>
@@ -484,21 +484,28 @@ export default {
   margin-right: 5px;
 }
 
-.status-badge {
+/* General Status Styles */
+.status {
   padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.9em;
-  font-weight: 500;
+  border-radius: 15px;
+  font-size: 12px;
+  display: inline-block; /* Ensure it behaves like a block element */
 }
 
-.status-badge.completed {
-  background-color: #32cd32;
-  color: white;
+/* Specific Status Styles */
+.status-completed {
+  background: #E8F5E9; /* Light green */
+  color: #4CAF50; /* Dark green */
 }
 
-.status-badge.cancelled {
-  background-color: #ff4444;
-  color: white;
+.status-pending {
+  background: #FFF3E0; /* Light yellow */
+  color: #FF9800; /* Dark yellow */
+}
+
+.status-cancelled {
+  background: #F8D7DA; /* Light red */
+  color: #721c24; /* Dark red */
 }
 ul {
   list-style-type: none;

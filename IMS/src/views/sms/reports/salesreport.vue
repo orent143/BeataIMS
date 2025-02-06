@@ -47,7 +47,7 @@
                   <td>₱{{ report.remitted.toFixed(2) }}</td>
                   <td>{{ report.itemLeft }}</td>
                   <td>
-                    <span :class="['status-badge', report.status.toLowerCase()]">
+                    <span :class="'status status-' + report.status.toLowerCase().replace(/ /g, '-')">
                       {{ report.status }}
                     </span>
                   </td>
@@ -215,27 +215,29 @@
   }
   
   /* Status Badge */
-  .status-badge {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.9em;
-    font-weight: 500;
-  }
-  
-  .status-badge.completed {
-    background-color: #32cd32;
-    color: white;
-  }
-  
-  .status-badge.pending {
-    background-color: #ffa500;
-    color: white;
-  }
-  
-  .status-badge.cancelled {
-    background-color: #ff4444;
-    color: white;
-  }
+/* General Status Styles */
+.status {
+  padding: 4px 8px;
+  border-radius: 15px;
+  font-size: 12px;
+  display: inline-block; /* Ensure it behaves like a block element */
+}
+
+/* Specific Status Styles */
+.status-completed {
+  background: #E8F5E9; /* Light green */
+  color: #4CAF50; /* Dark green */
+}
+
+.status-pending {
+  background: #FFF3E0; /* Light yellow */
+  color: #FF9800; /* Dark yellow */
+}
+
+.status-cancelled {
+  background: #F8D7DA; /* Light red */
+  color: #721c24; /* Dark red */
+}
   
   /* Totals Container */
   .totals-container {
