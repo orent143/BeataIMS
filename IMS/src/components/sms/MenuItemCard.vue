@@ -1,8 +1,8 @@
 <template>
     <div class="menu-item-card">
       <div class="item-icon">
-        <i :class="getItemIcon(item.name)"></i>
-      </div>
+      <i :class="getItemIcon(item.name)"></i>
+    </div>
       <div class="item-details">
         <h3>{{ item.name }}</h3>
         <p class="price">₱{{ item.price.toFixed(2) }}</p>
@@ -48,18 +48,18 @@
       getItemIcon(name) {
         // Map item names to Font Awesome icons
         const iconMap = {
-          'Cappuccino': ['fas', 'fa-mug-hot'],
-          'Latte': ['fas', 'fa-mug-hot'],
-          'Espresso': ['fas', 'fa-mug-hot'],
-          'Mocha': ['fas', 'fa-mug-hot'],
-          'Croissant': ['fas', 'fa-bread-slice'],
-          'Muffin': ['fas', 'fa-cookie']
-        }
-        return iconMap[name] || ['fas', 'fa-utensils']
+        'Cappuccino': 'pi-coffee',
+        'Latte': 'pi-coffee',
+        'Espresso': 'pi pi-coffee',
+        'Mocha': 'pi pi-coffee',
+        'Croissant': 'pi pi-bread',
+        'Muffin': 'pi pi-cookie'
       }
+      return iconMap[name] || 'pi pi-utensils'
     }
   }
-  </script>
+}
+</script>
   
   <style scoped>
   .menu-item-card {
@@ -88,7 +88,11 @@
     color: white;
     font-size: 24px;
   }
-  
+  .item-icon i {
+  font-size: 2rem;
+  color: white;
+
+}
   .item-details {
     text-align: center;
   }

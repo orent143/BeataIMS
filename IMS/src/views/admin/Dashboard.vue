@@ -1,5 +1,7 @@
 <template>
-    <sidebar />
+  <!-- Import Header component -->
+  <Header />
+      <sidebar />
     <div class="app-container">
     <div class="dashboard-container">
       <main class="main-content">
@@ -75,11 +77,12 @@
   
   <script>
   import sidebar from '@/components/admin/sidebar.vue';
-  
+  import Header from '@/components/Header.vue';
   export default {
     name: 'Dashboard',
     components: {
-      sidebar
+      sidebar,
+      Header
     },
     data() {
       return {
@@ -99,7 +102,7 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 250px; /* Make space for sidebar, adjust as needed */
+  margin-left: 230px; /* Make space for sidebar, adjust as needed */
   height: 100vh; /* Full height of the page */
 }
   .dashboard-container {

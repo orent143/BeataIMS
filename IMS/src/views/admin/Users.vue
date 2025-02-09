@@ -1,15 +1,9 @@
 <template>
+  <!-- Import Header component -->
+  <Header />
     <sidebar />
     <div class="app-container">
-      <div class="dashboard-container">
-        <main class="main-content">
-          <nav class="top-nav">
-            <div class="search-bar">
-              <i class="fas fa-search"></i>
-              <input type="text" v-model="searchQuery" placeholder="Search users..." />
-            </div>
-          </nav>
-  
+      <div class="dashboard-container">  
           <div class="user-management-container">
             <h2>User Management</h2>
   
@@ -29,7 +23,7 @@
             </div>
   
             <!-- User List Table -->
-            <table>
+            <table class="user-table">
               <thead>
                 <tr>
                   <th>User ID</th>
@@ -58,7 +52,6 @@
               </div>
             </div>
           </div>
-        </main>
       </div>
     </div>
   </template>
@@ -66,11 +59,13 @@
   <script>
   import axios from 'axios';
   import sidebar from '@/components/admin/sidebar.vue';
+import Header from '@/components/Header.vue';
   
   export default {
     name: 'UserManagement',
     components: {
       sidebar,
+      Header
     },
     data() {
       return {
@@ -81,7 +76,7 @@
           username: '',
           password: '',
         },
-        showNotification: false, // For showing success notification
+        showNotification: false, 
       };
     },
   
@@ -94,30 +89,29 @@
     },
   
     created() {
-      this.getUsers(); // Fetch users from the backend when the component is created
+      this.getUsers(); 
     },
   
     methods: {
       async getUsers() {
         try {
-          const response = await axios.get('http://localhost:8000/api/users/'); // Backend API call
-          this.users = response.data; // Assign the fetched users to the array
+          const response = await axios.get('http://localhost:8000/api/users/'); 
+          this.users = response.data;
         } catch (error) {
           console.error('There was an error fetching the users:', error);
         }
       },
   
       toggleStatus(user) {
-        // Only toggling status text for the front end, backend does not handle it yet
         user.status = user.status === 'Active' ? 'Inactive' : 'Active';
       },
   
       viewUserDetails(user) {
-        this.selectedUser = user; // Open the details modal for the selected user
+        this.selectedUser = user; 
       },
   
       closeModal() {
-        this.selectedUser = null; // Close the modal
+        this.selectedUser = null; 
       },
   
       async addUser() {
@@ -128,20 +122,18 @@
   
           const response = await axios.post('http://localhost:8000/api/users/', formData, {
             headers: {
-              'Content-Type': 'multipart/form-data', // Required for FormData
+              'Content-Type': 'multipart/form-data',
             },
           });
   
-          // Add the newly created user to the list
           this.users.push(response.data);
   
-          // Reset form fields
           this.newUser = { username: '', password: '' };
   
           // Show success notification
           this.showNotification = true;
           setTimeout(() => {
-            this.showNotification = false; // Hide after 3 seconds
+            this.showNotification = false; 
           }, 3000);
         } catch (error) {
           console.error('There was an error creating the user:', error);
@@ -152,13 +144,13 @@
   </script>
   
   <style scoped>
-  .app-container {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    margin-left: 250px;
-    height: 100%;
-  }
+.app-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Allow the container to take remaining space */
+  margin-left: 230px; /* Make space for sidebar, adjust as needed */
+  height: 100%; /* Full height of the page */
+}
   .add-user-form {
     margin-bottom: 20px;
     padding: 15px;
@@ -216,14 +208,14 @@
   }
   
   .dashboard-container {
-    display: flex;
-    background-color: #f5f5f5;
+    flex-grow: 1;
+  background-color: #EFEFEF;
+  border-radius: 25px;
+  overflow-y: auto;
+  margin-left: 5px;
   }
   
-  .main-content {
-    flex: 1;
-    padding: 20px;
-  }
+
   
   .top-nav {
     display: flex;
@@ -255,22 +247,34 @@
     padding: 20px;
   }
   
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
+  .user-table {
+    position: relative;
+  flex-grow: 1;
+  height: 37dvw;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  border-collapse: collapse;
+
+  background-color: #ffffff;
+  border-radius: 25px;
+  overflow-y: auto;
+  margin-left: 5px;
+  padding: 0;
   }
   
-  th,
-  td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
+  .user-table th,
+  .user-table td {
+    padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
   
   th {
-    font-weight: 600;
-    color: #666;
+    background-color: #f4f4f4;
+  padding: 13px;
+  font-weight: bold;
   }
   
   button {

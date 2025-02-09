@@ -159,7 +159,6 @@ export default {
 .app-container {
   display: flex;
   height: 100%;
-  background-color: #f8f9fa; /* Light background for the whole container */
 }
 
 .main-container {

@@ -1,7 +1,7 @@
 <template>
   <div class="landing-page">
     <nav class="navbar">
-      <div class="logo">BeataIMS</div>
+      <div class="logo">Cafe Beata</div>
       <div class="nav-links">
         <a href="#about">About</a>
         <a href="#features">Features</a>
@@ -91,24 +91,35 @@ export default {
   position: fixed;
   top: 0;
   width: 100%;
-  padding: 1.5rem 5%;
+  padding: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ff32bbc5;
+  background-image: linear-gradient(to right, #E54F70, #ed9598);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
 }
 
 .logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
+  font-family: 'Inknut Antiqua', serif;
+  font-size: 30px; /* Increase the font size to make the logo text bigger */
+    font-weight: bolder;
+    color: white;
+    text-shadow: 
+      1px 1px 0#940358, 
+      -1px 1px 0 #940358,
+      1px -1px 0 #940358,
+      -1px -1px 0 #940358,
+      0px 1px 0 #940358,
+      0px -1px 0 #940358,
+      1px 0px 0 #940358,
+      -1px 0px 0 #940358;
+    line-height: 1.2; /* Adjust line-height for better spacing */
 
 }
 
 .nav-links a {
-  margin-left: 2rem;
+  margin: 2rem;
   text-decoration: none;
   color: white;
   font-weight: 500;
@@ -121,7 +132,7 @@ export default {
 
 .hero {
   height: 100vh;
-  background: linear-gradient(rgba(255, 0, 170, 0.397), rgba(0, 0, 0, 0.7)),
+  background: linear-gradient(to right, #e54f6f7e, #ed959821, rgba(0, 0, 0, 0.863)),
               url('@/assets/background.jpg') center/cover no-repeat;
   display: flex;
   align-items: center;
@@ -150,7 +161,7 @@ export default {
   justify-content: center;
 }
 
-.primary-btn, .secondary-btn {
+.primary-btn, .secondary-btn, .third-btn {
   padding: 1rem 2rem;
   border-radius: 8px;
   font-size: 1.1rem;
@@ -164,13 +175,13 @@ export default {
 }
 
 .primary-btn {
-  background-color: #FF32BA;
+  background-color: #E54F70;
   color: white;
 }
 
 .secondary-btn {
   color: white;
-  background-color: #FF32BA;
+  background-color: #E54F70;
 }
 
 .primary-btn:hover, .secondary-btn:hover, .third-btn:hover {
@@ -179,7 +190,7 @@ export default {
 }
 .third-btn{
   color: white;
-  background-color: #FF32BA;
+  background-color: #E54F70;
 }
 .features {
   padding: 5rem 5%;
