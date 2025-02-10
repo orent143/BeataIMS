@@ -184,14 +184,17 @@ export default {
     },
 
     async handleUpdateProduct(updatedProduct) {
-      const index = this.productItems.findIndex(item => item.id === updatedProduct.id);
-      if (index !== -1) {
-        this.productItems[index] = { ...updatedProduct, Status: this.getStatusByQuantity(updatedProduct.Quantity) };
-        this.filterItems(); // Add this line to update the filtered list
-        this.saveToLocalStorage(); // Save updated list to local storage
-      }
-      this.showEditForm = false;
-    },
+  const index = this.productItems.findIndex(item => item.id === updatedProduct.id);
+  if (index !== -1) {
+    this.productItems[index] = { ...updatedProduct, Status: this.getStatusByQuantity(updatedProduct.Quantity) };
+    this.filterItems(); // Add this line to update the filtered list
+    this.saveToLocalStorage(); // Save updated list to local storage
+  }
+  this.showEditForm = false;
+  
+  // Refresh the product items without refreshing the whole page
+  this.fetchProductItems(); // Fetch updated data from the server
+},
 
     removeItem(itemId) {
       this.productItems = this.productItems.filter(item => item.id !== itemId);
