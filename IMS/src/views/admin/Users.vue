@@ -95,7 +95,7 @@ import Header from '@/components/Header.vue';
     methods: {
       async getUsers() {
         try {
-          const response = await axios.get('http://localhost:8000/api/users/'); 
+          const response = await axios.get('http://127.0.0.1:8000/api/'); 
           this.users = response.data;
         } catch (error) {
           console.error('There was an error fetching the users:', error);

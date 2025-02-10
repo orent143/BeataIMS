@@ -22,16 +22,19 @@
       </div>
       <div class="form-group">
         <label for="category">Category</label>
-        <select id="category" v-model="category" required>
+        <select id="category" v-model="categoryId" required>
           <option value="" disabled>Select Category</option>
-          <option value="Beverages">Beverages</option>
-          <option value="Bakery">Bakery</option>
-          <option value="Food">Food</option>
+          <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.CategoryName }}</option>
         </select>
       </div>
       <div class="form-group">
         <label for="supplier">Supplier</label>
-        <input id="supplier" v-model="supplier" placeholder="Supplier" required />
+        <select id="supplier" v-model="supplierId" required>
+          <option value="" disabled>Select Supplier</option>
+          <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
+  {{ supplier.suppliername }}
+</option>
+        </select>
       </div>
 
       <!-- Third Row -->
@@ -53,55 +56,72 @@
   </div>
 </template>
 
-
-
 <script>
+import { createInventoryProduct } from "@/api/inventory";
+import { fetchCategories, fetchSuppliers } from "@/api/utils"; // API functions to fetch categories and suppliers
+
 export default {
   props: {
     isVisible: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
-      name: '',
+      name: "",
       quantity: 0,
       unitPrice: 0,
-      category: '',
-      supplier: '',
-      status: 'In Stock' 
+      categoryId: null, // Category foreign key (id)
+      supplierId: null, // Supplier foreign key (id)
+      status: "In Stock",
+      categories: [],  // List of available categories
+      suppliers: [],  // List of available suppliers
     };
   },
+  async created() {
+    // Fetch available categories and suppliers when component is created
+    this.categories = await fetchCategories();
+    this.suppliers = await fetchSuppliers();
+  },
+  
   methods: {
     closeForm() {
       this.resetForm();
-      this.$emit('close');
+      this.$emit("close");
     },
     resetForm() {
-      this.name = '';
+      this.name = "";
       this.quantity = 0;
       this.unitPrice = 0;
-      this.category = '';
-      this.supplier = '';
-      this.status = 'In Stock';
+      this.categoryId = null;
+      this.supplierId = null;
+      this.status = "In Stock";
     },
-    submit() {
-      const newItem = {
-        id: Date.now(),
-        name: this.name,
-        quantity: this.quantity,
-        unitPrice: this.unitPrice,
-        category: this.category,
-        supplier: this.supplier,
-        status: this.status
-      };
-      this.$emit('add', newItem); 
-      this.closeForm(); 
-    }
-  }
+    async submit() {
+      try {
+        const formData = new FormData();
+        formData.append("ProductName", this.name);
+        formData.append("Quantity", this.quantity);
+        formData.append("UnitPrice", this.unitPrice);
+        formData.append("CategoryID", this.categoryId); // Use category ID
+        formData.append("SupplierID", this.supplierId); // Use supplier ID
+        formData.append("Status", this.status);
+
+        const response = await createInventoryProduct(formData);
+        console.log("Product added:", response.data);
+
+        this.$emit("add", response.data); // Emit event to parent component
+        this.closeForm(); // Close form after submission
+      } catch (error) {
+        console.error("Error adding product:", error);
+      }
+    },
+  },
 };
 </script>
+
+
 
 <style scoped>
 .popout-form {
@@ -113,8 +133,8 @@ export default {
   right: 50%;
   top: 50%;
   transform: translate(50%, -50%);
-  width: 400px; 
-  max-width: 100%; 
+  width: 400px;
+  max-width: 100%;
 }
 
 .form-header {
@@ -125,7 +145,7 @@ export default {
 
 .form-header h2 {
   font-size: 25px;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   font-weight: 1000;
   color: #000000;
 }
@@ -141,8 +161,8 @@ export default {
 
 .form-container {
   display: grid;
-  grid-template-columns: 1fr 1fr; 
-  gap: 15px; 
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
   width: 100%;
 }
 
@@ -152,7 +172,7 @@ export default {
 
 label {
   font-weight: 600;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   font-size: 14px;
   margin-bottom: 5px;
   display: block;
@@ -174,7 +194,7 @@ select {
 
 .form-actions {
   display: flex;
-  justify-content: flex-end; 
+  justify-content: flex-end;
   width: 100%;
   margin-top: 20px;
   margin-left: 50px;
@@ -182,7 +202,7 @@ select {
 
 .add-item-btn {
   padding: 10px 10px;
-  background-color: #FF32BA;
+  background-color: #ff32ba;
   color: #dbdbdb;
   border: none;
   border-radius: 10px;
@@ -199,5 +219,4 @@ select {
 .add-item-btn:focus {
   outline: none;
 }
-
 </style>

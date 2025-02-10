@@ -1,55 +1,49 @@
 <template>
-  <!-- Import Header component -->
   <Header />
-
   <SideBar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Categories</h1>
       <div class="header-actions">
-
-
-        <!-- Add Category Button -->
         <button @click="toggleAddForm" class="add-product-btn">Add</button>
       </div>
     </div>
 
-      <!-- Add Category Form -->
-      <AddCategory 
-        v-if="showAddForm" 
-        @add="addCategory" 
-        :isVisible="showAddForm" 
-        @close="toggleAddForm"
-        class="add-category-form" 
-      />
+    <!-- Add Category Form -->
+    <AddCategory 
+      v-if="showAddForm" 
+      @add="addCategory" 
+      :isVisible="showAddForm" 
+      @close="toggleAddForm"
+      class="add-category-form" 
+    />
 
-      <div class="category-list">
-        <!-- Categories Grid -->
-        <div v-for="category in filteredCategories" :key="category.id" class="category-card">
-          <h3>{{ category.name }}</h3>
-          
-          <!-- Action Buttons -->
-          <div class="category-actions">
-            <button @click="setEditCategory(category)" class="action-btn edit-btn">
-              <i class="pi pi-pencil"></i>
-            </button>
-            <button @click="removeCategory(category.id)" class="action-btn remove-btn">
-              <i class="pi pi-trash"></i>
-            </button>
-          </div>
+    <div class="category-list">
+      <!-- Categories Grid -->
+      <div v-for="category in filteredCategories" :key="category.id" class="category-card">
+        <h3>{{ category.CategoryName }}</h3> <!-- Display CategoryName -->
+        <div class="category-actions">
+          <button @click="setEditCategory(category)" class="action-btn edit-btn">
+            <i class="pi pi-pencil"></i>
+          </button>
+          <button @click="removeCategory(category.id)" class="action-btn remove-btn">
+            <i class="pi pi-trash"></i>
+          </button>
         </div>
       </div>
-
-      <!-- Edit Category Form -->
-      <EditCategory v-if="editingCategory" :category="editingCategory" @save="saveCategory" @close="toggleEditForm" />
     </div>
+
+    <!-- Edit Category Form -->
+    <EditCategory v-if="editingCategory" :category="editingCategory" @save="saveCategory" @close="toggleEditForm" />
+  </div>
 </template>
 
 <script>
-import SideBar from '@/components/ims/SideBar.vue';
+import axios from 'axios';
 import AddCategory from '@/components/ims/AddCategory.vue';
 import EditCategory from '@/components/ims/EditCategory.vue';
-import Header from '@/components/Header.vue'; // Import Header component
+import SideBar from '@/components/ims/SideBar.vue';
+import Header from '@/components/Header.vue';
 
 export default {
   components: {
@@ -60,14 +54,7 @@ export default {
   },
   data() {
     return {
-      categories: [
-        { id: 1, name: 'Hot Coffee' },
-        { id: 2, name: 'Ice Coffee' },
-        { id: 3, name: 'Juice' },
-        { id: 4, name: 'Milk Tea' },
-        { id: 5, name: 'Frappe' },
-        { id: 6, name: 'Choco Drink' }
-      ],
+      categories: [],  // Categories fetched from API
       showAddForm: false,
       editingCategory: null,
       searchTerm: ''
@@ -76,17 +63,28 @@ export default {
   computed: {
     filteredCategories() {
       return this.categories.filter(category =>
-        category.name.toLowerCase().includes(this.searchTerm.toLowerCase())
+        category.CategoryName.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
     }
+  },
+  created() {
+    this.fetchCategories();  // Fetch categories when the component is created
   },
   methods: {
     toggleAddForm() {
       this.showAddForm = !this.showAddForm;
     },
+    async fetchCategories() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/categories/');
+        this.categories = response.data;
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    },
     addCategory(newCategory) {
       this.categories.push(newCategory);
-      this.toggleAddForm(); // Close the form
+      this.toggleAddForm();
     },
     setEditCategory(category) {
       this.editingCategory = { ...category };
@@ -104,6 +102,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 .app-container {

@@ -1,80 +1,61 @@
 <template>
-  <!-- Import Header component -->
   <Header />
-
   <SideBar />
-
   <div class="app-container">
     <div class="header-container">
-      <h1 class="products-header">Suppliers List </h1>
+      <h1 class="products-header">Suppliers List</h1>
       <div class="header-actions">
-
-        <div class="filter-container">
-          <button class="filter-btn" @click="toggleFilterDropdown">
-            <i class="fas fa-filter"></i>
-          </button>
-          <div v-if="showFilterDropdown" class="dropdown">
-            <select v-model="selectedStatus" class="filter-select" @change="filterItems">
-              <option value="">All Statuses</option>
-              <option value="In Stock">In Stock</option>
-              <option value="Low Stock">Low Stock</option>
-              <option value="Out of Stock">Out of Stock</option>
-            </select>
-          </div>
-        </div>
-
         <button @click="toggleAddForm" class="add-product-btn">Add</button>
       </div>
     </div>
 
-      <div class="inventory-container">
-        <table class="supplier-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Contacts</th>
-              <th>Email</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="supplier in filteredItems" :key="supplier.id">
-              <td>{{ supplier.name }}</td>
-              <td>{{ supplier.category }}</td>
-              <td>${{ supplier.contacts }}</td>
-              <td>{{ supplier.email }}</td>
-              <td>
-  <button class="action-btn edit" @click="editItem(product)">
-    <i class="pi pi-pencil"></i>
-  </button>
-  <button class="action-btn delete" @click="removeItem(product.id)">
-    <i class="pi pi-trash"></i>
-  </button>
-</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="inventory-container">
+      <table class="supplier-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Contacts</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="supplier in filteredSuppliers" :key="supplier.id">
+            <td>{{ supplier.suppliername }}</td>
+            <td>{{ supplier.contactinfo }}</td>
+            <td>{{ supplier.email }}</td>
+            <td>
+              <button class="action-btn edit" @click="editSupplier(supplier)">
+                <i class="pi pi-pencil"></i>
+              </button>
+              <button class="action-btn delete" @click="removeSupplier(supplier.id)">
+                <i class="pi pi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <add-supplier 
       v-if="showAddForm" 
       :isVisible="showAddForm" 
       @close="toggleAddForm" 
-      @add="addItem"
+      @add="addSupplier"
     />
 
     <edit-supplier
       v-if="showEditForm"
       :isVisible="showEditForm"
-      :itemToEdit="selectedItem"
-      @close="toggleEditForm"
-      @update="updateItem"
+      :supplierToEdit="selectedSupplier"
+      @save="saveSupplier"
+      @cancel="cancelEdit"
     />
   </div>
 </template>
 
 <script>
+import axios from 'axios';
 import AddSupplier from '@/components/ims/AddSupplier.vue';
 import EditSupplier from '@/components/ims/EditSupplier.vue';
 import SideBar from '@/components/ims/SideBar.vue'; // Import Sidebar component
@@ -94,76 +75,83 @@ export default {
       showFilterDropdown: false,
       showAddForm: false,
       showEditForm: false,
-      selectedItem: null,
-      supplierItems: [
-        { id: 1, name: 'Coffee Co.', category: 'Grocery', contacts: '0912345678', email: 'CoffeeCo.com', status: 'In Stock' },
-        { id: 2, name: 'Dairy Corp.', category: 'Grocery', contacts: '0912345678', email: 'DairyCorp.com', status: 'Low Stock' },
-        { id: 3, name: 'Bakery Inc.', category: 'Bakery', contacts: '0912345678', email: 'Bakery.com', status: 'Out of Stock' },
-        { id: 4, name: 'Fruit Co.', category: 'Grocery', contacts: '0912345678', email: 'Fruit.com', status: 'In Stock' },
-        { id: 5, name: 'Sugar Corp.', category: 'Grocery', contacts: '0912345678', email: 'Sugar.com', status: 'Low Stock' },
-        { id: 6, name: 'Water Supply Co.', category: 'Grocery', contacts: '0912345678', email: 'Water.com', status: 'In Stock' },
-        { id: 7, name: 'Deli Foods', category: 'Grocery', contacts: '0912345678', email: 'Deli.com', status: 'In Stock' },
-        { id: 8, name: 'Green Farms', category: 'Grocery', contacts: '0912345678', email: 'Green.com', status: 'Out of Stock' }
-      ],
-      filteredItems: []
+      selectedSupplier: null,
+      suppliers: [],  // Changed from supplierItems to suppliers
+      filteredSuppliers: []   // Changed from filteredItems to filteredSuppliers
     };
   },
   methods: {
-    toggleFilterDropdown() {
-      this.showFilterDropdown = !this.showFilterDropdown;
-    },
-    toggleAddForm() {
-      this.showAddForm = !this.showAddForm;
-    },
-    toggleEditForm() {
-      this.showEditForm = !this.showEditForm;
-    },
-    filterItems() {
-      let filtered = this.supplierItems;
+  // Toggle Filter Dropdown
+  toggleFilterDropdown() {
+    this.showFilterDropdown = !this.showFilterDropdown;
+  },
 
-      if (this.searchTerm) {
-        filtered = filtered.filter(supplier =>
-          supplier.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-        );
-      }
+  // Toggle Add Supplier Form
+  toggleAddForm() {
+    this.showAddForm = !this.showAddForm;
+  },
 
-      if (this.selectedStatus) {
-        filtered = filtered.filter(supplier => supplier.status === this.selectedStatus);
-      }
+  // Toggle Edit Supplier Form
+  toggleEditForm() {
+    this.showEditForm = !this.showEditForm;
+  },
 
-      this.filteredItems = filtered;
-    },
-    editItem(item) {
-      this.selectedItem = item;
-      this.showEditForm = true;
-    },
-    updateItem(updatedItem) {
-      const index = this.supplierItems.findIndex(supplier => supplier.id === updatedItem.id);
-      if (index !== -1) {
-        this.supplierItems.splice(index, 1, updatedItem);
-      }
-      this.filterItems();
-      this.toggleEditForm();
-    },
-    removeItem(itemId) {
-      this.supplierItems = this.supplierItems.filter(item => item.id !== itemId);
-      this.filterItems();
-    },
-    addItem(newItem) {
-      newItem.id = this.supplierItems.length + 1;
-      this.supplierItems.push(newItem);
-      this.filterItems();
-      this.toggleAddForm();
+  // Fetch Suppliers from API
+  async fetchSuppliers() {
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/api/suppliers/');  // Correct endpoint
+      this.suppliers = response.data; // Assign fetched suppliers to suppliers array
+      this.filterSuppliers();  // Update filteredSuppliers
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
     }
   },
-  created() {
-    this.filterItems();
+
+  // Filter Suppliers based on search term or selected status (you can adjust this to your needs)
+  filterSuppliers() {
+    this.filteredSuppliers = this.suppliers.filter((supplier) => {
+      const matchesSearchTerm = supplier.suppliername.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchesStatus = this.selectedStatus ? supplier.status === this.selectedStatus : true;
+      return matchesSearchTerm && matchesStatus;
+    });
   },
+
+  // Additional method to handle adding, editing, and removing suppliers
+  addSupplier(newSupplier) {
+    this.suppliers.push(newSupplier);
+    this.filterSuppliers(); // Update the filtered list after adding
+  },
+
+  editSupplier(supplier) {
+    this.selectedSupplier = supplier;
+    this.toggleEditForm();
+  },
+
+  saveSupplier(updatedSupplier) {
+    const index = this.suppliers.findIndex(supplier => supplier.id === updatedSupplier.id);
+    if (index !== -1) {
+      this.suppliers[index] = updatedSupplier; // Update supplier in the list
+      this.filterSuppliers(); // Update the filtered list
+    }
+    this.toggleEditForm();
+  },
+
+  removeSupplier(supplierId) {
+    this.suppliers = this.suppliers.filter(supplier => supplier.id !== supplierId);
+    this.filterSuppliers(); // Update the filtered list after removal
+  }
+},
+
+// When the component is created, fetch the suppliers
+created() {
+  this.fetchSuppliers();
+},
   watch: {
-    searchTerm: 'filterItems',
-    selectedStatus: 'filterItems'
+    searchTerm: 'filterSuppliers',
+    selectedStatus: 'filterSuppliers'
   }
 };
+
 </script>
 
 <style scoped>

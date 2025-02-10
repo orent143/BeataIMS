@@ -31,61 +31,60 @@
     </div>
 
     <!-- Main Content Section -->
-      <div class="inventory-container">
-        <table class="stock-table">
-          <thead>
-            <tr>
-              <th v-if="isLowStockMode">Select</th>
-              <th>Name</th>
-              <th>Quantity</th>
-              <th>Unit Price</th>
-              <th>Category</th>
-              <th>Supplier</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="product in filteredItems" :key="product.id">
-              <td v-if="isLowStockMode">
-                <input
-                  type="checkbox"
-                  :value="product.id"
-                  v-model="selectedLowStockItems"
-                />
-              </td>
-              <td>{{ product.name }}</td>
-              <td>{{ product.quantity }}</td>
-              <td>₱{{ product.unitPrice }}</td>
-              <td>{{ product.category }}</td>
-              <td>{{ product.supplier }}</td>
-              <td>
-  <span :class="'status status-' + product.status.toLowerCase().replace(/ /g, '-')">
-    {{ product.status }}
-  </span>
-</td>
-              <td>
-  <button class="action-btn edit" @click="editItem(product)">
-    <i class="pi pi-pencil"></i>
-  </button>
-  <button class="action-btn delete" @click="removeItem(product.id)">
-    <i class="pi pi-trash"></i>
-  </button>
-</td>
-            </tr>
-          </tbody>
-        </table>
+    <div class="inventory-container">
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th v-if="isLowStockMode">Select</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Category</th>
+            <th>Supplier</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="product in filteredItems" :key="product.id">
+            <td v-if="isLowStockMode">
+              <input
+                type="checkbox"
+                :value="product.id"
+                v-model="selectedLowStockItems"
+              />
+            </td>
+            <td>{{ product.ProductName }}</td>
+            <td>{{ product.Quantity }}</td>
+            <td>₱{{ product.UnitPrice }}</td>
+            <td>{{ product.CategoryID }}</td>
+            <td>{{ product.SupplierID }}</td>
+            <td>
+              <span :class="'status status-' + product.Status.toLowerCase().replace(/ /g, '-')">
+                {{ product.Status }}
+              </span>
+            </td>
+            <td>
+              <button class="action-btn edit" @click="editItem(product)">
+                <i class="pi pi-pencil"></i>
+              </button>
+              <button class="action-btn delete" @click="removeItem(product.id)">
+                <i class="pi pi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-        <!-- Floating Button and Popout Options -->
-        <div class="floating-btn-container">
-          <button class="floating-btn" @click="togglePopoutOptions">+</button>
-          <div v-if="showPopoutOptions" class="popout-options">
-            <button class="popout-option" @click="addLowStock">Add Low Stock</button>
-            <button class="popout-option" @click="addSummary">Add Summary</button>
-          </div>
+      <!-- Floating Button and Popout Options -->
+      <div class="floating-btn-container">
+        <button class="floating-btn" @click="togglePopoutOptions">+</button>
+        <div v-if="showPopoutOptions" class="popout-options">
+          <button class="popout-option" @click="addLowStock">Add Low Stock</button>
+          <button class="popout-option" @click="addSummary">Add Summary</button>
         </div>
       </div>
-
+    </div>
 
     <!-- Add or Edit Item Form -->
     <add-product
@@ -101,16 +100,17 @@
       :isVisible="showEditForm"
       :itemToEdit="selectedItem"
       @close="toggleEditForm"
-      @update="updateItem"
+      @update="handleUpdateProduct"
     />
   </div>
 </template>
 
 <script>
-import SideBar from '@/components/ims/SideBar.vue'; // Import Sidebar component
+import axios from 'axios';
+import SideBar from '@/components/ims/SideBar.vue';
 import AddProduct from '@/components/ims/AddProduct.vue';
 import EditProduct from '@/components/ims/EditProduct.vue';
-import Header from '@/components/Header.vue'; // Import Header component
+import Header from '@/components/Header.vue';
 
 export default {
   components: { AddProduct, EditProduct, SideBar, Header },
@@ -123,54 +123,16 @@ export default {
       showEditForm: false,
       showPopoutOptions: false,
       selectedItem: null,
-      productItems: [
-        { id: 1, name: "Espresso", quantity: 50, unitPrice: 60, category: "Beverages", supplier: "Coffee Co.", status: "In Stock" },
-        { id: 2, name: "Cappuccino", quantity: 30, unitPrice: 50, category: "Beverages", supplier: "Coffee Co.", status: "In Stock" },
-        { id: 3, name: "Croissant", quantity: 20, unitPrice: 50, category: "Bakery", supplier: "Bakery Inc.", status: "Low Stock" },
-        { id: 4, name: "Bagel", quantity: 15, unitPrice: 20, category: "Bakery", supplier: "Bakery Inc.", status: "In Stock" },
-        { id: 5, name: "Lemonade", quantity: 25, unitPrice: 75, category: "Beverages", supplier: "Beverage Co.", status: "In Stock" },
-        { id: 6, name: "Cheese Sandwich", quantity: 10, unitPrice: 60, category: "Food", supplier: "Deli Foods", status: "Out of Stock" },
-        { id: 7, name: "Cheese Sandwich", quantity: 10, unitPrice: 60, category: "Food", supplier: "Deli Foods", status: "Out of Stock" },
-        { id: 1, name: "Espresso", quantity: 50, unitPrice: 60, category: "Beverages", supplier: "Coffee Co.", status: "In Stock" },
-        { id: 2, name: "Cappuccino", quantity: 30, unitPrice: 50, category: "Beverages", supplier: "Coffee Co.", status: "In Stock" },
-        { id: 3, name: "Croissant", quantity: 20, unitPrice: 50, category: "Bakery", supplier: "Bakery Inc.", status: "Low Stock" },
-        { id: 4, name: "Bagel", quantity: 15, unitPrice: 20, category: "Bakery", supplier: "Bakery Inc.", status: "In Stock" },
-        { id: 5, name: "Lemonade", quantity: 25, unitPrice: 75, category: "Beverages", supplier: "Beverage Co.", status: "In Stock" },
-        { id: 6, name: "Cheese Sandwich", quantity: 10, unitPrice: 60, category: "Food", supplier: "Deli Foods", status: "Out of Stock" },
-        { id: 7, name: "Cheese Sandwich", quantity: 10, unitPrice: 60, category: "Food", supplier: "Deli Foods", status: "Out of Stock" },
-        
-      ],
+      productItems: [],
       filteredItems: [],
       selectedLowStockItems: [],
       isLowStockMode: false,
-      // New properties for summary functionality
+      currentDate: new Date().toISOString().split('T')[0],
       inventorySummaries: [],
-      currentDate: new Date().toISOString().split('T')[0]
     };
-  },
-  
-  computed: {
-    totalInventoryValue() {
-      return this.productItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-    },
-    totalItems() {
-      return this.productItems.reduce((sum, item) => sum + item.quantity, 0);
-    },
-    lowStockItems() {
-      return this.productItems.filter(item => item.status === "Low Stock");
-    },
-    outOfStockItems() {
-      return this.productItems.filter(item => item.status === "Out of Stock");
-    }
   },
 
   methods: {
-  editItem(product) {
-    this.selectedItem = product;
-    this.showEditForm = true;
-  },
-
-    // Existing methods
     toggleFilterDropdown() {
       this.showFilterDropdown = !this.showFilterDropdown;
     },
@@ -186,69 +148,70 @@ export default {
     filterItems() {
       let filtered = this.productItems;
       if (this.searchTerm) {
-        filtered = filtered.filter(item => 
-          item.name.toLowerCase().includes(this.searchTerm.toLowerCase())
+        filtered = filtered.filter(item =>
+          item.ProductName.toLowerCase().includes(this.searchTerm.toLowerCase())
         );
       }
       if (this.selectedStatus) {
-        filtered = filtered.filter(item => item.status === this.selectedStatus);
+        filtered = filtered.filter(item => item.Status === this.selectedStatus);
       }
       this.filteredItems = filtered;
     },
 
-    // Updated methods with summary integration
-    updateItem(updatedItem) {
-      const index = this.productItems.findIndex(item => item.id === updatedItem.id);
-      if (index !== -1) {
-        // Update status based on quantity
-        if (updatedItem.quantity <= 10) {
-          updatedItem.status = 'Low Stock';
-        } else if (updatedItem.quantity === 0) {
-          updatedItem.status = 'Out of Stock';
-        } else {
-          updatedItem.status = 'In Stock';
-        }
-        
-        this.productItems.splice(index, 1, updatedItem);
-        this.createInventorySummary();
+    getStatusByQuantity(quantity) {
+      if (quantity === 0) {
+        return 'Out of Stock';
+      } else if (quantity <= 10) {
+        return 'Low Stock';
+      } else {
+        return 'In Stock';
       }
-      this.filterItems();
-      this.toggleEditForm();
     },
 
     addItem(newItem) {
       newItem.id = this.productItems.length + 1;
-      // Set initial status based on quantity
-      if (newItem.quantity <= 10) {
-        newItem.status = 'Low Stock';
-      } else if (newItem.quantity === 0) {
-        newItem.status = 'Out of Stock';
-      } else {
-        newItem.status = 'In Stock';
-      }
-      
-      this.productItems.push(newItem);
+      newItem.Status = this.getStatusByQuantity(newItem.Quantity); // Set status based on quantity
+      this.productItems.push(newItem); // Add the item to the product list
       this.filterItems();
       this.toggleAddForm();
       this.createInventorySummary();
+      this.saveToLocalStorage(); // Save data to local storage
+    },
+
+    editItem(product) {
+      this.selectedItem = { ...product }; // Clone object to avoid direct mutation
+      this.showEditForm = true;
+    },
+
+    async handleUpdateProduct(updatedProduct) {
+      const index = this.productItems.findIndex(item => item.id === updatedProduct.id);
+      if (index !== -1) {
+        this.productItems[index] = { ...updatedProduct, Status: this.getStatusByQuantity(updatedProduct.Quantity) };
+        this.filterItems(); // Add this line to update the filtered list
+        this.saveToLocalStorage(); // Save updated list to local storage
+      }
+      this.showEditForm = false;
     },
 
     removeItem(itemId) {
       this.productItems = this.productItems.filter(item => item.id !== itemId);
       this.filterItems();
       this.createInventorySummary();
+      this.saveToLocalStorage(); // Save data to local storage
     },
 
-    // New summary methods
     createInventorySummary() {
+      const lowStockItems = this.productItems.filter(item => item.Status === 'Low Stock');
+      const outOfStockItems = this.productItems.filter(item => item.Status === 'Out of Stock');
+
       const summary = {
         id: Date.now(),
         date: this.currentDate,
         products: [...this.productItems],
-        totalItems: this.totalItems,
-        totalValue: this.totalInventoryValue,
-        lowStockCount: this.lowStockItems.length,
-        outOfStockCount: this.outOfStockItems.length
+        totalItems: this.productItems.length,
+        totalValue: this.productItems.reduce((sum, item) => sum + (item.Quantity * item.UnitPrice), 0),
+        lowStockCount: lowStockItems.length,
+        outOfStockCount: outOfStockItems.length
       };
 
       this.inventorySummaries.push(summary);
@@ -257,13 +220,13 @@ export default {
 
     saveToLocalStorage() {
       localStorage.setItem('inventorySummaries', JSON.stringify(this.inventorySummaries));
-      localStorage.setItem('productItems', JSON.stringify(this.productItems));
+      localStorage.setItem('productItems', JSON.stringify(this.productItems)); // Save updated list
     },
 
     loadFromLocalStorage() {
       const savedSummaries = localStorage.getItem('inventorySummaries');
       const savedProducts = localStorage.getItem('productItems');
-      
+
       if (savedSummaries) {
         this.inventorySummaries = JSON.parse(savedSummaries);
       }
@@ -280,6 +243,20 @@ export default {
     addSummary() {
       this.createInventorySummary();
       alert('Inventory summary has been created successfully!');
+    },
+
+    async fetchProductItems() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/inventory/');
+        this.productItems = response.data;
+        this.filterItems();
+      } catch (error) {
+        console.error('Error fetching product items:', error);
+      }
+    },
+
+    refreshProductList() {
+      this.fetchProductItems();
     }
   },
 
@@ -288,6 +265,7 @@ export default {
     if (this.inventorySummaries.length === 0) {
       this.createInventorySummary();
     }
+    this.fetchProductItems();
   },
 
   watch: {
@@ -302,7 +280,6 @@ export default {
   }
 };
 </script>
-s
 
 <style scoped>
 /* General Styling */
