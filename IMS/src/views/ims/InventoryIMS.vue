@@ -68,9 +68,9 @@
               <button class="action-btn edit" @click="editItem(product)">
                 <i class="pi pi-pencil"></i>
               </button>
-              <button class="action-btn delete" @click="removeItem(product.id)">
-                <i class="pi pi-trash"></i>
-              </button>
+<button class="action-btn delete" @click="removeItem(product.id)">
+  <i class="pi pi-trash"></i>
+</button>
             </td>
           </tr>
         </tbody>
@@ -169,14 +169,14 @@ export default {
     },
 
     addItem(newItem) {
-      newItem.id = this.productItems.length + 1;
-      newItem.Status = this.getStatusByQuantity(newItem.Quantity); // Set status based on quantity
-      this.productItems.push(newItem); // Add the item to the product list
-      this.filterItems();
-      this.toggleAddForm();
-      this.createInventorySummary();
-      this.saveToLocalStorage(); // Save data to local storage
-    },
+  newItem.id = this.productItems.length + 1;
+  newItem.Status = newItem.Status || "In Stock"; // Retain the chosen status
+  this.productItems.push(newItem);
+  this.filterItems();
+  this.toggleAddForm();
+  this.createInventorySummary();
+  this.saveToLocalStorage();
+},
 
     editItem(product) {
       this.selectedItem = { ...product }; // Clone object to avoid direct mutation
@@ -196,12 +196,34 @@ export default {
   this.fetchProductItems(); // Fetch updated data from the server
 },
 
-    removeItem(itemId) {
+async removeItem(itemId) {
+  try {
+    // Make a DELETE request to the API
+    const response = await axios.delete(`http://127.0.0.1:8000/api/inventory/inventoryproduct/${itemId}`);
+    
+    // Check if the response is successful
+    if (response.status === 200) {
+      // Remove the item from the product list
       this.productItems = this.productItems.filter(item => item.id !== itemId);
+      
+      // Update filtered list after removal
       this.filterItems();
+      
+      // Optionally update the inventory summary after removal
       this.createInventorySummary();
-      this.saveToLocalStorage(); // Save data to local storage
-    },
+      
+      // Save updated data to localStorage
+      this.saveToLocalStorage();
+      
+      alert('Product deleted successfully');
+    } else {
+      alert('Failed to delete product');
+    }
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    alert('An error occurred while deleting the product');
+  }
+},
 
     createInventorySummary() {
       const lowStockItems = this.productItems.filter(item => item.Status === 'Low Stock');

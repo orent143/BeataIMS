@@ -5,7 +5,6 @@
       <button class="close-btn" @click="closeForm">x</button>
     </div>
     <form @submit.prevent="submit" class="form-container">
-      <!-- First Row -->
       <div class="form-group">
         <label for="name">Item Name</label>
         <input id="name" v-model="name" placeholder="Item Name" required />
@@ -14,8 +13,6 @@
         <label for="quantity">Quantity</label>
         <input id="quantity" v-model="quantity" type="number" placeholder="Quantity" required min="1" />
       </div>
-
-      <!-- Second Row -->
       <div class="form-group">
         <label for="unitPrice">Unit Price</label>
         <input id="unitPrice" v-model="unitPrice" type="number" placeholder="Unit Price" required min="0" step="0.01" />
@@ -24,7 +21,9 @@
         <label for="category">Category</label>
         <select id="category" v-model="categoryId" required>
           <option value="" disabled>Select Category</option>
-          <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.CategoryName }}</option>
+          <option v-for="category in categories" :key="category.id" :value="category.id">
+            {{ category.CategoryName }}
+          </option>
         </select>
       </div>
       <div class="form-group">
@@ -32,23 +31,18 @@
         <select id="supplier" v-model="supplierId" required>
           <option value="" disabled>Select Supplier</option>
           <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
-  {{ supplier.suppliername }}
-</option>
+            {{ supplier.suppliername }}
+          </option>
         </select>
       </div>
-
-      <!-- Third Row -->
       <div class="form-group">
         <label for="status">Status</label>
         <select id="status" v-model="status" required>
-          <option value="" disabled>Select Status</option>
           <option value="In Stock">In Stock</option>
           <option value="Low Stock">Low Stock</option>
           <option value="Out of Stock">Out of Stock</option>
         </select>
       </div>
-
-      <!-- Form Actions -->
       <div class="form-actions">
         <button type="submit" class="add-item-btn">Add Product</button>
       </div>
@@ -57,34 +51,36 @@
 </template>
 
 <script>
-import { createInventoryProduct } from "@/api/inventory";
-import { fetchCategories, fetchSuppliers } from "@/api/utils"; // API functions to fetch categories and suppliers
+import axios from "axios";
 
 export default {
   props: {
-    isVisible: {
-      type: Boolean,
-      required: true,
-    },
+    isVisible: Boolean,
   },
   data() {
     return {
       name: "",
-      quantity: 0,
+      quantity: 1, // Default to 1 to prevent accidental empty submission
       unitPrice: 0,
-      categoryId: null, // Category foreign key (id)
-      supplierId: null, // Supplier foreign key (id)
+      categoryId: null,
+      supplierId: null,
       status: "In Stock",
-      categories: [],  // List of available categories
-      suppliers: [],  // List of available suppliers
+      categories: [],
+      suppliers: [],
     };
   },
   async created() {
-    // Fetch available categories and suppliers when component is created
-    this.categories = await fetchCategories();
-    this.suppliers = await fetchSuppliers();
+    try {
+      const [categoryResponse, supplierResponse] = await Promise.all([
+        axios.get("http://127.0.0.1:8000/api/categories"),
+        axios.get("http://127.0.0.1:8000/api/suppliers"),
+      ]);
+      this.categories = categoryResponse.data;
+      this.suppliers = supplierResponse.data;
+    } catch (error) {
+      console.error("Error fetching categories or suppliers:", error);
+    }
   },
-  
   methods: {
     closeForm() {
       this.resetForm();
@@ -92,31 +88,41 @@ export default {
     },
     resetForm() {
       this.name = "";
-      this.quantity = 0;
+      this.quantity = 1;
       this.unitPrice = 0;
       this.categoryId = null;
       this.supplierId = null;
       this.status = "In Stock";
     },
     async submit() {
-      try {
-        const formData = new FormData();
-        formData.append("ProductName", this.name);
-        formData.append("Quantity", this.quantity);
-        formData.append("UnitPrice", this.unitPrice);
-        formData.append("CategoryID", this.categoryId); // Use category ID
-        formData.append("SupplierID", this.supplierId); // Use supplier ID
-        formData.append("Status", this.status);
+  try {
+    console.log("Selected Status:", this.status); // ✅ Debugging to check selected status
 
-        const response = await createInventoryProduct(formData);
-        console.log("Product added:", response.data);
+    const formData = new URLSearchParams();
+    formData.append("ProductName", this.name);
+    formData.append("Quantity", this.quantity);
+    formData.append("UnitPrice", this.unitPrice);
+    formData.append("CategoryID", this.categoryId);
+    formData.append("SupplierID", this.supplierId);
+    formData.append("Status", this.status); // ✅ Ensure the correct status is being sent
 
-        this.$emit("add", response.data); // Emit event to parent component
-        this.closeForm(); // Close form after submission
-      } catch (error) {
-        console.error("Error adding product:", error);
-      }
-    },
+    const response = await axios.post(
+      "http://127.0.0.1:8000/api/inventory/inventoryproduct/",
+      formData, 
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
+
+    console.log("Product added:", response.data);
+    this.$emit("add", response.data);
+    alert('added successfully!');
+    setTimeout(() => {
+      this.showNotification = false; 
+    this.closeForm();
+  }, 3000);
+  } catch (error) {
+    console.error("Error adding product:", error.response?.data || error);
+  }
+},
   },
 };
 </script>
