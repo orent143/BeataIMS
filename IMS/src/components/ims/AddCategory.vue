@@ -7,7 +7,7 @@
     <form @submit.prevent="submitForm" class="form-container">
       <div class="form-group">
         <label for="categoryName">Category Name:</label>
-        <input v-model="newCategory.name" id="categoryName" type="text" placeholder="Category Name" required />
+        <input v-model="newCategory.CategoryName" id="categoryName" type="text" placeholder="Category Name" required />
       </div>
       
       <div class="form-actions">
@@ -18,6 +18,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   props: {
     isVisible: Boolean 
@@ -25,7 +27,7 @@ export default {
   data() {
     return {
       newCategory: {
-        name: ''
+        CategoryName: '' // Match API field
       }
     };
   },
@@ -33,16 +35,30 @@ export default {
     closeForm() {
       this.$emit('close'); 
     },
-    submitForm() {
-      if (this.newCategory.name) {
-        const newCategory = { ...this.newCategory, id: Date.now() }; 
-        this.$emit('add', newCategory); 
-        this.closeForm();
-      }
-    }
+    async submitForm() {
+  if (!this.newCategory.CategoryName) {
+    alert("Category Name is required!");
+    return;
+  }
+
+  try {
+    const response = await axios.post(
+      'http://127.0.0.1:8000/api/categories/categories/',  // ✅ Check this URL
+      new URLSearchParams({ CategoryName: this.newCategory.CategoryName }),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } } // ✅ Fix content type
+    );
+
+    this.$emit('add', response.data); 
+    this.closeForm();
+  } catch (error) {
+    console.error("Error adding category:", error.response?.data || error);
+  }
+}
+
   }
 };
 </script>
+
 
 <style scoped>
 .popout-form {

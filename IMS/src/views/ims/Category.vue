@@ -34,7 +34,12 @@
     </div>
 
     <!-- Edit Category Form -->
-    <EditCategory v-if="editingCategory" :category="editingCategory" @save="saveCategory" @close="toggleEditForm" />
+    <EditCategory 
+  v-if="editingCategory" 
+  :category="editingCategory" 
+  @save="saveCategory" 
+  @close="toggleEditForm"
+/>
   </div>
 </template>
 
@@ -71,31 +76,35 @@ export default {
     this.fetchCategories();  // Fetch categories when the component is created
   },
   methods: {
+    toggleEditForm() {
+    this.editingCategory = null;
+  },
     toggleAddForm() {
       this.showAddForm = !this.showAddForm;
     },
     async fetchCategories() {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/api/categories/');
-        this.categories = response.data;
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    },
-    addCategory(newCategory) {
-      this.categories.push(newCategory);
-      this.toggleAddForm();
-    },
-    setEditCategory(category) {
-      this.editingCategory = { ...category };
-    },
-    saveCategory(updatedCategory) {
-      const index = this.categories.findIndex(cat => cat.id === updatedCategory.id);
-      if (index !== -1) {
-        this.categories.splice(index, 1, updatedCategory);
-      }
-      this.editingCategory = null;
-    },
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/api/categories/');
+      this.categories = response.data;
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  },
+  async addCategory(newCategory) {
+    await this.fetchCategories(); // Refresh categories after adding
+    this.toggleAddForm();
+  },
+  setEditCategory(category) {
+    this.editingCategory = { ...category };
+  },
+  async saveCategory(updatedCategory) {
+    const index = this.categories.findIndex(cat => cat.id === updatedCategory.id);
+    if (index !== -1) {
+      this.categories[index] = updatedCategory;
+    }
+    this.editingCategory = null; // Close the form
+  },
+  
     removeCategory(categoryId) {
       this.categories = this.categories.filter(cat => cat.id !== categoryId);
     }

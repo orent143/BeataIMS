@@ -1,47 +1,58 @@
 <template>
-    <div class="popout-form" v-if="isVisible">
-      <div class="form-header">
-        <h2>Edit Category</h2>
-        <button @click="closeForm" class="close-btn">x</button>
-      </div>
-      <form @submit.prevent="submitForm" class="form-container">
-        <div class="form-group">
-          <label for="categoryName">Category Name:</label>
-          <input v-model="editedCategory.name" id="categoryName" type="text" placeholder="Category Name" required />
-        </div>
-        
-        <div class="form-actions">
-          <button type="submit" class="save-category-btn">Save Category</button>
-        </div>
-      </form>
+  <div class="popout-form" v-if="category">
+    <div class="form-header">
+      <h2>Edit Category</h2>
+      <button @click="closeForm" class="close-btn">x</button>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    props: {
-      isVisible: Boolean,
-      category: Object 
-    },
-    data() {
-      return {
-        editedCategory: { ...this.category }
-      };
-    },
-    methods: {
-      closeForm() {
-        this.$emit('close'); 
-      },
-      submitForm() {
-        if (this.editedCategory.name) {
-          this.$emit('save', this.editedCategory);
-          this.closeForm(); 
-        }
+    <form @submit.prevent="submitForm" class="form-container">
+      <div class="form-group">
+        <label for="categoryName">Category Name:</label>
+        <input v-model="editedCategory.CategoryName" id="categoryName" type="text" placeholder="Category Name" required />
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="save-category-btn">Save Category</button>
+      </div>
+    </form>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  props: {
+    category: Object
+  },
+  data() {
+    return {
+      editedCategory: { ...this.category }
+    };
+  },
+  methods: {
+    async submitForm() {
+      try {
+        await axios.put(`http://127.0.0.1:8000/api/categories/categories/${this.category.id}`,  
+          new URLSearchParams({
+            CategoryName: this.editedCategory.CategoryName
+          }),
+          {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+          }
+        );
+
+        this.$emit("save", this.editedCategory); // Emit event to update UI
+        this.closeForm();
+      } catch (error) {
+        console.error("Error updating category:", error.response?.data || error.message);
       }
+    },
+    closeForm() {
+      this.$emit("close");
     }
-  };
-  </script>
-  
+  }
+};
+</script>
+
   <style scoped>
   .popout-form {
     background-color: #ffffff;
