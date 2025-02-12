@@ -105,10 +105,21 @@ export default {
     this.editingCategory = null; // Close the form
   },
   
-    removeCategory(categoryId) {
-      this.categories = this.categories.filter(cat => cat.id !== categoryId);
-    }
+  async removeCategory(categoryId) {
+  try {
+    console.log("Deleting category with ID:", categoryId); // Debugging log
+
+    // Use categoryId instead of id
+    const response = await axios.delete(`http://127.0.0.1:8000/api/categories/categories/${categoryId}`);
+    
+    console.log(response.data); // Log backend response
+    this.categories = this.categories.filter(cat => cat.id !== categoryId);
+  } catch (error) {
+    console.error("Error deleting category:", error.response?.data || error.message);
   }
+}
+
+},
 };
 </script>
 

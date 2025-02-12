@@ -49,7 +49,7 @@
       :isVisible="showEditForm"
       :supplierToEdit="selectedSupplier"
       @save="saveSupplier"
-      @cancel="cancelEdit"
+      @close="closeForm"
     />
   </div>
 </template>
@@ -93,8 +93,8 @@ export default {
 
   // Toggle Edit Supplier Form
   toggleEditForm() {
-    this.showEditForm = !this.showEditForm;
-  },
+      this.showEditForm = !this.showEditForm;
+    },
 
   // Fetch Suppliers from API
   async fetchSuppliers() {
@@ -117,9 +117,9 @@ export default {
   },
 
   // Additional method to handle adding, editing, and removing suppliers
-  addSupplier(newSupplier) {
-    this.suppliers.push(newSupplier);
-    this.filterSuppliers(); // Update the filtered list after adding
+  async addSupplier(newSupplier) {
+    await this.fetchSuppliers(); // Refresh supplier list after adding
+    this.toggleAddForm();
   },
 
   editSupplier(supplier) {
@@ -136,11 +136,22 @@ export default {
     this.toggleEditForm();
   },
 
-  removeSupplier(supplierId) {
-    this.suppliers = this.suppliers.filter(supplier => supplier.id !== supplierId);
-    this.filterSuppliers(); // Update the filtered list after removal
+  async removeSupplier(supplierId) {
+  if (confirm("Are you sure you want to delete this supplier?")) {
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/suppliers/suppliers/${supplierId}`);
+      this.fetchSuppliers(); // Refresh the supplier list after deletion
+    } catch (error) {
+      console.error("Error deleting supplier:", error);
+    }
   }
 },
+closeForm() {
+      this.selectedSupplier = null; // Reset the selected supplier
+      this.toggleEditForm(); // Close the edit form
+    }
+  },
+
 
 // When the component is created, fetch the suppliers
 created() {

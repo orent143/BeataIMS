@@ -1,59 +1,69 @@
 <template>
-    <div class="popout-form" v-if="isVisible">
-      <div class="form-header">
-        <h2>Edit Supplier</h2>
-        <button @click="closeForm" class="close-btn">x</button>
-      </div>
-      <form @submit.prevent="submitForm" class="form-container">
-        <!-- Form fields, same as AddStock but prefilled -->
-        <div class="form-group">
-          <label for="name">Name:</label>
-          <input v-model="editedSupplier.name" id="name" type="text" placeholder="Item Name" required />
-        </div>
-        <div class="form-group">
-          <label for="category">Category:</label>
-          <input v-model="editedSupplier.category" id="category" type="text" placeholder="Category" required />
-        </div>
-  
-        <div class="form-group">
-          <label for="contacts">Contacts:</label>
-          <input v-model="editedSupplier.contacts"  id="contacts" type="number" placeholder="Contacts" required min="0" step="0.01" />
-        </div>
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input v-model="editedSupplier.email"  id="email" type="text" placeholder="Email" required />
-        </div>
-
-  
-        <div class="form-actions">
-          <button type="submit" class="add-item-btn">Update Supplier</button>
-        </div>
-      </form>
+  <div class="popout-form" v-if="isVisible">
+    <div class="form-header">
+      <h2>Edit Supplier</h2>
+      <button @click="closeForm" class="close-btn">x</button>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    props: {
-      isVisible: Boolean,
-      itemToEdit: Object
-    },
-    data() {
-      return {
-        editedSupplier: { ...this.itemToEdit } 
-      };
-    },
-    methods: {
-      closeForm() {
-        this.$emit('close');
+    <form @submit.prevent="submitForm" class="form-container">
+      <div class="form-group">
+        <label for="suppliername">Name:</label>
+        <input v-model="editedSupplier.suppliername" id="suppliername" type="text" required />
+      </div>
+      <div class="form-group">
+        <label for="contactinfo">Contacts:</label>
+        <input v-model="editedSupplier.contactinfo" id="contactinfo" type="text" required />
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input v-model="editedSupplier.email" id="email" type="email" required />
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="update-btn">Update Supplier</button>
+      </div>
+    </form>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  props: {
+    isVisible: Boolean,
+    supplierToEdit: Object
+  },
+  data() {
+    return {
+      editedSupplier: { ...this.supplierToEdit }
+    };
+  },
+  watch: {
+    supplierToEdit: {
+      handler(newVal) {
+        this.editedSupplier = { ...newVal };
       },
-      submitForm() {
-        this.$emit('update', this.editedSupplier);
-        this.closeForm(); 
-      }
+      deep: true,
+      immediate: true
     }
-  };
-  </script>
+  },
+  methods: {
+    closeForm() {
+      this.$emit('close');
+    },
+    async submitForm() {
+      try {
+        await axios.put(`http://127.0.0.1:8000/api/suppliers/suppliers/   ${this.editedSupplier.id}`, this.editedSupplier, {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        this.$emit('save', this.editedSupplier);
+      } catch (error) {
+        console.error('Error updating supplier:', error);
+      }
+    },
+  }
+};
+</script>
+
   
   
   <style scoped>
@@ -121,20 +131,20 @@
   margin-top: 10px; 
   grid-column: span 2; 
 }
-.add-item-btn {
+.update-btn {
   padding: 10px 20px;
-  background-color: #01a501f8;
-  color: rgb(0, 0, 0);
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s;
+    background-color: #FF32BA;
+    color: #dbdbdb;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-.add-item-btn:hover {
-  background-color: #00b32d;
+.update-btn:hover {
+  background-color: #fc62c9;
 }
 
 .add-item-btn:focus {

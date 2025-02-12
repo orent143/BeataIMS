@@ -1,61 +1,75 @@
 <template>
-    <div class="popout-form" v-if="isVisible">
-      <div class="form-header">
-        <h2>Add Supplier</h2>
-        <button @click="closeForm" class="close-btn">x</button>
-      </div>
-      <form @submit.prevent="submitForm" class="form-container">
-        <!-- First Row -->
-        <div class="form-group">
-          <label for="name">Name:</label>
-          <input v-model="newSupplier.name" id="name" type="text" placeholder="Supplier Name" required />
-        </div>
-        <div class="form-group">
-          <label for="category">Category:</label>
-          <input v-model="newSupplier.category" id="category" type="text" placeholder="Category" required />
-        </div>
-  
-        <!-- Second Row -->
-        <div class="form-group">
-          <label for="contacts">Contacts:</label>
-          <input v-model="newSupplier.contacts" id="contacts" type="number" placeholder="Contacts" required min="0" step="0.01" />
-        </div>
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input v-model="newSupplier.email" id="email" type="text" placeholder="Email" required />
-        </div>
-  
-  
-        <!-- Form Actions (aligned with status) -->
-        <div class="form-actions">
-          <button type="submit" class="add-item-btn">Add Supplier</button>
-        </div>
-      </form>
+  <div class="popout-form" v-if="isVisible">
+    <div class="form-header">
+      <h2>Add Supplier</h2>
+      <button @click="closeForm" class="close-btn">x</button>
     </div>
-  </template>
-  
-  <script>
+    <form @submit.prevent="submitForm" class="form-container">
+      <!-- First Row -->
+      <div class="form-group">
+        <label for="suppliername">Name:</label>
+        <input v-model="newSupplier.suppliername" id="suppliername" type="text" placeholder="Supplier Name" required />
+      </div>
+
+      <div class="form-group">
+        <label for="contactinfo">Contacts:</label>
+        <input v-model="newSupplier.contactinfo" id="contactinfo" type="text" placeholder="Contacts" required />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input v-model="newSupplier.email" id="email" type="email" placeholder="Email" required />
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="submit" class="add-item-btn">Add Supplier</button>
+      </div>
+    </form>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
 export default {
   props: {
-    isVisible: Boolean 
+    isVisible: Boolean,
   },
   data() {
     return {
       newSupplier: {
-        name: '',
-        category: '',
-        contacts: '',
-        email: '',
+        suppliername: '',
+        contactinfo: '',
+        email: ''
       }
     };
   },
   methods: {
     closeForm() {
-      this.$emit('close'); 
+      this.$emit('close');
     },
-    submitForm() {
-      this.$emit('add', { ...this.newSupplier }); 
-      this.newSupplier = { name: '', category: '', contacts: '', email: ''}; 
+    async submitForm() {
+      try {
+        if (!this.newSupplier.suppliername || !this.newSupplier.contactinfo || !this.newSupplier.email) {
+          alert("All fields are required!");
+          return;
+        }
+
+        const response = await axios.post(
+          'http://127.0.0.1:8000/api/suppliers/suppliers/',  // Removed extra "/suppliers/"
+          new URLSearchParams({
+            suppliername: this.newSupplier.suppliername.trim(),
+            contactinfo: this.newSupplier.contactinfo.trim(),
+            email: this.newSupplier.email.trim()
+          })
+        );
+
+        this.$emit('add', response.data);
+        this.closeForm();
+      } catch (error) {
+        console.error("Error adding supplier:", error.response?.data || error.message);
+      }
     }
   }
 };
