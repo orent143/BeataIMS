@@ -1,88 +1,64 @@
 <template>
-    <div class="order-summary">
-      <h2>Order Summary</h2>
-      <div class="summary-content">
-        <div class="summary-items">
-          <h3>Selected Items</h3>
-          <div v-if="hasItems">
-            <ul>
-              <li v-for="(item, index) in validItems" :key="index">
-                {{ item.quantity }}x {{ item.name }}
-                <span class="item-price">₱{{ getItemPrice(item) }}</span>
-              </li>
-            </ul>
-          </div>
-          <div v-else class="empty-message">
-            No items selected
-          </div>
-        </div>
-        
-        <div class="summary-totals">
-          <div class="total-line">
-            <span>Total Items:</span>
-            <span>{{ totalItems }}</span>
-          </div>
-          <div class="total-line">
-            <span>Total Amount:</span>
-            <span>₱{{ totalAmount }}</span>
-          </div>
-        </div>
-  
-        <!-- Payment Method Section -->
-        <div class="payment-method">
-          <span><strong>Payment Method:</strong> {{ paymentMethod }}</span>
-        </div>
-      </div>
+  <div class="order-summary">
+    <h2>Order Summary</h2>
+    <div v-if="items.length > 0" class="summary-items">
+      <ul>
+        <li v-for="(item, index) in items" :key="index">
+          {{ item.quantity }}x {{ item.name }}
+          <span class="item-price">₱{{ getItemPrice(item) }}</span>
+        </li>
+      </ul>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    name: 'OrderSummary',
-    props: {
-      items: {
-        type: Array,
-        required: true,
-        default: () => []
-      },
-      menuItems: {
-        type: Array,
-        required: true,
-        default: () => []
-      },
-      paymentMethod: {
-        type: String,
-        required: true,
-      }
+    <div v-else class="empty-message">No items selected</div>
+    <div class="summary-totals">
+      <p><strong>Total Items:</strong> {{ totalItems }}</p>
+      <p><strong>Total Amount:</strong> ₱{{ totalAmount }}</p>
+    </div>
+    <p><strong>Payment Method:</strong> {{ paymentMethod }}</p>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'OrderSummary',
+  props: {
+    items: {
+      type: Array,
+      default: () => []
     },
-    computed: {
-      validItems() {
-        return this.items.filter(item => item && item.name && item.quantity > 0)
-      },
-      hasItems() {
-        return this.validItems.length > 0
-      },
-      totalItems() {
-        return this.validItems.reduce((sum, item) => {
-          return sum + (item.quantity || 0)
-        }, 0)
-      },
-      totalAmount() {
-        return this.validItems.reduce((sum, item) => {
-          const menuItem = this.menuItems.find(m => m.name === item.name)
-          return sum + ((menuItem?.price || 0) * (item.quantity || 0))
-        }, 0).toFixed(2)
-      }
+    paymentMethod: {
+      type: String,
+      default: 'CASH'
+    }
+  },
+  computed: {
+    totalItems() {
+      return this.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
     },
-    methods: {
-      getItemPrice(item) {
-        if (!item || !item.name) return '0.00'
-        const menuItem = this.menuItems.find(m => m.name === item.name)
-        return ((menuItem?.price || 0) * (item.quantity || 1)).toFixed(2)
-      }
+    totalAmount() {
+      return this.items
+        .map(item => item.quantity * (item.price || 0))
+        .reduce((sum, price) => sum + price, 0)
+        .toFixed(2);
+    }
+  },
+  methods: {
+    getItemPrice(item) {
+      return (item.quantity * (item.price || 0)).toFixed(2);
+    }
+  },
+  watch: {
+    items: {
+      handler() {
+        this.$forceUpdate(); // Ensure Vue re-renders when `items` changes
+      },
+      deep: true // Watch for changes within array objects
     }
   }
-  </script>
+};
+</script>
+
+
   
   <style scoped>
   .order-summary {

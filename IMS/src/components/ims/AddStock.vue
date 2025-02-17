@@ -8,68 +8,113 @@
       <!-- First Row -->
       <div class="form-group">
         <label for="name">Name:</label>
-        <input v-model="newItem.name" id="name" type="text" placeholder="Item Name" required />
+        <input v-model="newItem.StockName" id="name" type="text" placeholder="Item Name" required />
       </div>
       <div class="form-group">
         <label for="quantity">Quantity:</label>
-        <input v-model="newItem.quantity" id="quantity" type="number" placeholder="Quantity" required min="1" />
+        <input v-model="newItem.Quantity" id="quantity" type="number" placeholder="Quantity" required min="1" />
       </div>
 
       <!-- Second Row -->
       <div class="form-group">
         <label for="costPrice">Cost Price:</label>
-        <input v-model="newItem.costPrice" id="costPrice" type="number" placeholder="Cost Price" required min="0" step="0.01" />
+        <input v-model="newItem.CostPrice" id="costPrice" type="number" placeholder="Cost Price" required min="0" step="0.01" />
       </div>
       <div class="form-group">
         <label for="supplier">Supplier:</label>
-        <input v-model="newItem.supplier" id="supplier" placeholder="Supplier" required />
-      </div>
-
-      <!-- Third Row (Centered Status) -->
-      <div class="form-group status-group">
-        <label for="status">Status:</label>
-        <select v-model="newItem.status" id="status" required>
-          <option value="In Stock">In Stock</option>
-          <option value="Low Stock">Low Stock</option>
-          <option value="Out of Stock">Out of Stock</option>
+        <select v-model="newItem.SupplierID" id="supplier" class="form-control" required>
+          <option value="" disabled>Select Supplier</option>
+          <option v-for="supplier in suppliers" :key="supplier.SupplierID" :value="supplier.SupplierID">
+  {{ supplier.SupplierName }}
+</option>
         </select>
       </div>
 
-      <!-- Form Actions (aligned with status) -->
+      <!-- Form Actions -->
       <div class="form-actions">
-        <button type="submit" class="add-item-btn">Add Stock</button>
+        <button type="submit" class="add-item-btn" :disabled="loading">
+          {{ loading ? "Adding..." : "Add Stock" }}
+        </button>
       </div>
     </form>
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    <p v-if="successMessage" class="success">{{ successMessage }}</p>
   </div>
 </template>
-
 <script>
+import axios from "axios";
+
 export default {
-  props: {
-    isVisible: Boolean 
-  },
+  props: ["isVisible"],
   data() {
     return {
       newItem: {
-        name: '',
-        quantity: 0,
-        costPrice: 0,
-        supplier: '',
-        status: 'In Stock'
-      }
+        StockName: "",
+        Quantity: null,
+        CostPrice: null,
+        SupplierID: ""
+      },
+      suppliers: [], // 🆕 Store suppliers here
+      loading: false,
+      errorMessage: "",
+      successMessage: ""
     };
   },
   methods: {
-    closeForm() {
-      this.$emit('close');
+    async fetchSuppliers() {
+  try {
+    const response = await axios.get('http://127.0.0.1:8000/api/suppliers/');
+    this.suppliers = response.data.map(supplier => ({
+      SupplierID: supplier.id,  // Ensure the key names match
+      SupplierName: supplier.suppliername
+    }));
+  } catch (error) {
+    console.error("Error fetching suppliers:", error);
+  }
+},
+    async submitForm() {
+      this.loading = true;
+      this.errorMessage = "";
+      this.successMessage = "";
+
+      try {
+        await axios.post('http://127.0.0.1:8000/api/stock/stocks/', new URLSearchParams({
+          StockName: this.newItem.StockName,
+          Quantity: this.newItem.Quantity,
+          CostPrice: this.newItem.CostPrice,
+          SupplierID: this.newItem.SupplierID
+        }));
+
+        this.successMessage = "Stock added successfully!";
+        this.$emit("update-parent");
+        this.$emit("close");
+      } catch (error) {
+        this.errorMessage = "Error adding stock.";
+        console.error("Error adding stock:", error);
+      } finally {
+        this.loading = false;
+      }
     },
-    submitForm() {
-      this.$emit('add', { ...this.newItem }); 
-      this.newItem = { name: '', quantity: 0, costPrice: 0, supplier: '', status: 'In Stock' }; 
+    closeForm() {
+      this.$emit("close");
     }
+  },
+  mounted() {
+    this.fetchSuppliers();
   }
 };
 </script>
+
+
+<style>
+/* Add styling as needed */
+.error {
+  color: red;
+}
+.success {
+  color: green;
+}
+</style>
 
 <style scoped>
 .popout-form {

@@ -2,208 +2,245 @@
   <!-- Import Header component -->
   <Header />
 
-  <Sidebar />
-    <div class="app-container">
-      <!-- Header Section -->
-      <div class="header-container">
-        <h1 class="products-header">Product List</h1>
-        <div class="header-actions">
-          <!-- Search Bar -->
+  <SideBar />
 
-  
-          <!-- Filter Dropdown -->
-          <div class="filter-container">
-            <button class="filter-btn" @click="toggleFilterDropdown">
-              <i class="fas fa-filter"></i>
-            </button>
-            <div v-if="showFilterDropdown" class="dropdown">
-              <select v-model="selectedStatus" class="filter-select" @change="filterItems">
-                <option value="">All Statuses</option>
-                <option value="In Stock">In Stock</option>
-                <option value="Low Stock">Low Stock</option>
-                <option value="Out of Stock">Out of Stock</option>
-              </select>
-            </div>
+  <div class="app-container">
+    <!-- Header Section -->
+    <div class="header-container">
+      <h1 class="products-header">Product List</h1>
+      <div class="header-actions">
+
+        <!-- Filter Dropdown -->
+        <div class="filter-container">
+          <button class="filter-btn" @click="toggleFilterDropdown">
+            <i class="fas fa-filter"></i>
+          </button>
+          <div v-if="showFilterDropdown" class="dropdown">
+            <select v-model="selectedStatus" class="filter-select" @change="filterItems">
+              <option value="">All Statuses</option>
+              <option value="In Stock">In Stock</option>
+              <option value="Low Stock">Low Stock</option>
+              <option value="Out of Stock">Out of Stock</option>
+            </select>
           </div>
-  
-          <!-- Add Stock Button -->
-          <button @click="toggleAddForm" class="add-product-btn">Add</button>
+        </div>
+
+        <!-- Add Stock Button -->
+        <button @click="toggleAddForm" class="add-product-btn">Add</button>
+      </div>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="inventory-container">
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th v-if="isLowStockMode">Select</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="product in filteredItems" :key="product.id">
+            <td v-if="isLowStockMode">
+              <input
+                type="checkbox"
+                :value="product.id"
+                v-model="selectedLowStockItems"
+              />
+            </td>
+            <td>{{ product.ProductName }}</td>
+            <td>{{ product.Quantity }}</td>
+            <td>₱{{ product.UnitPrice }}</td>
+            <td>{{ product.CategoryID }}</td>
+            <td>
+              <span :class="'status status-' + product.Status.toLowerCase().replace(/ /g, '-')">
+                {{ product.Status }}
+              </span>
+            </td>
+            <td>
+              <button class="action-btn edit" @click="editItem(product)">
+                <i class="pi pi-pencil"></i>
+              </button>
+              <button class="action-btn delete" @click="removeItem(product.id)">
+                <i class="pi pi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Floating Button and Popout Options -->
+      <div class="floating-btn-container">
+        <button class="floating-btn" @click="togglePopoutOptions">+</button>
+        <div v-if="showPopoutOptions" class="popout-options">
+          <button class="popout-option" @click="addLowStock">Add Low Stock</button>
+          <button class="popout-option" @click="addSummary">Add Summary</button>
         </div>
       </div>
-  
-      <!-- Main Content Section -->
-        <div class="inventory-container">
-          <table class="stock-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Category</th>
-                <th>Supplier</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="product in filteredItems" :key="product.id">
-                <td>{{ product.name }}</td>
-                <td>{{ product.quantity }}</td>
-                <td>₱{{ product.unitPrice }}</td> <!-- Change to peso symbol -->
-                <td>{{ product.category }}</td>
-                <td>{{ product.supplier }}</td>
-                <td>
-  <span :class="'status status-' + product.status.toLowerCase().replace(/ /g, '-')">
-    {{ product.status }}
-  </span>
-</td>
-                <td>
-  <button class="action-btn edit" @click="editItem(product)">
-    <i class="pi pi-pencil"></i>
-  </button>
-  <button class="action-btn delete" @click="removeItem(product.id)">
-    <i class="pi pi-trash"></i>
-  </button>
-</td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <!-- Floating Button and Popout Options -->
-          <div class="floating-btn-container">
-            <button class="floating-btn" @click="togglePopoutOptions">+</button>
-            <div v-if="showPopoutOptions" class="popout-options">
-              <button class="popout-option" @click="addLowStock">Add Low Stock</button>
-              <button class="popout-option" @click="addSummary">Add Summary</button>
-            </div>
-          </div>
-        </div>
-  
-      <!-- Add or Edit Item Form -->
-      <add-product
-        v-if="showAddForm"
-        :isVisible="showAddForm"
-        @close="toggleAddForm"
-        @add="addItem"
-      />
-  
-      <!-- Edit Item Form -->
-      <edit-product
-        v-if="showEditForm"
-        :isVisible="showEditForm"
-        :itemToEdit="selectedItem"
-        @close="toggleEditForm"
-        @update="updateItem"
-      />
     </div>
-  </template>
-  
-  
-  <script>
-  import AddProduct from '@/components/sms/AddProduct.vue';
-  import EditProduct from '@/components/sms/EditProduct.vue';
-import Sidebar from '@/components/sms/Sidebar.vue';
+
+    <!-- Add or Edit Item Form -->
+    <add-product
+  v-if="showAddForm"
+  :isVisible="showAddForm"
+  @close="toggleAddForm"
+  @add="addItem"
+/>
+
+    <!-- Edit Item Form -->
+    <edit-product
+  v-if="showEditForm"
+  :isVisible="showEditForm"
+  :itemToEdit="selectedItem"
+  @close="toggleEditForm"
+  @update="handleUpdateProduct"
+/>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+import SideBar from '@/components/sms/Sidebar.vue';
+import AddProduct from '@/components/ims/AddProduct.vue';
+import EditProduct from '@/components/ims/EditProduct.vue';
 import Header from '@/components/Header.vue';
 
-  export default {
-    components: {
-      AddProduct,
-      EditProduct,
-      Sidebar,
-      Header
+export default {
+  components: { AddProduct, EditProduct, SideBar, Header },
+  data() {
+    return {
+      searchTerm: '',
+      selectedStatus: '',
+      showFilterDropdown: false,
+      showAddForm: false,
+      showEditForm: false,
+      showPopoutOptions: false,
+      selectedItem: null,
+      productItems: [],
+      filteredItems: [],
+      selectedLowStockItems: [],
+      isLowStockMode: false,
+      currentDate: new Date().toISOString().split('T')[0],
+      inventorySummaries: [],
+    };
+  },
+
+  methods: {
+    toggleFilterDropdown() {
+      this.showFilterDropdown = !this.showFilterDropdown;
     },
-    data() {
-      return {
-        searchTerm: '',
-        selectedStatus: '',
-        showFilterDropdown: false,
-        showAddForm: false,
-        showEditForm: false,
-        showPopoutOptions: false, // Controls the visibility of popout options
-        selectedItem: null,
-        productItems: [
-          { id: 1, name: "Espresso", quantity: 50, unitPrice: 60, category: "Beverages", supplier: "Coffee Co.", status: "In Stock" },
-          { id: 2, name: "Cappuccino", quantity: 30, unitPrice: 50, category: "Beverages", supplier: "Coffee Co.", status: "In Stock" },
-          { id: 3, name: "Croissant", quantity: 20, unitPrice: 50, category: "Bakery", supplier: "Bakery Inc.", status: "Low Stock" },
-          { id: 4, name: "Bagel", quantity: 15, unitPrice: 20, category: "Bakery", supplier: "Bakery Inc.", status: "In Stock" },
-          { id: 5, name: "Lemonade", quantity: 25, unitPrice: 75, category: "Beverages", supplier: "Beverage Co.", status: "In Stock" },
-          { id: 6, name: "Cheese Sandwich", quantity: 10, unitPrice: 60, category: "Food", supplier: "Deli Foods", status: "Out of Stock" },
-          { id: 7, name: "Cheese Sandwich", quantity: 10, unitPrice: 60, category: "Food", supplier: "Deli Foods", status: "Out of Stock" },
-          // More items...
-        ],
-        filteredItems: []
-      };
+    toggleAddForm() {
+      this.showAddForm = !this.showAddForm;
     },
-    methods: {
-      toggleFilterDropdown() {
-        this.showFilterDropdown = !this.showFilterDropdown;
-      },
-      toggleAddForm() {
-        this.showAddForm = !this.showAddForm;
-      },
-      toggleEditForm() {
-        this.showEditForm = !this.showEditForm;
-      },
-      togglePopoutOptions() {
-        this.showPopoutOptions = !this.showPopoutOptions;
-      },
-      filterItems() {
-        let filtered = this.productItems;
-  
-        if (this.searchTerm) {
-          filtered = filtered.filter(item =>
-            item.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-          );
-        }
-  
-        if (this.selectedStatus) {
-          filtered = filtered.filter(item => item.status === this.selectedStatus);
-        }
-  
-        this.filteredItems = filtered;
-      },
-      editItem(item) {
-        this.selectedItem = item;
-        this.showEditForm = true;
-      },
-      updateItem(updatedItem) {
-        const index = this.productItems.findIndex(item => item.id === updatedItem.id);
-        if (index !== -1) {
-          this.productItems.splice(index, 1, updatedItem);
-        }
-        this.filterItems();
-        this.toggleEditForm();
-      },
-      removeItem(itemId) {
-        this.productItems = this.productItems.filter(item => item.id !== itemId);
-        this.filterItems();
-      },
-      addItem(newItem) {
-        newItem.id = this.productItems.length + 1;
-        this.productItems.push(newItem);
-        this.filterItems();
-        this.toggleAddForm();
-      },
-      addLowStock() {
-        console.log("Add Low Stock clicked");
-        // Handle adding low stock logic
-      },
-      addSummary() {
-        console.log("Add Summary clicked");
-        // Handle adding summary logic
+    toggleEditForm() {
+      this.showEditForm = !this.showEditForm;
+    },
+    togglePopoutOptions() {
+      this.showPopoutOptions = !this.showPopoutOptions;
+    },
+    filterItems() {
+      let filtered = this.productItems;
+      if (this.searchTerm) {
+        filtered = filtered.filter(item =>
+          item.ProductName.toLowerCase().includes(this.searchTerm.toLowerCase())
+        );
+      }
+      if (this.selectedStatus) {
+        filtered = filtered.filter(item => item.Status === this.selectedStatus);
+      }
+      this.filteredItems = filtered;
+    },
+
+    getStatusByQuantity(quantity) {
+      if (quantity === 0) {
+        return 'Out of Stock';
+      } else if (quantity <= 10) {
+        return 'Low Stock';
+      } else {
+        return 'In Stock';
       }
     },
-    created() {
+    addItem(newProduct) {
+    this.productItems.push(newProduct);
+    this.filterItems();
+    this.showAddForm = false; // Close the form
+  },
+  async fetchProductItems() {
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/api/inventory/');
+      this.productItems = response.data;
       this.filterItems();
-    },
-    watch: {
-      searchTerm: 'filterItems',
-      selectedStatus: 'filterItems'
+    } catch (error) {
+      console.error('Error fetching product items:', error);
     }
-  };
-  </script>
-  
-  <style scoped>
+  },
+  async removeItem(productId) {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/api/inventory/inventoryproduct/${productId}`);
+        this.productItems = this.productItems.filter(item => item.id !== productId);
+        this.filterItems();
+      } catch (error) {
+        console.error('Error deleting product:', error);
+      }
+    },
+
+async handleUpdateProduct(updatedProduct) {
+  try {
+    console.log("Updating product in parent:", updatedProduct);
+
+    await axios.put(
+      `http://127.0.0.1:8000/api/inventory/inventoryproduct/${updatedProduct.id}`,
+      updatedProduct
+    );
+
+    // Ensure the product list updates properly
+    const index = this.productItems.findIndex(
+      (item) => item.id === updatedProduct.id
+    );
+    if (index !== -1) {
+      this.productItems[index] = { ...updatedProduct };
+      this.productItems = [...this.productItems]; // Force Vue to detect changes
+    }
+
+    this.filterItems();
+    this.showEditForm = false;
+  } catch (error) {
+    console.error("Error updating product:", error);
+  }
+},
+editItem(product) {
+  console.log("Editing product:", product); // Debugging log
+  this.selectedItem = { ...product };
+  this.showEditForm = true;
+}
+
+  },
+
+  created() {
+    this.fetchProductItems();
+  },
+
+  watch: {
+    searchTerm: 'filterItems',
+    selectedStatus: 'filterItems',
+    productItems: {
+      deep: true,
+      handler() {
+        localStorage.setItem('productItems', JSON.stringify(this.productItems));
+      }
+    }
+  }
+};
+</script>
+
+
+
+<style scoped>
 /* General Styling */
 .app-container {
   display: flex;

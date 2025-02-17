@@ -26,23 +26,6 @@
           </option>
         </select>
       </div>
-      <div class="form-group">
-        <label for="supplier">Supplier</label>
-        <select id="supplier" v-model="supplierId" required>
-          <option value="" disabled>Select Supplier</option>
-          <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
-            {{ supplier.suppliername }}
-          </option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="status">Status</label>
-        <select id="status" v-model="status" required>
-          <option value="In Stock">In Stock</option>
-          <option value="Low Stock">Low Stock</option>
-          <option value="Out of Stock">Out of Stock</option>
-        </select>
-      </div>
       <div class="form-actions">
         <button type="submit" class="add-item-btn">Add Product</button>
       </div>
@@ -63,22 +46,15 @@ export default {
       quantity: 1, // Default to 1 to prevent accidental empty submission
       unitPrice: 0,
       categoryId: null,
-      supplierId: null,
-      status: "In Stock",
       categories: [],
-      suppliers: [],
     };
   },
   async created() {
     try {
-      const [categoryResponse, supplierResponse] = await Promise.all([
-        axios.get("http://127.0.0.1:8000/api/categories"),
-        axios.get("http://127.0.0.1:8000/api/suppliers"),
-      ]);
-      this.categories = categoryResponse.data;
-      this.suppliers = supplierResponse.data;
+      const response = await axios.get("http://127.0.0.1:8000/api/categories");
+      this.categories = response.data;
     } catch (error) {
-      console.error("Error fetching categories or suppliers:", error);
+      console.error("Error fetching categories:", error);
     }
   },
   methods: {
@@ -91,34 +67,29 @@ export default {
       this.quantity = 1;
       this.unitPrice = 0;
       this.categoryId = null;
-      this.supplierId = null;
-      this.status = "In Stock";
     },
     async submit() {
   try {
-    console.log("Selected Status:", this.status); // ✅ Debugging to check selected status
-
-    const formData = new URLSearchParams();
+    const formData = new FormData();
     formData.append("ProductName", this.name);
     formData.append("Quantity", this.quantity);
     formData.append("UnitPrice", this.unitPrice);
-    formData.append("CategoryID", this.categoryId);
-    formData.append("SupplierID", this.supplierId);
-    formData.append("Status", this.status); // ✅ Ensure the correct status is being sent
+    if (this.categoryId) {
+      formData.append("CategoryID", this.categoryId);
+    }
 
     const response = await axios.post(
-      "http://127.0.0.1:8000/api/inventory/inventoryproduct/",
-      formData, 
-      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+      `http://127.0.0.1:8000/api/inventory/inventoryproduct/`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } } // Important for form data
     );
 
     console.log("Product added:", response.data);
     this.$emit("add", response.data);
-    alert('added successfully!');
+    alert("Added successfully!");
     setTimeout(() => {
-      this.showNotification = false; 
-    this.closeForm();
-  }, 3000);
+      this.closeForm();
+    }, 3000);
   } catch (error) {
     console.error("Error adding product:", error.response?.data || error);
   }
@@ -126,8 +97,6 @@ export default {
   },
 };
 </script>
-
-
 
 <style scoped>
 .popout-form {

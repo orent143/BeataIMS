@@ -1,13 +1,10 @@
 <template>
-  <!-- Import Header component -->
   <Header />
-
   <SideBar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Stock List</h1>
       <div class="header-actions">
-
         <div class="filter-container">
           <button class="filter-btn" @click="toggleFilterDropdown">
             <i class="fas fa-filter"></i>
@@ -21,119 +18,114 @@
             </select>
           </div>
         </div>
-
         <button @click="toggleAddForm" class="add-product-btn">Add</button>
       </div>
     </div>
 
+    <div class="inventory-container">
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Cost Price</th>
+            <th>Supplier</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="stock in filteredItems" :key="stock.StockID">
+            <td>{{ stock.StockName }}</td>
+            <td>{{ stock.Quantity }}</td>
+            <td>₱{{ stock.CostPrice }}</td>
+            <td>{{ stock.SupplierID }}</td>
+            <td>
+              <span :class="'status status-' + getStatus(stock.Quantity).toLowerCase().replace(/ /g, '-')">
+                {{ getStatus(stock.Quantity) }}
+              </span>
+            </td>
+            <td>
+              <button class="action-btn edit" @click="editItem(stock)">
+                <i class="pi pi-pencil"></i>
+              </button>
+              <button class="action-btn delete" @click="removeItem(stock.StockID)">
+                <i class="pi pi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-      <div class="inventory-container">
-        <table class="stock-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Quantity</th>
-              <th>Cost Price</th>
-              <th>Supplier</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="ingredient in filteredItems" :key="ingredient.id">
-              <td>{{ ingredient.name }}</td>
-              <td>{{ ingredient.quantity }}</td>
-              <td>₱{{ ingredient.costPrice }}</td>
-              <td>{{ ingredient.supplier }}</td>
-              <td>
-  <span :class="'status status-' + ingredient.status.toLowerCase().replace(/ /g, '-')">
-    {{ ingredient.status }}
-  </span>
-</td>
-              <td>
-  <button class="action-btn edit" @click="editItem(product)">
-    <i class="pi pi-pencil"></i>
-  </button>
-  <button class="action-btn delete" @click="removeItem(product.id)">
-    <i class="pi pi-trash"></i>
-  </button>
-</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="floating-btn-container">
-          <button class="floating-btn" @click="togglePopoutOptions">+</button>
-          <div v-if="showPopoutOptions" class="popout-options">
-            <button class="popout-option" @click="addLowStock">Add Low Stock</button>
-            <button class="popout-option" @click="filterLowStock">Low Stock</button>
-          </div>
+      <div class="floating-btn-container">
+        <button class="floating-btn" @click="togglePopoutOptions">+</button>
+        <div v-if="showPopoutOptions" class="popout-options">
+          <button class="popout-option" @click="addLowStock">Add Low Stock</button>
+          <button class="popout-option" @click="filterLowStock">Low Stock</button>
         </div>
       </div>
+    </div>
 
     <add-stock 
-      v-if="showAddForm" 
-      :isVisible="showAddForm" 
-      @close="toggleAddForm" 
-      @add="addItem"
-    />
+  v-if="showAddForm" 
+  :isVisible="showAddForm" 
+  @close="toggleAddForm" 
+  @update-parent="fetchStocks"
+/>
 
     <edit-stock
       v-if="showEditForm"
       :isVisible="showEditForm"
       :itemToEdit="selectedItem"
       @close="toggleEditForm"
-      @update="updateItem"
+      @update-parent="fetchStocks"
     />
   </div>
 </template>
 
 <script>
+import axios from 'axios';
 import AddStock from '@/components/ims/AddStock.vue';
 import EditStock from '@/components/ims/EditStock.vue';
 import SideBar from '@/components/ims/SideBar.vue';
-import Header from '@/components/Header.vue'; // Import Header component
+import Header from '@/components/Header.vue';
 
 export default {
   components: {
-    SideBar,
     AddStock,
     EditStock,
+    SideBar,
     Header
   },
   data() {
     return {
-      searchTerm: '',
+      stocks: [],
+      filteredItems: [],
       selectedStatus: '',
       showFilterDropdown: false,
       showAddForm: false,
       showEditForm: false,
-      showPopoutOptions: false,
       selectedItem: null,
-      lowStockFiltered: false,
-      stockItems: [
-        { id: 1, name: 'Coffee Beans', quantity: 50, costPrice: 5, status: 'In Stock', supplier: 'Coffee Co.' },
-        { id: 2, name: 'Milk', quantity: 30, costPrice: 1.5, status: 'In Stock', supplier: 'Dairy Corp.' },
-        { id: 3, name: 'Coffee Beans', quantity: 30, costPrice: 5, status: 'In Stock', supplier: 'Coffee Co.' },
-        { id: 4, name: 'Milk', quantity: 20, costPrice: 1.5, status: 'In Stock', supplier: 'Dairy Corp.' },
-        { id: 5, name: 'Foam Milk', quantity: 10, costPrice: 2, status: 'Low Stock', supplier: 'Dairy Corp.' },
-        { id: 6, name: 'Flour', quantity: 40, costPrice: 1, status: 'In Stock', supplier: 'Bakery Inc.' },
-        { id: 7, name: 'Butter', quantity: 15, costPrice: 4, status: 'Low Stock', supplier: 'Bakery Inc.' },
-        { id: 8, name: 'Flour', quantity: 25, costPrice: 1, status: 'In Stock', supplier: 'Bakery Inc.' },
-        { id: 9, name: 'Yeast', quantity: 5, costPrice: 2, status: 'In Stock', supplier: 'Bakery Inc.' },
-        { id: 10, name: 'Lemon', quantity: 50, costPrice: 0.5, status: 'In Stock', supplier: 'Fruit Co.' },
-        { id: 11, name: 'Sugar', quantity: 20, costPrice: 1, status: 'In Stock', supplier: 'Sugar Corp.' },
-        { id: 12, name: 'Water', quantity: 100, costPrice: 0.1, status: 'In Stock', supplier: 'Water Supply Co.' },
-        { id: 13, name: 'Cheese', quantity: 10, costPrice: 6, status: 'Out of Stock', supplier: 'Deli Foods' },
-        { id: 14, name: 'Bread', quantity: 40, costPrice: 2, status: 'In Stock', supplier: 'Bakery Inc.' },
-        { id: 15, name: 'Lettuce', quantity: 30, costPrice: 3, status: 'Low Stock', supplier: 'Green Farms' },
-      ],
-      filteredItems: [],
-      inventorySummaries: [],
-      currentDate: new Date().toISOString().split('T')[0],
+      showPopoutOptions: false
     };
   },
   methods: {
+    async fetchStocks() {
+  try {
+    const response = await axios.get('http://127.0.0.1:8000/api/stock/');
+    this.stocks = response.data;
+    this.filteredItems = [...this.stocks]; // Refresh filtered list
+  } catch (error) {
+    console.error('Error fetching stocks:', error);
+  }
+    },
+    filterItems() {
+      if (this.selectedStatus) {
+        this.filteredItems = this.stocks.filter(stock => this.getStatus(stock.Quantity) === this.selectedStatus);
+      } else {
+        this.filteredItems = this.stocks;
+      }
+    },
     toggleFilterDropdown() {
       this.showFilterDropdown = !this.showFilterDropdown;
     },
@@ -146,87 +138,60 @@ export default {
     togglePopoutOptions() {
       this.showPopoutOptions = !this.showPopoutOptions;
     },
-    filterItems() {
-      let filtered = this.stockItems;
+    async addItem(newItem) {
+      try {
+        await axios.post('http://127.0.0.1:8000/api/stock/stocks/', {
+          StockName: newItem.StockName,
+          Quantity: newItem.Quantity,
+          CostPrice: newItem.CostPrice,
+          SupplierID: newItem.SupplierID
+        });
 
-      if (this.searchTerm) {
-        filtered = filtered.filter(item =>
-          item.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-        );
-      }
-
-      if (this.selectedStatus) {
-        filtered = filtered.filter(item => item.status === this.selectedStatus);
-      }
-
-      this.filteredItems = filtered;
-    },
-    filterLowStock() {
-      this.selectedStatus = 'Low Stock';
-      this.lowStockFiltered = true;
-      this.filterItems();
-    },
-    addLowStock() {
-      if (this.lowStockFiltered && this.filteredItems.length > 0) {
-        const lowStockItems = this.filteredItems;
-
-        const lowStockSummary = {
-          id: Date.now(),
-          date: this.currentDate,
-          products: lowStockItems,
-          totalLowStock: lowStockItems.length,
-          totalValue: lowStockItems.reduce((sum, item) => sum + (item.quantity * item.costPrice), 0),
-        };
-
-        let lowStockReports = JSON.parse(localStorage.getItem('lowStockReports')) || [];
-
-        lowStockReports.push(lowStockSummary);
-
-        localStorage.setItem('lowStockReports', JSON.stringify(lowStockReports));
-
-        alert(`Low stock report created! Total low stock items: ${lowStockItems.length}`);
-      } else {
-        alert('No low stock items to report.');
+        this.fetchStocks(); // 🔄 Refresh stocks
+        this.showAddForm = false;
+      } catch (error) {
+        console.error('Error adding stock:', error);
       }
     },
     editItem(item) {
       this.selectedItem = item;
-      this.showEditForm = true;
-    },
-    updateItem(updatedItem) {
-      const index = this.stockItems.findIndex(item => item.id === updatedItem.id);
-      if (index !== -1) {
-        this.stockItems.splice(index, 1, updatedItem);
-      }
-      this.filterItems();
       this.toggleEditForm();
     },
-    removeItem(itemId) {
-      this.stockItems = this.stockItems.filter(item => item.id !== itemId);
-      this.filterItems();
+    async updateItem(updatedItem) {
+      try {
+        await axios.put(`http://127.0.0.1:8000/api/stock/stocks/${updatedItem.StockID}/`, updatedItem);
+        this.fetchStocks(); // 🔄 Refresh stocks after update
+        this.showEditForm = false;
+      } catch (error) {
+        console.error('Error updating stock:', error);
+      }
     },
-    addItem(newItem) {
-      newItem.id = this.stockItems.length + 1;
-      this.stockItems.push(newItem);
-      this.filterItems();
-      this.toggleAddForm();
+    async removeItem(stockID) {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/api/stock/stocks/${stockID}/`);
+        this.fetchStocks(); // 🔄 Refresh stocks after deletion
+      } catch (error) {
+        console.error('Error removing stock:', error);
+      }
     },
-  },
-  created() {
-    const savedSummaries = localStorage.getItem('inventorySummaries');
-    if (savedSummaries) {
-      this.inventorySummaries = JSON.parse(savedSummaries);
+    addLowStock() {
+      // Logic to add low stock
+    },
+    filterLowStock() {
+      this.filteredItems = this.stocks.filter(stock => stock.Quantity <= 10);
+    },
+    getStatus(quantity) {
+      if (quantity === 0) return "Out of Stock";
+      if (quantity <= 10) return "Low Stock";
+      return "In Stock";
     }
-    this.filterItems();
   },
-  watch: {
-    searchTerm: 'filterItems',
-    selectedStatus: 'filterItems',
-  },
+  mounted() {
+    this.fetchStocks();
+  }
 };
 </script>
 
-  
   <style scoped>
   /* Use same styles as Inventory page */
   .app-container {

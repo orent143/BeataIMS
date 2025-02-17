@@ -1,189 +1,139 @@
 <template>
-  <!-- Import Header component -->
   <Header />
-
   <Sidebar />
-    <div class="app-container">
-      <div class="header-container">
-        <h1 class="header">Orders</h1>
-        <div class="header-actions">
-          <div class="filter-container">
-            <select v-model="statusFilter" class="filter-select">
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="preparing">Preparing</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+  <div class="app-container">
+    <div class="header-container">
+      <h1 class="header">Orders</h1>
+      <div class="header-actions">
+        <div class="filter-container">
+          <select v-model="statusFilter" class="filter-select">
+            <option value="all">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Preparing">Preparing</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="orders-grid">
+      <div v-for="order in filteredOrders" :key="order.order_id" class="order-card">
+        <div class="order-header">
+          <span class="order-number">#{{ order.order_id }}</span>
+          <StatusBadge :status="order.order_status || 'Pending'" />
+        </div>
+
+        <div class="order-info">
+          <p><strong>Customer:</strong> {{ order.customer_name }}</p>
+          <p><strong>Table:</strong> {{ order.table_number }}</p>
+          <p><strong>Time:</strong> {{ formatTime(order.order_date) }}</p>
+        </div>
+
+        <!-- ✅ Display Ordered Items -->
+        <div class="order-items">
+          <h4>Items:</h4>
+          <ul>
+            <li v-for="item in order.items" :key="item.product_id">
+              {{ item.name }} (x{{ item.quantity }})
+            </li>
+          </ul>
+        </div>
+
+        <div class="order-footer">
+          <p class="total-amount">Total: ₱{{ order.total_amount }}</p>
+          <div class="action-buttons">
+            <button 
+              v-if="order.order_status === 'Pending'" 
+              @click="updateOrderStatus(order.order_id, 'Preparing')"
+              class="prepare-btn"
+            >
+              Prepare
+            </button>
+            <button 
+              v-if="order.order_status === 'Preparing'" 
+              @click="updateOrderStatus(order.order_id, 'Completed')"
+              class="complete-btn"
+            >
+              Complete
+            </button>
+            <button 
+              v-if="order.order_status === 'Pending'" 
+              @click="updateOrderStatus(order.order_id, 'Cancelled')"
+              class="cancel-btn"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       </div>
-  
-        <div class="orders-grid">
-          <div v-for="order in filteredOrders" :key="order.id" class="order-card">
-            <div class="order-header">
-              <span class="order-number">#{{ order.id }}</span>
-              <span :class="['status-badge', order.status]">{{ order.status }}</span>
-            </div>
-            
-            <div class="order-info">
-              <p><strong>Customer:</strong> {{ order.customerName }}</p>
-              <p><strong>Table:</strong> {{ order.tableNumber }}</p>
-              <p><strong>Time:</strong> {{ formatTime(order.timestamp) }}</p>
-            </div>
-  
-            <div class="order-items">
-              <h4>Items:</h4>
-              <ul>
-                <li v-for="(item, index) in order.items" :key="index">
-                  {{ item.quantity }}x {{ item.name }}
-                </li>
-              </ul>
-            </div>
-  
-            <div class="order-footer">
-              <p class="total-amount">Total: ₱{{ order.totalAmount }}</p>
-              <div class="action-buttons">
-                <button 
-                  v-if="order.status === 'pending'" 
-                  @click="updateStatus(order.id, 'preparing')"
-                  class="prepare-btn"
-                >
-                  Prepare
-                </button>
-                <button 
-                  v-if="order.status === 'preparing'" 
-                  @click="updateStatus(order.id, 'completed')"
-                  class="complete-btn"
-                >
-                  Complete
-                </button>
-                <button 
-                  v-if="order.status === 'pending'" 
-                  @click="updateStatus(order.id, 'cancelled')"
-                  class="cancel-btn"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-      </div>
     </div>
-  </template>
-  
-  <script>
-import Sidebar from '@/components/sms/Sidebar.vue';
-import Header from '@/components/Header.vue';
+  </div>
+</template>
 
-  export default {
-    components: {
+<script>
+import axios from "axios";
+import Sidebar from "@/components/sms/Sidebar.vue";
+import Header from "@/components/Header.vue";
+import StatusBadge from "@/components/sms/StatusBadge.vue";
+
+export default {
+  name: "Orders",
+  components: {
     Sidebar,
-    Header
+    Header,
+    StatusBadge
   },
-    data() {
-      return {
-        searchTerm: '',
-        statusFilter: 'all',
-        orders: [
-          {
-            id: 1001,
-            customerName: 'John Doe',
-            tableNumber: 5,
-            timestamp: new Date(),
-            status: 'pending',
-            items: [
-              { name: 'Cappuccino', quantity: 2 },
-              { name: 'Croissant', quantity: 1 }
-            ],
-            totalAmount: '12.50'
-          },
-          {
-            id: 1002,
-            customerName: 'Jane Smith',
-            tableNumber: 3,
-            timestamp: new Date(),
-            status: 'preparing',
-            items: [
-              { name: 'Latte', quantity: 1 },
-              { name: 'Muffin', quantity: 2 }
-            ],
-            totalAmount: '9.00'
-          },
-          {
-            id: 1003,
-            customerName: 'John Soi',
-            tableNumber: 6,
-            timestamp: new Date(),
-            status: 'pending',
-            items: [
-              { name: 'Cappuccino', quantity: 2 },
-              { name: 'Croissant', quantity: 1 }
-            ],
-            totalAmount: '12.50'
-          },
-          {
-            id: 1004,
-            customerName: 'Patrick Smith',
-            tableNumber: 1,
-            timestamp: new Date(),
-            status: 'preparing',
-            items: [
-              { name: 'Latte', quantity: 1 },
-              { name: 'Muffin', quantity: 2 }
-            ],
-            totalAmount: '9.00'
-          },
-          {
-            id: 1005,
-            customerName: 'John Doe',
-            tableNumber: 7,
-            timestamp: new Date(),
-            status: 'pending',
-            items: [
-              { name: 'Cappuccino', quantity: 2 },
-              { name: 'Croissant', quantity: 1 }
-            ],
-            totalAmount: '12.50'
-          },
-          {
-            id: 1006,
-            customerName: 'Jane Smith',
-            tableNumber: 8,
-            timestamp: new Date(),
-            status: 'preparing',
-            items: [
-              { name: 'Latte', quantity: 1 },
-              { name: 'Muffin', quantity: 2 }
-            ],
-            totalAmount: '9.00'
-          }
-        ]
+  data() {
+    return {
+      orders: [],
+      statusFilter: "all",
+    };
+  },
+  computed: {
+    filteredOrders() {
+      if (this.statusFilter === "all") {
+        return this.orders;
       }
-    },
-    computed: {
-      filteredOrders() {
-        return this.orders.filter(order => {
-          const matchesSearch = order.customerName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                              order.id.toString().includes(this.searchTerm)
-          const matchesStatus = this.statusFilter === 'all' || order.status === this.statusFilter
-          return matchesSearch && matchesStatus
-        })
-      }
-    },
-    methods: {
-      formatTime(timestamp) {
-        return new Date(timestamp).toLocaleTimeString()
-      },
-      updateStatus(orderId, newStatus) {
-        const order = this.orders.find(o => o.id === orderId)
-        if (order) {
-          order.status = newStatus
-        }
-      }
+      return this.orders.filter(order => order.order_status === this.statusFilter);
     }
+  },
+  methods: {
+    async fetchOrders() {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/ordersummary/orders");
+        this.orders = response.data.map(order => ({
+          ...order,
+          order_status: order.order_status || "Pending", // ✅ Ensure status is always set
+        }));
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    },
+    async updateOrderStatus(order_id, newStatus) {
+      try {
+        await axios.put(
+          `http://127.0.0.1:8000/api/ordersummary/orders/${order_id}/status`,
+          { status: newStatus },
+          { headers: { "Content-Type": "application/json" } }
+        );
+
+        this.fetchOrders(); // ✅ Refresh orders after updating status
+      } catch (error) {
+        console.error("Error updating order:", error.response?.data || error);
+      }
+    },
+    formatTime(timestamp) {
+      return new Date(timestamp).toLocaleTimeString();
+    }
+  },
+  mounted() {
+    this.fetchOrders();
   }
-  </script>
+};
+</script>
+
+
   
   <style scoped>
   .app-container {

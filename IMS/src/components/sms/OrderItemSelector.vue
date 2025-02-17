@@ -1,77 +1,94 @@
 <template>
-    <div class="menu-section">
-      <h2>Menu Items</h2>
-      <div class="items-grid">
-        <div v-for="menuItem in menuItems" :key="menuItem.id" class="menu-item">
-          <MenuItemCard
-            :item="menuItem"
-            :quantity="getItemQuantity(menuItem)"
-            :selected="isItemSelected(menuItem)"
-            @add="addOrUpdateItem(menuItem)"
-            @update:quantity="updateQuantity(menuItem, $event)"
-          />
-        </div>
-      </div>
+  <div class="menu-section">
+    <h2>Menu Items</h2>
+    <div v-if="loading">Loading menu items...</div>
+    <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
+    <div v-if="menuItems.length > 0" class="items-grid">
+      <MenuItemCard
+        v-for="menuItem in menuItems"
+        :key="menuItem.id"
+        :item="menuItem"
+        :quantity="getItemQuantity(menuItem)"
+        :selected="isItemSelected(menuItem)"
+        @add="addOrUpdateItem(menuItem)"
+        @update:quantity="updateQuantity(menuItem, $event)"
+      />
     </div>
-  </template>
-  
-  <script>
-  import MenuItemCard from './MenuItemCard.vue'
-  
-  export default {
-    name: 'OrderItemSelector',
-    components: {
-      MenuItemCard
-    },
-    props: {
-      items: {
-        type: Array,
-        required: true
-      },
-      menuItems: {
-        type: Array,
-        required: true
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+import MenuItemCard from './MenuItemCard.vue';
+
+export default {
+  name: 'OrderItemSelector',
+  components: { MenuItemCard },
+  props: {
+    items: Array,
+    menuItems: Array // ✅ Comes from parent `CreateOrder.vue`
+  },
+  data() {
+    return {
+      loading: false,
+      errorMessage: ''
+    };
+  },
+  mounted() {
+    this.fetchMenuItems();
+  },
+  methods: {
+    async fetchMenuItems() {
+      try {
+        this.loading = true;
+        console.log("Fetching menu items...");
+        
+        const response = await axios.get('http://127.0.0.1:8000/api/createorder/menu_items');
+        
+        console.log("Menu items received:", response.data);
+        
+        // ✅ Emit to parent to update `menuItems`
+        this.$emit('update:menuItems', response.data);
+
+        if (!response.data.length) {
+          this.errorMessage = "No menu items found.";
+        }
+      } catch (error) {
+        console.error("Error fetching menu:", error.response?.data?.detail || error.message);
+        this.errorMessage = "Failed to load menu items.";
+      } finally {
+        this.loading = false;
       }
     },
-    emits: ['update:items'],
-    methods: {
-      getItemQuantity(menuItem) {
-        const existingItem = this.items.find(item => item.name === menuItem.name)
-        return existingItem?.quantity || 1
-      },
-      isItemSelected(menuItem) {
-        return this.items.some(item => item.name === menuItem.name)
-      },
-      addOrUpdateItem(menuItem) {
-        const existingIndex = this.items.findIndex(item => item.name === menuItem.name)
-        const quantity = this.getItemQuantity(menuItem)
-  
-        if (existingIndex >= 0) {
-          // Update existing item
-          const updatedItems = [...this.items]
-          updatedItems[existingIndex] = { ...updatedItems[existingIndex], quantity }
-          this.$emit('update:items', updatedItems)
-        } else {
-          // Add new item
-          const updatedItems = [
-            ...this.items.filter(item => item.name !== ''), // Keep non-empty items
-            { name: menuItem.name, quantity }
-          ]
-          this.$emit('update:items', updatedItems)
-        }
-      },
-      updateQuantity(menuItem, quantity) {
-        const existingIndex = this.items.findIndex(item => item.name === menuItem.name)
-        if (existingIndex >= 0) {
-          const updatedItems = [...this.items]
-          updatedItems[existingIndex] = { ...updatedItems[existingIndex], quantity }
-          this.$emit('update:items', updatedItems)
-        }
+    getItemQuantity(menuItem) {
+      return this.items.find(item => item.id === menuItem.id)?.quantity || 1;
+    },
+    isItemSelected(menuItem) {
+      return this.items.some(item => item.id === menuItem.id);
+    },
+    addOrUpdateItem(menuItem) {
+      const updatedItems = [...this.items];
+      const existingItem = updatedItems.find(item => item.id === menuItem.id);
+
+      if (existingItem) {
+        existingItem.quantity = this.getItemQuantity(menuItem);
+      } else {
+        updatedItems.push({ id: menuItem.id, name: menuItem.name, quantity: 1 });
       }
+
+      this.$emit('update:items', updatedItems);
+    },
+    updateQuantity(menuItem, quantity) {
+      const updatedItems = this.items.map(item =>
+        item.id === menuItem.id ? { ...item, quantity } : item
+      );
+      this.$emit('update:items', updatedItems);
     }
   }
-  </script>
-  
+};
+</script>
+
+
   <style scoped>
   .menu-section {
     background: #f8f9fa;

@@ -40,7 +40,6 @@
             <th>Quantity</th>
             <th>Unit Price</th>
             <th>Category</th>
-            <th>Supplier</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -58,7 +57,6 @@
             <td>{{ product.Quantity }}</td>
             <td>₱{{ product.UnitPrice }}</td>
             <td>{{ product.CategoryID }}</td>
-            <td>{{ product.SupplierID }}</td>
             <td>
               <span :class="'status status-' + product.Status.toLowerCase().replace(/ /g, '-')">
                 {{ product.Status }}
@@ -68,9 +66,9 @@
               <button class="action-btn edit" @click="editItem(product)">
                 <i class="pi pi-pencil"></i>
               </button>
-<button class="action-btn delete" @click="removeItem(product.id)">
-  <i class="pi pi-trash"></i>
-</button>
+              <button class="action-btn delete" @click="removeItem(product.id)">
+                <i class="pi pi-trash"></i>
+              </button>
             </td>
           </tr>
         </tbody>
@@ -88,20 +86,20 @@
 
     <!-- Add or Edit Item Form -->
     <add-product
-      v-if="showAddForm"
-      :isVisible="showAddForm"
-      @close="toggleAddForm"
-      @add="addItem"
-    />
+  v-if="showAddForm"
+  :isVisible="showAddForm"
+  @close="toggleAddForm"
+  @add="addItem"
+/>
 
     <!-- Edit Item Form -->
     <edit-product
-      v-if="showEditForm"
-      :isVisible="showEditForm"
-      :itemToEdit="selectedItem"
-      @close="toggleEditForm"
-      @update="handleUpdateProduct"
-    />
+  v-if="showEditForm"
+  :isVisible="showEditForm"
+  :itemToEdit="selectedItem"
+  @close="toggleEditForm"
+  @update="handleUpdateProduct"
+/>
   </div>
 </template>
 
@@ -167,129 +165,63 @@ export default {
         return 'In Stock';
       }
     },
-
-    addItem(newItem) {
-  newItem.id = this.productItems.length + 1;
-  newItem.Status = newItem.Status || "In Stock"; // Retain the chosen status
-  this.productItems.push(newItem);
-  this.filterItems();
-  this.toggleAddForm();
-  this.createInventorySummary();
-  this.saveToLocalStorage();
-},
-
-    editItem(product) {
-      this.selectedItem = { ...product }; // Clone object to avoid direct mutation
-      this.showEditForm = true;
-    },
-
-    async handleUpdateProduct(updatedProduct) {
-  const index = this.productItems.findIndex(item => item.id === updatedProduct.id);
-  if (index !== -1) {
-    this.productItems[index] = { ...updatedProduct, Status: this.getStatusByQuantity(updatedProduct.Quantity) };
-    this.filterItems(); // Add this line to update the filtered list
-    this.saveToLocalStorage(); // Save updated list to local storage
-  }
-  this.showEditForm = false;
-  
-  // Refresh the product items without refreshing the whole page
-  this.fetchProductItems(); // Fetch updated data from the server
-},
-
-async removeItem(itemId) {
-  try {
-    // Make a DELETE request to the API
-    const response = await axios.delete(`http://127.0.0.1:8000/api/inventory/inventoryproduct/${itemId}`);
-    
-    // Check if the response is successful
-    if (response.status === 200) {
-      // Remove the item from the product list
-      this.productItems = this.productItems.filter(item => item.id !== itemId);
-      
-      // Update filtered list after removal
+    addItem(newProduct) {
+    this.productItems.push(newProduct);
+    this.filterItems();
+    this.showAddForm = false; // Close the form
+  },
+  async fetchProductItems() {
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/api/inventory/');
+      this.productItems = response.data;
       this.filterItems();
-      
-      // Optionally update the inventory summary after removal
-      this.createInventorySummary();
-      
-      // Save updated data to localStorage
-      this.saveToLocalStorage();
-      
-      alert('Product deleted successfully');
-    } else {
-      alert('Failed to delete product');
+    } catch (error) {
+      console.error('Error fetching product items:', error);
     }
-  } catch (error) {
-    console.error('Error deleting product:', error);
-    alert('An error occurred while deleting the product');
-  }
-},
-
-    createInventorySummary() {
-      const lowStockItems = this.productItems.filter(item => item.Status === 'Low Stock');
-      const outOfStockItems = this.productItems.filter(item => item.Status === 'Out of Stock');
-
-      const summary = {
-        id: Date.now(),
-        date: this.currentDate,
-        products: [...this.productItems],
-        totalItems: this.productItems.length,
-        totalValue: this.productItems.reduce((sum, item) => sum + (item.Quantity * item.UnitPrice), 0),
-        lowStockCount: lowStockItems.length,
-        outOfStockCount: outOfStockItems.length
-      };
-
-      this.inventorySummaries.push(summary);
-      this.saveToLocalStorage();
-    },
-
-    saveToLocalStorage() {
-      localStorage.setItem('inventorySummaries', JSON.stringify(this.inventorySummaries));
-      localStorage.setItem('productItems', JSON.stringify(this.productItems)); // Save updated list
-    },
-
-    loadFromLocalStorage() {
-      const savedSummaries = localStorage.getItem('inventorySummaries');
-      const savedProducts = localStorage.getItem('productItems');
-
-      if (savedSummaries) {
-        this.inventorySummaries = JSON.parse(savedSummaries);
-      }
-      if (savedProducts) {
-        this.productItems = JSON.parse(savedProducts);
-        this.filterItems();
-      }
-    },
-
-    addLowStock() {
-      this.isLowStockMode = !this.isLowStockMode;
-    },
-
-    addSummary() {
-      this.createInventorySummary();
-      alert('Inventory summary has been created successfully!');
-    },
-
-    async fetchProductItems() {
+  },
+  async removeItem(productId) {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/inventory/');
-        this.productItems = response.data;
+        await axios.delete(`http://127.0.0.1:8000/api/inventory/inventoryproduct/${productId}`);
+        this.productItems = this.productItems.filter(item => item.id !== productId);
         this.filterItems();
       } catch (error) {
-        console.error('Error fetching product items:', error);
+        console.error('Error deleting product:', error);
       }
     },
 
-    refreshProductList() {
-      this.fetchProductItems();
+async handleUpdateProduct(updatedProduct) {
+  try {
+    console.log("Updating product in parent:", updatedProduct);
+
+    await axios.put(
+      `http://127.0.0.1:8000/api/inventory/inventoryproduct/${updatedProduct.id}`,
+      updatedProduct
+    );
+
+    // Ensure the product list updates properly
+    const index = this.productItems.findIndex(
+      (item) => item.id === updatedProduct.id
+    );
+    if (index !== -1) {
+      this.productItems[index] = { ...updatedProduct };
+      this.productItems = [...this.productItems]; // Force Vue to detect changes
     }
+
+    this.filterItems();
+    this.showEditForm = false;
+  } catch (error) {
+    console.error("Error updating product:", error);
+  }
+},
+editItem(product) {
+  console.log("Editing product:", product); // Debugging log
+  this.selectedItem = { ...product };
+  this.showEditForm = true;
+}
+
   },
 
   created() {
-    this.loadFromLocalStorage();
-    if (this.inventorySummaries.length === 0) {
-      this.createInventorySummary();
-    }
     this.fetchProductItems();
   },
 
@@ -299,12 +231,14 @@ async removeItem(itemId) {
     productItems: {
       deep: true,
       handler() {
-        this.saveToLocalStorage();
+        localStorage.setItem('productItems', JSON.stringify(this.productItems));
       }
     }
   }
 };
 </script>
+
+
 
 <style scoped>
 /* General Styling */

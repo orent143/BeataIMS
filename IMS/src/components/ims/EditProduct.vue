@@ -15,7 +15,6 @@
         <input id="quantity" v-model="product.Quantity" type="number" placeholder="Quantity" required min="1" />
       </div>
 
-      <!-- Second Row -->
       <div class="form-group">
         <label for="unitPrice">Unit Price</label>
         <input id="unitPrice" v-model="product.UnitPrice" type="number" placeholder="Unit Price" required min="0" step="0.01" />
@@ -25,26 +24,6 @@
         <select id="category" v-model="product.CategoryID" required>
           <option value="" disabled>Select Category</option>
           <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.CategoryName }}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="supplier">Supplier</label>
-        <select id="supplier" v-model="product.SupplierID" required>
-          <option value="" disabled>Select Supplier</option>
-          <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
-            {{ supplier.suppliername }}
-          </option>
-        </select>
-      </div>
-
-      <!-- Third Row -->
-      <div class="form-group">
-        <label for="status">Status</label>
-        <select id="status" v-model="product.Status" required>
-          <option value="" disabled>Select Status</option>
-          <option value="In Stock">In Stock</option>
-          <option value="Low Stock">Low Stock</option>
-          <option value="Out of Stock">Out of Stock</option>
         </select>
       </div>
 
@@ -67,9 +46,7 @@ export default {
   data() {
     return {
       product: { ...this.itemToEdit }, // Initialize with product data
-      categories: [],  // List of categories
-      suppliers: [],    // List of suppliers
-      showNotification: false // Notification visibility
+      categories: []  // List of categories
     };
   },
   methods: {
@@ -77,46 +54,31 @@ export default {
       this.$emit('close');
     },
     async updateProduct() {
-      try {
-        const productId = parseInt(this.product.id); // Ensure ID is valid
+  try {
+    console.log("Updating product:", this.product);
 
-        if (isNaN(productId)) {
-          throw new Error("Invalid product ID");
-        }
-
-        const response = await axios.put(
-          `http://127.0.0.1:8000/api/inventory/inventoryproduct/${productId}`,
-          {
-            ProductName: this.product.ProductName,
-            Quantity: this.product.Quantity,
-            UnitPrice: this.product.UnitPrice,
-            CategoryID: this.product.CategoryID,
-            SupplierID: this.product.SupplierID,
-            Status: this.product.Status
-          },
-          { headers: { "Content-Type": "application/json" } }
-        );
-
-        this.$emit("update", response.data); // Emit updated product
-        alert('updated successfully!');
-        setTimeout(() => {
-          this.showNotification = false; // Hide notification after 3 seconds
-          this.closeForm(); // Close the form
-        }, 3000);
-      } catch (error) {
-        console.error("Error updating product:", error);
-        alert("Failed to update product");
-      }
+    if (!this.product.id) {
+      throw new Error("Product ID is missing!");
     }
+
+    await axios.put(
+      `http://127.0.0.1:8000/api/inventory/inventoryproduct/${this.product.id}`,
+      this.product
+    );
+
+    this.$emit("update", { ...this.product }); // Emit updated product
+    alert("Product updated successfully!");
+    this.closeForm();
+  } catch (error) {
+    console.error("Error updating product:", error);
+    alert("Failed to update product");
+  }
+}
   },
   created() {
-    // Fetch categories and suppliers data (you should have these in your backend API)
+    // Fetch categories data
     axios.get('http://127.0.0.1:8000/api/categories').then(response => {
       this.categories = response.data;
-    });
-
-    axios.get('http://127.0.0.1:8000/api/suppliers').then(response => {
-      this.suppliers = response.data;
     });
   }
 };

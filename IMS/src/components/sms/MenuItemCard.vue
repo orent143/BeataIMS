@@ -1,65 +1,65 @@
 <template>
-    <div class="menu-item-card">
-      <div class="item-icon">
+  <div class="menu-item-card">
+    <div class="item-icon">
       <i :class="getItemIcon(item.name)"></i>
     </div>
-      <div class="item-details">
-        <h3>{{ item.name }}</h3>
-        <p class="price">₱{{ item.price.toFixed(2) }}</p>
-        <div class="item-controls">
-          <input 
-            :value="quantity"
-            @input="$emit('update:quantity', Number($event.target.value) || 1)"
-            type="number" 
-            min="1" 
-            class="quantity-input" 
-          />
-          <button 
-            class="add-btn"
-            @click="$emit('add')"
-            :class="{ 'selected': selected }"
-          >
-            {{ selected ? 'Update' : 'Add' }}
-          </button>
-        </div>
+    <div class="item-details">
+      <h3>{{ item.name }}</h3>
+      <p class="price">₱{{ formattedPrice }}</p>
+      <p class="stock" :class="{ 'low-stock': item.stock <= 5 }">Stock: {{ item.stock }}</p>
+
+      <div class="item-controls">
+        <input 
+          type="number"
+          min="1"
+          :max="item.stock"
+          :value="quantity"
+          @input="$emit('update:quantity', Math.min(Math.max(1, Number($event.target.value)), item.stock))"
+          class="quantity-input"
+        />
+        <button 
+          class="add-btn"
+          @click="$emit('add', item)"
+          :class="{ 'selected': selected }"
+          :disabled="item.stock <= 0"
+        >
+          {{ selected ? 'Update' : 'Add' }}
+        </button>
       </div>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    name: 'MenuItemCard',
-    props: {
-      item: {
-        type: Object,
-        required: true
-      },
-      quantity: {
-        type: Number,
-        default: 1
-      },
-      selected: {
-        type: Boolean,
-        default: false
-      }
-    },
-    emits: ['add', 'update:quantity'],
-    methods: {
-      getItemIcon(name) {
-        // Map item names to Font Awesome icons
-        const iconMap = {
-        'Cappuccino': 'pi-coffee',
-        'Latte': 'pi-coffee',
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'MenuItemCard',
+  props: {
+    item: Object,
+    quantity: Number,
+    selected: Boolean
+  },
+  computed: {
+    formattedPrice() {
+      return `${Number(this.item.price || 0).toFixed(2)}`;
+    }
+  },
+  methods: {
+    getItemIcon(name) {
+      const iconMap = {
+        'Cappuccino': 'pi pi-coffee',
+        'Latte': 'pi pi-coffee',
         'Espresso': 'pi pi-coffee',
         'Mocha': 'pi pi-coffee',
         'Croissant': 'pi pi-bread',
         'Muffin': 'pi pi-cookie'
-      }
-      return iconMap[name] || 'pi pi-utensils'
+      };
+      return iconMap[name] || 'pi pi-utensils';
     }
   }
-}
+};
 </script>
+
+  
   
   <style scoped>
   .menu-item-card {
@@ -70,7 +70,10 @@
     transition: transform 0.2s;
     padding: 20px;
   }
-  
+  .low-stock {
+  color: red;
+  font-weight: bold;
+}
   .menu-item-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);

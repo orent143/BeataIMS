@@ -1,59 +1,70 @@
-<template>  <!-- Import Header component -->
+<template>
   <Header />
-
   <SideBar />
   <div class="app-container">
-
-    
     <div class="main-container">
       <div class="header-container">
         <h1 class="header">Create Inventory Product</h1>
       </div>
-
       <div class="content-wrapper">
-          <!-- Product Details -->
-          <div class="product-details">
-            <h2>Product Details</h2>
-            <div class="form-group">
-              <label>Product Name</label>
-              <input v-model="product.name" type="text" required class="form-input" />
-            </div>
+        <div class="product-details">
+          <h2>Product Details</h2>
+          <div class="form-group">
+            <label>Product Name</label>
+            <input v-model="product.ProductName" type="text" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Product Quantity</label>
+            <input v-model.number="product.Quantity" type="number" min="1" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Unit Price (₱)</label>
+            <input v-model.number="product.UnitPrice" type="number" min="0" step="0.01" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select v-model="product.CategoryID" class="form-input">
+              <option value="" disabled>Select Category</option>
+              <option v-for="category in categories" :key="category.id" :value="category.id">
+                {{ category.CategoryName }}
+              </option>
+            </select>
+          </div>
 
-            <div class="form-group">
-              <label>Product Quantity</label>
-              <input v-model.number="product.quantity" type="number" min="1" class="form-input" />
-            </div>
-
-            <div class="form-group">
-              <label>Unit Price (₱)</label>
-              <input v-model.number="product.unitPrice" type="number" min="0" step="0.01" class="form-input" />
-            </div>
-
-            <div class="form-group">
-              <label>Category</label>
-              <select v-model="product.category" class="form-input">
-                <option value="">Select Category</option>
-                <option value="BEVERAGE">Beverage</option>
-                <option value="PASTRY">Pastry</option>
-                <option value="DESSERT">Dessert</option>
+          <!-- Multiple Stock Selection -->
+          <div class="form-group">
+            <label>Stocks (Optional, Add Multiple)</label>
+            <div v-for="(stockEntry, index) in product.Stocks" :key="index" class="stock-entry">
+              <select v-model.number="stockEntry.StockID" class="form-input">
+                <option value="" disabled>Select Stock</option>
+                <option v-for="stock in stocks" :key="stock.StockID" :value="stock.StockID">
+                  {{ stock.StockName }} (Available: {{ stock.Quantity }})
+                </option>
               </select>
+              <input v-model.number="stockEntry.StockQuantity" type="number" min="1" class="form-input stock-quantity" placeholder="Stock Quantity" />
+              <button @click="removeStock(index)" class="remove-btn">Remove</button>
             </div>
-
-          <!-- Raw Materials / Stock Selector -->
-          <ProductItemSelector 
-            :items="product.items"
-            :stockItems="stockItems"
-            @update:items="updateItems"
-          />
+            <button @click="addStock" class="add-btn">Add Another Stock</button>
+          </div>
         </div>
-
+        
         <!-- Product Summary -->
         <div class="summary-section">
-          <ProductSummary 
-            :productItems="product.items"
-            :stockItems="stockItems"
-            :laborCost="product.unitPrice * product.quantity"
-          />
+          <h2>Product Summary</h2>
+          <div class="summary-details">
+            <p><strong>Product Name:</strong> {{ product.ProductName || 'N/A' }}</p>
+            <p><strong>Category:</strong> {{ selectedCategoryName }}</p>
+            <p><strong>Quantity:</strong> {{ product.Quantity }}</p>
+            <p><strong>Unit Price:</strong> ₱{{ product.UnitPrice.toFixed(2) }}</p>
+            <p><strong>Stocks:</strong></p>
+            <ul>
+              <li v-for="(stock, index) in product.Stocks" :key="index">
+                {{ getStockName(stock.StockID) }} - {{ stock.StockQuantity }} units
+              </li>
+            </ul>
+            <hr />
+            <p><strong>Total Cost:</strong> ₱{{ totalCost.toFixed(2) }}</p>
+          </div>
 
           <div class="form-actions">
             <button type="button" @click="resetForm" class="reset-btn">Reset</button>
@@ -66,92 +77,106 @@
 </template>
 
 <script>
+import axios from 'axios';
 import SideBar from '@/components/ims/SideBar.vue';
-import ProductSummary from '@/components/ims/ProductSummary.vue';
-import ProductItemSelector from '@/components/ims/ProductItemSelector.vue';
-import Header from '@/components/Header.vue'; // Import Header component
+import Header from '@/components/Header.vue';
 
 export default {
-  name: 'CreateProduct',
-  components: {
-    ProductSummary,
-    SideBar,
-    ProductItemSelector,
-    Header
-  },
+  components: { SideBar, Header },
   data() {
     return {
       product: {
-        name: '',
-        quantity: 1,
-        unitPrice: 0,
-        category: '',
-        items: [{ stockId: '', quantity: 1 }]  // Default to one empty item
+        ProductName: "",
+        CategoryID: null,
+        Quantity: 1,
+        UnitPrice: 0,
+        Stocks: [],
       },
-      stockItems: [
-        { id: 1, name: 'Coffee Beans', price: 500.00, quantity: 1000 },
-        { id: 2, name: 'Milk', price: 80.00, quantity: 500 },
-        { id: 3, name: 'Sugar', price: 50.00, quantity: 1000 },
-        { id: 4, name: 'Chocolate Powder', price: 300.00, quantity: 500 },
-        { id: 5, name: 'Flour', price: 45.00, quantity: 1000 },
-        { id: 6, name: 'Butter', price: 120.00, quantity: 200 },
-        { id: 7, name: 'Eggs', price: 8.00, quantity: 300 },
-        { id: 8, name: 'Vanilla Extract', price: 150.00, quantity: 100 }
-      ]
+      categories: [],
+      stocks: [],
+      loading: false,
+      errorMessage: "",
     };
   },
-  methods: {
-    updateItems(updatedItems) {
-      this.product.items = updatedItems;
+  computed: {
+    totalCost() {
+      return this.product.Quantity * this.product.UnitPrice;
     },
-
-    submitProduct() {
-      // Validate product details
-      if (!this.product.name) {
-        alert('Please enter product name');
-        return;
-      }
-      if (!this.product.category) {
-        alert('Please select product category');
-        return;
-      }
-
-      // Validate that all items have a valid stockId and quantity
-      const invalidItem = this.product.items.find(item => !item.stockId || item.quantity < 1);
-      if (invalidItem) {
-        alert('Please ensure all stock items have been selected with valid quantities');
-        return;
-      }
-
-      // Calculate total price
-      const totalPrice = this.product.unitPrice * this.product.quantity;
-
-      // Prepare the product object for submission
-      const productToSubmit = {
-        ...this.product,
-        totalPrice
-      };
-
-      // Simulate product submission (e.g., API call)
-      console.log('Product submitted:', productToSubmit);
-
-      // Reset form after submission
-      this.resetForm();
-
-      // Optionally navigate to another page or display a success message
-      this.$router.push('/inventoryims');
+    selectedCategoryName() {
+      const category = this.categories.find(cat => cat.id === this.product.CategoryID);
+      return category ? category.CategoryName : 'N/A';
     },
-
-    resetForm() {
-      this.product = {
-        name: '',
-        quantity: 1,
-        unitPrice: 0,
-        category: '',
-        items: [{ stockId: '', quantity: 1 }]  // Reset items
+    getStockName() {
+      return (stockID) => {
+        const stock = this.stocks.find(s => s.StockID === stockID);
+        return stock ? stock.StockName : 'N/A';
       };
     }
-  }
+  },
+  mounted() {
+    this.fetchPrepopulateData();
+  },
+  methods: {
+    async fetchPrepopulateData() {
+      this.loading = true;
+      this.errorMessage = "";
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/createproduct/products/prepopulate');
+        if (response.data.categories && response.data.stocks) {
+          this.categories = response.data.categories;
+          this.stocks = response.data.stocks;
+          console.log("Categories fetched:", this.categories);
+          console.log("Stocks fetched:", this.stocks);
+        } else {
+          throw new Error("Invalid response structure");
+        }
+      } catch (error) {
+        console.error('Error fetching prepopulate data:', error.response?.data?.detail || error.message);
+        this.errorMessage = "Failed to fetch categories and stocks.";
+      } finally {
+        this.loading = false;
+      }
+    },
+    addStock() {
+      this.product.Stocks.push({ StockID: null, StockQuantity: 1 });
+    },
+    removeStock(index) {
+      this.product.Stocks.splice(index, 1);
+    },
+    async submitProduct() {
+      this.loading = true;
+      try {
+        const formData = new FormData();
+        formData.append("ProductName", this.product.ProductName);
+        formData.append("CategoryID", this.product.CategoryID);
+        formData.append("Quantity", this.product.Quantity);
+        formData.append("UnitPrice", this.product.UnitPrice);
+        formData.append("Stocks", JSON.stringify(this.product.Stocks));
+
+        const response = await axios.post("http://127.0.0.1:8000/api/createproduct/products/", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        alert("Product created successfully!");
+        console.log("Product created:", response.data);
+        this.resetForm();
+      } catch (error) {
+        console.error("Error creating product:", error.response?.data?.detail || error.message);
+        alert("Failed to create product.");
+      } finally {
+        this.loading = false;
+      }
+    },
+    resetForm() {
+      this.product = {
+        ProductName: "",
+        CategoryID: null,
+        Quantity: 1,
+        UnitPrice: 0,
+        Stocks: [],
+      };
+    },
+  },
 };
 </script>
 
@@ -294,7 +319,28 @@ button:focus {
   box-shadow: 0 0 5px rgba(255, 50, 186, 0.5);
   outline: none;
 }
-
+.stock-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.stock-quantity {
+  width: 80px;
+}
+.add-stock-btn, .remove-stock-btn {
+  margin-top: 5px;
+  padding: 5px;
+  cursor: pointer;
+  border-color: #FF32BA;
+  box-shadow: 0 0 5px rgba(255, 50, 186, 0.5);
+  outline: none;
+  color: #f9f9f9;
+}
+.form-group button{
+  display: flex;
+  border-radius: 5px;
+  background-color: #E54F70;
+}
 .product-details select {
   font-size: 1rem;
   color: #333;

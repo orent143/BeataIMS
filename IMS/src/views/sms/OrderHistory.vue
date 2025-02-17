@@ -1,13 +1,10 @@
 <template>
-  <!-- Import Header component -->
   <Header />
-
   <Sidebar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="sales-header">Order History</h1>
       <div class="header-actions">
-        
         <div class="filter-container">
           <button class="filter-btn" @click="toggleFilterDropdown">
             <i class="fas fa-filter"></i>
@@ -15,323 +12,115 @@
           <div v-if="showFilterDropdown" class="dropdown">
             <select v-model="selectedStatus" class="filter-select" @change="filterOrders">
               <option value="">All Orders</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
             </select>
           </div>
         </div>
       </div>
     </div>
-      <div class="sales-container">
-        <div class="sales-table-container">
-          <table class="sales-table">
-            <thead>
-              <tr>
-                <th v-if="showCheckboxes">Select</th>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Table</th>
-                <th>Items</th>
-                <th>Total</th>
-                <th>Time</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="order in filteredOrders" 
-                  :key="order.id"
-                  @click="toggleItemSelection(order)"
-                  :class="{ selected: selectedItems.includes(order) }">
-                <td v-if="showCheckboxes">
-                  <input 
-                    type="checkbox"
-                    :checked="selectedItems.includes(order)"
-                    @click.stop
-                  />
-                </td>
-                <td>#{{ order.id }}</td>
-                <td>{{ order.customerName }}</td>
-                <td>{{ order.tableNumber }}</td>
-                <td>
-                  <ul>
-                    <li v-for="(item, index) in order.items" :key="index">
-                      {{ item.quantity }}x {{ item.name }}
-                    </li>
-                  </ul>
-                </td>
-                <td>₱{{ order.totalAmount }}</td>
-                <td>{{ formatTime(order.timestamp) }}</td>
-                <td>
-                  <span :class="'status status-' + order.status.toLowerCase().replace(/ /g, '-')">
-                    {{ order.status }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+    <div class="sales-container">
+      <div class="sales-table-container">
+        <table class="sales-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Table</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="order in filteredOrders" :key="order.order_id">
+              <td>#{{ order.order_id }}</td>
+              <td>{{ order.customer_name }}</td>
+              <td>{{ order.table_number }}</td>
+              <td>
+                <ul>
+                  <li v-for="(item, index) in order.items" :key="index">
+                    {{ item.quantity }}x {{ item.name }}
+                  </li>
+                </ul>
+              </td>
+              <td>₱{{ order.total_amount }}</td>
+              <td>{{ formatTime(order.order_date) }}</td>
+              <td>
+                <span :class="'status status-' + order.order_status.toLowerCase().replace(/ /g, '-')">
+                  {{ order.order_status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="totals-container">
+        <div class="totals-item">
+          <span>Total Orders:</span>
+          <span>{{ filteredOrders.length }}</span>
         </div>
-        <div class="totals-container">
-          <div class="totals-item">
-            <span>Total Orders:</span>
-            <span>{{ filteredOrders.length }}</span>
-          </div>
-          <div class="totals-item">
-            <span>Total Sales:</span>
-            <span>₱{{ totalSales }}</span>
-          </div>
+        <div class="totals-item">
+          <span>Total Sales:</span>
+          <span>₱{{ totalSales }}</span>
         </div>
       </div>
-    <button class="add-to-reports-btn" @click="addToReports">+</button>
+    </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
 import Sidebar from '@/components/sms/Sidebar.vue';
-import Header from '@/components/Header.vue';
+  import Header from '@/components/Header.vue';
 
-export default {
-  components: { Sidebar, Header },
+  export default {
+    components: {
+      Sidebar,
+      Header
+    },
   data() {
     return {
-      searchTerm: '',
+      orders: [],
       selectedStatus: '',
       showFilterDropdown: false,
-      showCheckboxes: false,
-      selectedItems: [],
-      orders: [
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        {
-          id: 1001,
-          customerName: 'John Doe',
-          tableNumber: 5,
-          timestamp: new Date(),
-          status: 'completed',
-          items: [
-            { name: 'Cappuccino', quantity: 2 },
-            { name: 'Croissant', quantity: 1 }
-          ],
-          totalAmount: '12.50'
-        },
-        
-        // ... your other orders
-      ]
     };
   },
   computed: {
     filteredOrders() {
-      return this.orders.filter(order => {
-        const matchesSearch = order.customerName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                            order.id.toString().includes(this.searchTerm);
-        const matchesStatus = !this.selectedStatus || order.status === this.selectedStatus;
-        const isCompletedOrCancelled = order.status === 'completed' || order.status === 'cancelled';
-        return matchesSearch && matchesStatus && isCompletedOrCancelled;
-      });
+      if (!this.selectedStatus) return this.orders;
+      return this.orders.filter(order => order.order_status === this.selectedStatus);
     },
     totalSales() {
-      return this.filteredOrders
-        .reduce((sum, order) => sum + parseFloat(order.totalAmount), 0)
-        .toFixed(2);
-    }
+      return this.filteredOrders.reduce((sum, order) => sum + order.total_amount, 0).toFixed(2);
+    },
   },
   methods: {
-    formatTime(timestamp) {
-      return new Date(timestamp).toLocaleTimeString();
+    async fetchOrders() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/ordersummary/orders/history');
+        this.orders = response.data;
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+      }
+    },
+    formatTime(datetime) {
+      return new Date(datetime).toLocaleString();
     },
     toggleFilterDropdown() {
       this.showFilterDropdown = !this.showFilterDropdown;
     },
     filterOrders() {
-      // Method kept for input handler
+      // No need for extra logic; computed property handles filtering
     },
-    toggleItemSelection(order) {
-      if (!this.showCheckboxes) return;
-      const index = this.selectedItems.indexOf(order);
-      if (index > -1) {
-        this.selectedItems.splice(index, 1);
-      } else {
-        this.selectedItems.push(order);
-      }
-    },
-    addToReports() {
-      this.showCheckboxes = !this.showCheckboxes;
-      
-      if (this.selectedItems.length > 0) {
-        const existingReports = JSON.parse(localStorage.getItem('orderReports') || '[]');
-        const newReports = this.selectedItems.map(item => ({
-          ...item,
-          dateAdded: new Date().toISOString()
-        }));
-        
-        const updatedReports = [...existingReports, ...newReports];
-        localStorage.setItem('orderReports', JSON.stringify(updatedReports));
-        
-        this.selectedItems = [];
-        this.showCheckboxes = false;
-        alert('Selected orders added to reports!');
-      } else if (this.showCheckboxes) {
-        return;
-      } else {
-        alert('Please select orders to add to reports.');
-      }
-    }
-  }
+  },
+  mounted() {
+    this.fetchOrders();
+  },
 };
 </script>
+
 
 <style scoped>
 .app-container {

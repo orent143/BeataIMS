@@ -1,20 +1,17 @@
 <template>
-  <!-- Import Header component -->
   <Header />
-
   <Sidebar />
 
   <div class="app-container">
     <div class="header-container">
       <h1 class="sales-header">Sales Report</h1>
       <div class="header-actions">
-
         <div class="filter-container">
           <button class="filter-btn" @click="toggleFilterDropdown">
             <i class="fas fa-filter"></i>
           </button>
           <div v-if="showFilterDropdown" class="dropdown">
-            <select v-model="selectedStatus" class="filter-select" @change="filterItems">
+            <select v-model="selectedStatus" class="filter-select">
               <option value="">All Statuses</option>
               <option value="Completed">Completed</option>
               <option value="Pending">Pending</option>
@@ -25,173 +22,110 @@
       </div>
     </div>
 
-      <div class="sales-container">
-        <div class="sales-table-container">
-          <table class="sales-table">
-            <thead>
-              <tr>
-                <th v-if="showCheckboxes">Select</th>
-                <th>Name</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Items Sold</th>
-                <th>Remitted</th>
-                <th>Item Left</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="sale in filteredItems" :key="sale.id" @click="toggleItemSelection(sale)" :class="{ selected: selectedItems.includes(sale) }">
-                <td v-if="showCheckboxes">
-                  <input type="checkbox" v-model="selectedItems" :value="sale" />
-                </td>
-                <td>{{ sale.name }}</td>
-                <td>{{ sale.quantity }}</td>
-                <td>₱{{ sale.unitPrice.toFixed(2) }}</td>
-                <td>{{ sale.itemsSold }}</td>
-                <td>₱{{ sale.remitted.toFixed(2) }}</td>
-                <td>{{ sale.itemLeft }}</td>
-                <td>
-                  <span :class="'status status-' + sale.status.toLowerCase().replace(/ /g, '-')">
-                    {{ sale.status }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <div class="sales-container">
+      <div class="sales-table-container" v-if="salesData.length">
+        <table class="sales-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Items Sold</th>
+              <th>Remitted</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="sale in salesData" :key="sale.name">
+              <td>{{ sale.name }}</td>
+              <td>{{ sale.quantity }}</td>
+              <td>₱{{ sale.unit_price.toFixed(2) }}</td>
+              <td>{{ sale.items_sold }}</td>
+              <td>₱{{ sale.remitted.toFixed(2) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-        <div class="totals-container">
-          <div class="totals-item">
-            <span>Total Items Sold:</span>
-            <span>{{ totalItemsSold }}</span>
-          </div>
-          <div class="totals-item">
-            <span>Total Sales:</span>
-            <span>₱{{ totalSales.toFixed(2) }}</span>
-          </div>
+      <div class="totals-container" v-if="salesData.length">
+        <div class="totals-item">
+          <span>Total Items Sold:</span>
+          <span>{{ totalItemsSold }}</span>
+        </div>
+        <div class="totals-item">
+          <span>Total Sales:</span>
+          <span>₱{{ totalSales.toFixed(2) }}</span>
         </div>
       </div>
 
-    <button class="add-to-reports-btn" @click="addToReports">+</button>
+      <div v-else class="loading">
+        <p>Loading sales data...</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import Sidebar from '@/components/sms/Sidebar.vue';
 import Header from '@/components/Header.vue';
+import axios from 'axios';
 
 export default {
-  components: {
-    Sidebar,
-    Header
-  },
+  components: { Sidebar, Header },
   data() {
     return {
-      searchTerm: '',
-      selectedStatus: '',
+      salesData: [],
       showFilterDropdown: false,
-      showCheckboxes: false, // New property to control checkbox visibility
-      selectedItems: [], // Track selected items for reporting
-      salesItems: [
-        { id: 1, name: 'Lemonade', quantity: 100, unitPrice: 50, itemsSold: 20, remitted: 1000, itemLeft: 80, status: 'Completed' },
-        { id: 2, name: 'Cappuccino', quantity: 150, unitPrice: 40, itemsSold: 50, remitted: 2000, itemLeft: 100, status: 'Pending' },
-        { id: 3, name: 'Espresso', quantity: 200, unitPrice: 30, itemsSold: 100, remitted: 3000, itemLeft: 100, status: 'Completed' },
-        { id: 4, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' },
-        { id: 5, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' },
-        { id: 1, name: 'Lemonade', quantity: 100, unitPrice: 50, itemsSold: 20, remitted: 1000, itemLeft: 80, status: 'Completed' },
-        { id: 2, name: 'Cappuccino', quantity: 150, unitPrice: 40, itemsSold: 50, remitted: 2000, itemLeft: 100, status: 'Pending' },
-        { id: 3, name: 'Espresso', quantity: 200, unitPrice: 30, itemsSold: 100, remitted: 3000, itemLeft: 100, status: 'Completed' },
-        { id: 4, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' },
-        { id: 5, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' },
-        { id: 1, name: 'Lemonade', quantity: 100, unitPrice: 50, itemsSold: 20, remitted: 1000, itemLeft: 80, status: 'Completed' },
-        { id: 2, name: 'Cappuccino', quantity: 150, unitPrice: 40, itemsSold: 50, remitted: 2000, itemLeft: 100, status: 'Pending' },
-        { id: 3, name: 'Espresso', quantity: 200, unitPrice: 30, itemsSold: 100, remitted: 3000, itemLeft: 100, status: 'Completed' },
-        { id: 4, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' },
-        { id: 5, name: 'Croissant', quantity: 250, unitPrice: 25, itemsSold: 150, remitted: 3750, itemLeft: 100, status: 'Cancelled' }
-      ],
-      filteredItems: []
+      selectedStatus: '',
     };
   },
   computed: {
     totalItemsSold() {
-      return this.filteredItems.reduce((sum, sale) => sum + sale.itemsSold, 0);
+      return this.salesData.reduce((sum, sale) => sum + sale.items_sold, 0);
     },
     totalSales() {
-      return this.filteredItems.reduce((sum, sale) => sum + sale.remitted, 0);
-    }
+      return this.salesData.reduce((sum, sale) => sum + (sale.items_sold * sale.unit_price), 0);
+    },
   },
   methods: {
-    toggleFilterDropdown() {
-      this.showFilterDropdown = !this.showFilterDropdown;
-    },
-    filterItems() {
-      let filtered = this.salesItems;
-
-      if (this.searchTerm) {
-        filtered = filtered.filter(item => item.name.toLowerCase().includes(this.searchTerm.toLowerCase()));
+    async fetchSalesData() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/sales/sales');
+        this.salesData = response.data;
+      } catch (error) {
+        console.error("Error fetching sales data:", error);
       }
-
-      if (this.selectedStatus) {
-        filtered = filtered.filter(item => item.status === this.selectedStatus);
-      }
-
-      this.filteredItems = filtered;
     },
-    addToReports() {
-    this.showCheckboxes = !this.showCheckboxes; // Toggle checkbox visibility
-    
-    if (this.selectedItems.length > 0) {
-      // Get existing reports or initialize empty array
-      const existingReports = JSON.parse(localStorage.getItem('salesReports') || '[]');
-      
-      // Add dateAdded to selected items
-      const newReports = this.selectedItems.map(item => ({
-        ...item,
-        dateAdded: new Date().toISOString()
-      }));
+    async updateSales(productId, quantitySold, remitted) {
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/api/sales/update', {
+      product_id: productId,
+      quantity_sold: quantitySold,
+      remitted: remitted
+    });
 
-      // Combine existing and new reports
-      const updatedReports = [...existingReports, ...newReports];
-      
-      // Save to localStorage
-      localStorage.setItem('salesReports', JSON.stringify(updatedReports));
-      
-      // Clear selection
-      this.selectedItems = [];
-      this.showCheckboxes = false;
-      
-      alert('Selected items added to reports!');
-    } else if (this.showCheckboxes) {
-      // If just toggling checkboxes, don't show alert
-      return;
-    } else {
-      alert('Please select items to add to reports.');
-    }
-  },
-
-  toggleItemSelection(sale) {
-    if (!this.showCheckboxes) return; // Only allow selection when checkboxes are shown
-    
-    const index = this.selectedItems.indexOf(sale);
-    if (index > -1) {
-      this.selectedItems.splice(index, 1);
-    } else {
-      this.selectedItems.push(sale);
-    }
+    console.log(response.data.message);
+  } catch (error) {
+    console.error("Error updating sales:", error.response.data.detail);
   }
 },
-  created() {
-    this.filterItems();
+    toggleFilterDropdown() {
+      this.showFilterDropdown = !this.showFilterDropdown;
+    }
   },
-  watch: {
-    searchTerm: 'filterItems',
-    selectedStatus: 'filterItems'
+  mounted() {
+    this.fetchSalesData();
   }
 };
 </script>
 
 <style scoped>
+/* Add any relevant styles for your table and layout here */
+.loading {
+  text-align: center;
+  margin-top: 20px;
+}
+
+
 .app-container {
   display: flex;
   flex-direction: column;
