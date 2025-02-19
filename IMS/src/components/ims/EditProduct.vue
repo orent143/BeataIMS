@@ -152,8 +152,8 @@ select {
 
 .add-item-btn {
   padding: 10px 20px;
-  background-color: #01a501f8;
-  color: rgb(0, 0, 0);
+  background-color: #E54F70;
+  color: #ffffff;
   border: none;
   border-radius: 10px;
   font-size: 14px;
@@ -163,7 +163,7 @@ select {
 }
 
 .add-item-btn:hover {
-  background-color: #00b32d;
+  background-color: #a33950;
 }
 
 .add-item-btn:focus {

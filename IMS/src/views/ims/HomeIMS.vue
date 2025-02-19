@@ -161,7 +161,7 @@ export default {
 }
 
 .products-header {
-  color: #000000;
+  color: #333;
   font-size: 30px;
   font-family: 'Arial', sans-serif;
   font-weight: 900;
@@ -215,22 +215,18 @@ export default {
 }
 
 .total-sales .card-icon {
-  background-color: #e3f2fd;
   color: #E54F70;
 }
 
 .total-products .card-icon {
-  background-color: #e8f5e9;
   color: #E54F70;
 }
 
 .low-stock .card-icon {
-  background-color: #fff3e0;
   color: #E54F70;
 }
 
 .top-selling .card-icon {
-  background-color: #f3e5f5;
   color: #E54F70;
 }
 

@@ -108,7 +108,7 @@ export default {
   }
   
   .item-price {
-    color: #FF32BA;
+    color: #E54F70;
     font-weight: bold;
   }
   

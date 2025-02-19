@@ -123,7 +123,7 @@ export default {
   
   .save-category-btn {
     padding: 10px 20px;
-    background-color: #01a501;
+    background-color: #E54F70;
     color: white;
     border: none;
     border-radius: 10px;
@@ -134,7 +134,7 @@ export default {
   }
   
   .save-category-btn:hover {
-    background-color: #00b32d;
+    background-color: #a33950;
   }
   
   .save-category-btn:focus {

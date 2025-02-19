@@ -224,7 +224,7 @@ export default {
   margin-bottom: 8px;
   font-size: 1rem;
   font-weight: 600;
-  color: #333;
+  color: #111111;
 }
 
 .form-input {
@@ -234,7 +234,7 @@ export default {
   border-radius: 6px;
   background-color: #f9f9f9;
   font-size: 1rem;
-  color: #333;
+  color: #f9f9f9;
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
@@ -257,7 +257,7 @@ textarea.form-input {
 }
 
 .submit-btn {
-  background: #FF32BA;
+  background: #E54F70;
   color: white;
   border: none;
   border-radius: 8px;
@@ -268,7 +268,7 @@ textarea.form-input {
 }
 
 .submit-btn:hover {
-  background-color: #e02c9b; /* Darker hover color */
+  background-color: #c0425d; /* Darker hover color */
 }
 
 .reset-btn {
@@ -331,7 +331,7 @@ button:focus {
   margin-top: 5px;
   padding: 5px;
   cursor: pointer;
-  border-color: #FF32BA;
+  border-color: #E54F70;
   box-shadow: 0 0 5px rgba(255, 50, 186, 0.5);
   outline: none;
   color: #f9f9f9;
@@ -339,6 +339,7 @@ button:focus {
 .form-group button{
   display: flex;
   border-radius: 5px;
+  color:#ffffff;
   background-color: #E54F70;
 }
 .product-details select {

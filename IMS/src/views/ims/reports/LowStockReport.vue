@@ -159,7 +159,7 @@ export default {
 }
 
 .products-header {
-  color: #000;
+  color: #333;
   font-size: 30px;
   font-family: 'Arial', sans-serif;
   font-weight: 900;

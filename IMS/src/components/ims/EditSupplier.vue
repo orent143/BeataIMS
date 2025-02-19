@@ -133,8 +133,8 @@ export default {
 }
 .update-btn {
   padding: 10px 20px;
-    background-color: #FF32BA;
-    color: #dbdbdb;
+    background-color: #E54F70;
+    color: #ffffff;
     border: none;
     border-radius: 10px;
     font-size: 14px;
@@ -144,7 +144,7 @@ export default {
 }
 
 .update-btn:hover {
-  background-color: #fc62c9;
+  background-color: #a33950;
 }
 
 .add-item-btn:focus {

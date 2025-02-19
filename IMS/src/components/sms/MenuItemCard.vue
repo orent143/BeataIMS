@@ -86,7 +86,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #FF32BA;
+    background-color: #E54F70;
     border-radius: 50%;
     color: white;
     font-size: 24px;
@@ -107,7 +107,7 @@ export default {
   }
   
   .price {
-    color: #FF32BA;
+    color: #E54F70;
     font-weight: bold;
     font-size: 1.1em;
     margin: 8px 0;
@@ -129,7 +129,7 @@ export default {
   
   .add-btn {
     flex: 1;
-    background: #FF32BA;
+    background: #E54F70;
     color: white;
     border: none;
     border-radius: 4px;

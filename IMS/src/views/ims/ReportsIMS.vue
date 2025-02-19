@@ -7,10 +7,7 @@
     <div class="header-container">
       <h1 class="products-header">Reports</h1>
       <div class="header-actions">
-        <div class="search-container">
-          <input type="text" v-model="searchTerm" placeholder="Search" class="search-bar" />
-          <i class="fas fa-search search-icon"></i>
-        </div>
+
       </div>
     </div>
     
@@ -105,7 +102,7 @@ export default {
 }
 
 .products-header {
-  color: #000000;
+  color: #333;
   font-size: 30px;
   font-family: 'Arial', sans-serif;
   font-weight: 900;

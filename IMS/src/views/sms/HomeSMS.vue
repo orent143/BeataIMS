@@ -21,7 +21,7 @@
   
         <div class="stats-grid">
           <div class="stat-card">
-            <i class="fas fa-shopping-cart stat-icon"></i>
+            <i class="pi pi-shopping-cart"></i>
             <div class="stat-info">
               <h3>Total Orders</h3>
               <p class="stat-value">{{ totalOrders }}</p>
@@ -29,7 +29,7 @@
           </div>
   
           <div class="stat-card">
-            <i class="fas fa-dollar-sign stat-icon"></i>
+            <i class="pi pi-dollar"></i>
             <div class="stat-info">
               <h3>Total Revenue</h3>
               <p class="stat-value">₱{{ totalRevenue }}</p>
@@ -37,7 +37,7 @@
           </div>
   
           <div class="stat-card">
-            <i class="fas fa-mug-hot stat-icon"></i>
+            <i class="pi pi-star-fil"></i>
             <div class="stat-info">
               <h3>Top Selling Item</h3>
               <p class="stat-value">{{ topSellingItem }}</p>
@@ -45,7 +45,7 @@
           </div>
   
           <div class="stat-card">
-            <i class="fas fa-users stat-icon"></i>
+            <i class="pi pi-user profile-icon"></i>
             <div class="stat-info">
               <h3>Total Customers</h3>
               <p class="stat-value">{{ totalCustomers }}</p>
@@ -170,7 +170,7 @@ import Header from '@/components/Header.vue';
 }
   
   .header {
-    color: #000000;
+    color: #333;
     font-size: 30px;
     font-family: 'Arial', sans-serif;
     font-weight: 900;
@@ -218,12 +218,11 @@ import Header from '@/components/Header.vue';
     align-items: center;
     gap: 15px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 24px;
+    color: #E54F70;
+
   }
   
-  .stat-icon {
-    font-size: 24px;
-    color: #FF32BA;
-  }
   
   .stat-info h3 {
     margin: 0;

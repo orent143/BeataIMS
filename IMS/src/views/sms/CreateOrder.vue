@@ -204,7 +204,12 @@ export default {
   margin-left: 18px;
   width: 95%;
 }
-  
+h1 {
+    color: #333;
+    font-size: 30px;
+    font-family: 'Arial', sans-serif;
+    font-weight: 900;
+  }
   .content-wrapper {
     display: grid;
     grid-template-columns: 1fr 400px;
@@ -269,7 +274,7 @@ export default {
   }
   
   .submit-btn {
-    background: #FF32BA;
+    background: #E54F70;
     color: white;
     border: none;
     border-radius: 4px;
