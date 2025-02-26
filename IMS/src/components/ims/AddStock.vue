@@ -110,15 +110,7 @@ export default {
 };
 </script>
 
-<style>
-/* Add styling as needed */
-.error {
-  color: red;
-}
-.success {
-  color: green;
-}
-</style>
+
 
 <style scoped>
 .popout-form {

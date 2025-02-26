@@ -122,7 +122,7 @@ input {
   padding: 10px;
   font-size: 14px;
   border-radius: 12px;
-  width: 100%;
+  width: 95%;
   border: 1px solid #ccc;
 }
 

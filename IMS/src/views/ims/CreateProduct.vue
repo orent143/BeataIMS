@@ -330,6 +330,7 @@ button:focus {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-bottom: 10px;
 }
 .stock-quantity {
   width: 80px;

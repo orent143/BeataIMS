@@ -61,6 +61,7 @@
         <p>Loading sales data...</p>
       </div>
     </div>
+    
   </div>
 </template>
 
@@ -159,19 +160,14 @@ export default {
 .sales-container {
   position: relative;
   flex-grow: 1;
-  height: 100%;
+  height: 37dvw;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+
   background-color: #ffffff;
   border-radius: 25px;
   overflow-y: auto;
   margin-left: 5px;
   padding: 0;
-}
-
-.sales-table-container {
-  overflow-y: auto;
-  flex-grow: 1;
-  max-height: calc(100vh - 150px);
 }
 
 .sales-table {
@@ -261,6 +257,8 @@ export default {
   border-bottom: 10px;
   font-family: 'Arial', sans-serif;
   font-size: 16px;
+  position: sticky;
+  bottom: 0;
 }
 
 .totals-item {

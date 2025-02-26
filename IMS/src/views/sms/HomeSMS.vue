@@ -6,7 +6,7 @@
 
     <div class="app-container">
       <div class="header-container">
-        <h1 class="header">Reports</h1>
+        <h1 class="header">Dashboard</h1>
         <div class="header-actions">
           <div class="date-range">
             <input type="date" v-model="startDate" class="date-input" />

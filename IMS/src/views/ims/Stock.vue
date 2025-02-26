@@ -170,17 +170,24 @@ export default {
       this.toggleEditForm();
     },
     async updateItem(updatedItem) {
-      const toast = useToast();
-      try {
-        await axios.put(`http://127.0.0.1:8000/api/stock/stocks/${updatedItem.StockID}/`, updatedItem);
-        await this.fetchStocks(); // Ensure fresh data
-        this.showEditForm = false;
-        toast.success('Stock updated successfully!');
-      } catch (error) {
-        console.error('Error updating stock:', error);
-        toast.error('Error updating stock.');
+    const toast = useToast();
+    try {
+      await axios.put(`http://127.0.0.1:8000/api/stock/stocks/${updatedItem.StockID}/`, updatedItem);
+      
+      // 🔄 **Update stock list locally instead of fetching all stocks again**
+      const index = this.stocks.findIndex(stock => stock.StockID === updatedItem.StockID);
+      if (index !== -1) {
+        this.stocks[index] = updatedItem;
       }
-    },
+      this.filteredItems = [...this.stocks]; // Refresh list
+      this.showEditForm = false;
+      
+      toast.success('Stock updated successfully!');
+    } catch (error) {
+      console.error('Error updating stock:', error);
+      toast.error('Error updating stock.');
+    }
+  },
     async removeItem(stockID) {
       const toast = useToast();
       try {
@@ -215,8 +222,8 @@ export default {
   .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 230px; /* Make space for sidebar, adjust as needed */
+  flex-grow: 1;
+  margin-left: 230px; 
   height: 100%; /* Full height of the page */
 }
 .header-container {
