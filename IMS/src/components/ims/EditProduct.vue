@@ -37,6 +37,7 @@
 
 <script>
 import axios from 'axios';
+import { useToast } from 'vue-toastification';
 
 export default {
   props: {
@@ -54,26 +55,27 @@ export default {
       this.$emit('close');
     },
     async updateProduct() {
-  try {
-    console.log("Updating product:", this.product);
+      const toast = useToast();
+      try {
+        console.log("Updating product:", this.product);
 
-    if (!this.product.id) {
-      throw new Error("Product ID is missing!");
+        if (!this.product.id) {
+          throw new Error("Product ID is missing!");
+        }
+
+        await axios.put(
+          `http://127.0.0.1:8000/api/inventory/inventoryproduct/${this.product.id}`,
+          this.product
+        );
+
+        this.$emit("update", { ...this.product }); // Emit updated product
+        toast.success("Product updated successfully!");
+        this.closeForm();
+      } catch (error) {
+        console.error("Error updating product:", error);
+        toast.error("Failed to update product");
+      }
     }
-
-    await axios.put(
-      `http://127.0.0.1:8000/api/inventory/inventoryproduct/${this.product.id}`,
-      this.product
-    );
-
-    this.$emit("update", { ...this.product }); // Emit updated product
-    alert("Product updated successfully!");
-    this.closeForm();
-  } catch (error) {
-    console.error("Error updating product:", error);
-    alert("Failed to update product");
-  }
-}
   },
   created() {
     // Fetch categories data

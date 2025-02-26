@@ -89,6 +89,7 @@ import AddStock from '@/components/ims/AddStock.vue';
 import EditStock from '@/components/ims/EditStock.vue';
 import SideBar from '@/components/ims/SideBar.vue';
 import Header from '@/components/Header.vue';
+import { useToast } from 'vue-toastification';
 
 export default {
   components: {
@@ -109,15 +110,23 @@ export default {
       showPopoutOptions: false
     };
   },
+  watch: {
+    selectedStatus() {
+      this.filterItems();
+    },
+    stocks() {
+      this.filterItems();
+    }
+  },
   methods: {
     async fetchStocks() {
-  try {
-    const response = await axios.get('http://127.0.0.1:8000/api/stock/');
-    this.stocks = response.data;
-    this.filteredItems = [...this.stocks]; // Refresh filtered list
-  } catch (error) {
-    console.error('Error fetching stocks:', error);
-  }
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/stock/');
+        this.stocks = response.data;
+        this.filteredItems = [...this.stocks]; // Refresh filtered list
+      } catch (error) {
+        console.error('Error fetching stocks:', error);
+      }
     },
     filterItems() {
       if (this.selectedStatus) {
@@ -139,6 +148,7 @@ export default {
       this.showPopoutOptions = !this.showPopoutOptions;
     },
     async addItem(newItem) {
+      const toast = useToast();
       try {
         await axios.post('http://127.0.0.1:8000/api/stock/stocks/', {
           StockName: newItem.StockName,
@@ -147,10 +157,12 @@ export default {
           SupplierID: newItem.SupplierID
         });
 
-        this.fetchStocks(); // 🔄 Refresh stocks
+        await this.fetchStocks(); // 🔄 Refresh stocks
         this.showAddForm = false;
+        toast.success('Stock added successfully!');
       } catch (error) {
         console.error('Error adding stock:', error);
+        toast.error('Error adding stock.');
       }
     },
     editItem(item) {
@@ -158,20 +170,26 @@ export default {
       this.toggleEditForm();
     },
     async updateItem(updatedItem) {
+      const toast = useToast();
       try {
         await axios.put(`http://127.0.0.1:8000/api/stock/stocks/${updatedItem.StockID}/`, updatedItem);
-        this.fetchStocks(); // 🔄 Refresh stocks after update
+        await this.fetchStocks(); // Ensure fresh data
         this.showEditForm = false;
+        toast.success('Stock updated successfully!');
       } catch (error) {
         console.error('Error updating stock:', error);
+        toast.error('Error updating stock.');
       }
     },
     async removeItem(stockID) {
+      const toast = useToast();
       try {
         await axios.delete(`http://127.0.0.1:8000/api/stock/stocks/${stockID}/`);
-        this.fetchStocks(); // 🔄 Refresh stocks after deletion
+        await this.fetchStocks(); // 🔄 Refresh stocks after deletion
+        toast.success('Stock removed successfully!');
       } catch (error) {
         console.error('Error removing stock:', error);
+        toast.error('Error removing stock.');
       }
     },
     addLowStock() {

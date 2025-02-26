@@ -35,6 +35,7 @@
 
 <script>
 import axios from "axios";
+import { useToast } from "vue-toastification";
 
 export default {
   props: {
@@ -43,10 +44,11 @@ export default {
   data() {
     return {
       name: "",
-      quantity: 1, // Default to 1 to prevent accidental empty submission
+      quantity: 1,
       unitPrice: 0,
       categoryId: null,
       categories: [],
+      toast: useToast(), // Initialize toast
     };
   },
   async created() {
@@ -69,33 +71,42 @@ export default {
       this.categoryId = null;
     },
     async submit() {
-  try {
-    const formData = new FormData();
-    formData.append("ProductName", this.name);
-    formData.append("Quantity", this.quantity);
-    formData.append("UnitPrice", this.unitPrice);
-    if (this.categoryId) {
-      formData.append("CategoryID", this.categoryId);
-    }
+      try {
+        const formData = new FormData();
+        formData.append("ProductName", this.name);
+        formData.append("Quantity", this.quantity);
+        formData.append("UnitPrice", this.unitPrice);
+        if (this.categoryId) {
+          formData.append("CategoryID", this.categoryId);
+        }
 
-    const response = await axios.post(
-      `http://127.0.0.1:8000/api/inventory/inventoryproduct/`,
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } } // Important for form data
-    );
+        const response = await axios.post(
+          `http://127.0.0.1:8000/api/inventory/inventoryproduct/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
 
-    console.log("Product added:", response.data);
-    this.$emit("add", response.data);
-    alert("Added successfully!");
-    setTimeout(() => {
-      this.closeForm();
-    }, 3000);
-  } catch (error) {
-    console.error("Error adding product:", error.response?.data || error);
-  }
-},
+        console.log("Product added:", response.data);
+        this.$emit("add", response.data);
+
+        // Show success toast
+        this.toast.success("Product added successfully!", {
+          timeout: 3000,
+        });
+
+        this.closeForm();
+      } catch (error) {
+        console.error("Error adding product:", error.response?.data || error);
+        
+        // Show error toast
+        this.toast.error("Failed to add product!", {
+          timeout: 3000,
+        });
+      }
+    },
   },
 };
+
 </script>
 
 <style scoped>

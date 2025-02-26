@@ -86,20 +86,20 @@
 
     <!-- Add or Edit Item Form -->
     <add-product
-  v-if="showAddForm"
-  :isVisible="showAddForm"
-  @close="toggleAddForm"
-  @add="addItem"
-/>
+      v-if="showAddForm"
+      :isVisible="showAddForm"
+      @close="toggleAddForm"
+      @add="addItem"
+    />
 
     <!-- Edit Item Form -->
     <edit-product
-  v-if="showEditForm"
-  :isVisible="showEditForm"
-  :itemToEdit="selectedItem"
-  @close="toggleEditForm"
-  @update="handleUpdateProduct"
-/>
+      v-if="showEditForm"
+      :isVisible="showEditForm"
+      :itemToEdit="selectedItem"
+      @close="toggleEditForm"
+      @update="handleUpdateProduct"
+    />
   </div>
 </template>
 
@@ -166,20 +166,20 @@ export default {
       }
     },
     addItem(newProduct) {
-    this.productItems.push(newProduct);
-    this.filterItems();
-    this.showAddForm = false; // Close the form
-  },
-  async fetchProductItems() {
-    try {
-      const response = await axios.get('http://127.0.0.1:8000/api/inventory/');
-      this.productItems = response.data;
+      this.productItems.push(newProduct);
       this.filterItems();
-    } catch (error) {
-      console.error('Error fetching product items:', error);
-    }
-  },
-  async removeItem(productId) {
+      this.showAddForm = false; // Close the form
+    },
+    async fetchProductItems() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/inventory/');
+        this.productItems = response.data;
+        this.filterItems();
+      } catch (error) {
+        console.error('Error fetching product items:', error);
+      }
+    },
+    async removeItem(productId) {
       try {
         await axios.delete(`http://127.0.0.1:8000/api/inventory/inventoryproduct/${productId}`);
         this.productItems = this.productItems.filter(item => item.id !== productId);
@@ -189,35 +189,35 @@ export default {
       }
     },
 
-async handleUpdateProduct(updatedProduct) {
-  try {
-    console.log("Updating product in parent:", updatedProduct);
+    async handleUpdateProduct(updatedProduct) {
+      try {
+        console.log("Updating product in parent:", updatedProduct);
 
-    await axios.put(
-      `http://127.0.0.1:8000/api/inventory/inventoryproduct/${updatedProduct.id}`,
-      updatedProduct
-    );
+        await axios.put(
+          `http://127.0.0.1:8000/api/inventory/inventoryproduct/${updatedProduct.id}`,
+          updatedProduct
+        );
 
-    // Ensure the product list updates properly
-    const index = this.productItems.findIndex(
-      (item) => item.id === updatedProduct.id
-    );
-    if (index !== -1) {
-      this.productItems[index] = { ...updatedProduct };
-      this.productItems = [...this.productItems]; // Force Vue to detect changes
+        // Ensure the product list updates properly
+        const index = this.productItems.findIndex(
+          (item) => item.id === updatedProduct.id
+        );
+        if (index !== -1) {
+          this.productItems[index] = { ...updatedProduct };
+          this.productItems = [...this.productItems]; // Force Vue to detect changes
+        }
+
+        this.filterItems();
+        this.showEditForm = false;
+      } catch (error) {
+        console.error("Error updating product:", error);
+      }
+    },
+    editItem(product) {
+      console.log("Editing product:", product); // Debugging log
+      this.selectedItem = { ...product };
+      this.showEditForm = true;
     }
-
-    this.filterItems();
-    this.showEditForm = false;
-  } catch (error) {
-    console.error("Error updating product:", error);
-  }
-},
-editItem(product) {
-  console.log("Editing product:", product); // Debugging log
-  this.selectedItem = { ...product };
-  this.showEditForm = true;
-}
 
   },
 
@@ -237,8 +237,6 @@ editItem(product) {
   }
 };
 </script>
-
-
 
 <style scoped>
 /* General Styling */

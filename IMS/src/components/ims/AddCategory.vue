@@ -19,6 +19,7 @@
 
 <script>
 import axios from 'axios';
+import { useToast } from 'vue-toastification';
 
 export default {
   props: {
@@ -36,29 +37,30 @@ export default {
       this.$emit('close'); 
     },
     async submitForm() {
-  if (!this.newCategory.CategoryName) {
-    alert("Category Name is required!");
-    return;
-  }
+      const toast = useToast();
+      if (!this.newCategory.CategoryName) {
+        alert("Category Name is required!");
+        return;
+      }
 
-  try {
-    const response = await axios.post(
-      'http://127.0.0.1:8000/api/categories/categories/',  // ✅ Check this URL
-      new URLSearchParams({ CategoryName: this.newCategory.CategoryName }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } } // ✅ Fix content type
-    );
+      try {
+        const response = await axios.post(
+          'http://127.0.0.1:8000/api/categories/categories/',  // ✅ Check this URL
+          new URLSearchParams({ CategoryName: this.newCategory.CategoryName }),
+          { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } } // ✅ Fix content type
+        );
 
-    this.$emit('add', response.data); 
-    this.closeForm();
-  } catch (error) {
-    console.error("Error adding category:", error.response?.data || error);
-  }
-}
-
+        toast.success('Category added successfully!');
+        this.$emit('add', response.data); 
+        this.closeForm();
+      } catch (error) {
+        toast.error('Error adding category.');
+        console.error("Error adding category:", error.response?.data || error);
+      }
+    }
   }
 };
 </script>
-
 
 <style scoped>
 .popout-form {

@@ -31,7 +31,6 @@
             </select>
           </div>
 
-          <!-- Multiple Stock Selection -->
           <div class="form-group">
             <label>Stocks (Optional, Add Multiple)</label>
             <div v-for="(stockEntry, index) in product.Stocks" :key="index" class="stock-entry">
@@ -47,8 +46,7 @@
             <button @click="addStock" class="add-btn">Add Another Stock</button>
           </div>
         </div>
-        
-        <!-- Product Summary -->
+
         <div class="summary-section">
           <h2>Product Summary</h2>
           <div class="summary-details">
@@ -80,6 +78,7 @@
 import axios from 'axios';
 import SideBar from '@/components/ims/SideBar.vue';
 import Header from '@/components/Header.vue';
+import { useToast } from 'vue-toastification';
 
 export default {
   components: { SideBar, Header },
@@ -96,6 +95,7 @@ export default {
       stocks: [],
       loading: false,
       errorMessage: "",
+      toast: useToast(), // Initialize Toast
     };
   },
   computed: {
@@ -127,21 +127,25 @@ export default {
           this.stocks = response.data.stocks;
           console.log("Categories fetched:", this.categories);
           console.log("Stocks fetched:", this.stocks);
+          this.toast.success("Categories and Stocks loaded successfully!");
         } else {
           throw new Error("Invalid response structure");
         }
       } catch (error) {
         console.error('Error fetching prepopulate data:', error.response?.data?.detail || error.message);
         this.errorMessage = "Failed to fetch categories and stocks.";
+        this.toast.error("Failed to fetch categories and stocks.");
       } finally {
         this.loading = false;
       }
     },
     addStock() {
       this.product.Stocks.push({ StockID: null, StockQuantity: 1 });
+      this.toast.info("New stock entry added.");
     },
     removeStock(index) {
       this.product.Stocks.splice(index, 1);
+      this.toast.warning("Stock entry removed.");
     },
     async submitProduct() {
       this.loading = true;
@@ -153,16 +157,18 @@ export default {
         formData.append("UnitPrice", this.product.UnitPrice);
         formData.append("Stocks", JSON.stringify(this.product.Stocks));
 
+        console.log("Submitting product:", this.product);
+
         const response = await axios.post("http://127.0.0.1:8000/api/createproduct/products/", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
-        alert("Product created successfully!");
+        this.toast.success("Product created successfully!");
         console.log("Product created:", response.data);
         this.resetForm();
       } catch (error) {
         console.error("Error creating product:", error.response?.data?.detail || error.message);
-        alert("Failed to create product.");
+        this.toast.error(error.response?.data?.detail || "Failed to create product.");
       } finally {
         this.loading = false;
       }
@@ -175,6 +181,7 @@ export default {
         UnitPrice: 0,
         Stocks: [],
       };
+      this.toast.info("Form reset.");
     },
   },
 };
@@ -234,7 +241,7 @@ export default {
   border-radius: 6px;
   background-color: #f9f9f9;
   font-size: 1rem;
-  color: #f9f9f9;
+  color: #333;
   transition: all 0.3s ease;
   box-sizing: border-box;
 }

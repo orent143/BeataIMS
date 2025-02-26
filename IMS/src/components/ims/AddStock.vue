@@ -25,8 +25,8 @@
         <select v-model="newItem.SupplierID" id="supplier" class="form-control" required>
           <option value="" disabled>Select Supplier</option>
           <option v-for="supplier in suppliers" :key="supplier.SupplierID" :value="supplier.SupplierID">
-  {{ supplier.SupplierName }}
-</option>
+            {{ supplier.SupplierName }}
+          </option>
         </select>
       </div>
 
@@ -41,8 +41,10 @@
     <p v-if="successMessage" class="success">{{ successMessage }}</p>
   </div>
 </template>
+
 <script>
 import axios from "axios";
+import { useToast } from 'vue-toastification';
 
 export default {
   props: ["isVisible"],
@@ -62,17 +64,18 @@ export default {
   },
   methods: {
     async fetchSuppliers() {
-  try {
-    const response = await axios.get('http://127.0.0.1:8000/api/suppliers/');
-    this.suppliers = response.data.map(supplier => ({
-      SupplierID: supplier.id,  // Ensure the key names match
-      SupplierName: supplier.suppliername
-    }));
-  } catch (error) {
-    console.error("Error fetching suppliers:", error);
-  }
-},
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/suppliers/');
+        this.suppliers = response.data.map(supplier => ({
+          SupplierID: supplier.id,  // Ensure the key names match
+          SupplierName: supplier.suppliername
+        }));
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+      }
+    },
     async submitForm() {
+      const toast = useToast();
       this.loading = true;
       this.errorMessage = "";
       this.successMessage = "";
@@ -86,10 +89,12 @@ export default {
         }));
 
         this.successMessage = "Stock added successfully!";
+        toast.success(this.successMessage);
         this.$emit("update-parent");
         this.$emit("close");
       } catch (error) {
         this.errorMessage = "Error adding stock.";
+        toast.error(this.errorMessage);
         console.error("Error adding stock:", error);
       } finally {
         this.loading = false;
@@ -104,7 +109,6 @@ export default {
   }
 };
 </script>
-
 
 <style>
 /* Add styling as needed */
@@ -217,5 +221,4 @@ select {
 .add-item-btn:focus {
   outline: none;
 }
-
 </style>
