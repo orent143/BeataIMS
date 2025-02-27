@@ -20,11 +20,15 @@
             />
           </div>
           <div class="profile">
-            <i class="pi pi-bell notification-icon"></i> <!-- Notification Icon -->
-            <router-link to="/">
-              <i class="pi pi-user profile-icon"></i> <!-- Profile Icon -->
-            </router-link>
+          <i class="pi pi-bell notification-icon"></i> 
+          <div class="profile-dropdown">
+            <i class="pi pi-user profile-icon" @mouseenter="showDropdown = true"></i> 
+            <div v-if="showDropdown" class="dropdown-menu" @mouseleave="showDropdown = false">
+              <router-link to="/profile" class="dropdown-item">View Profile</router-link>
+              <router-link to="/"  class="dropdown-item logout" @click="logout">Logout</router-link>
+            </div>
           </div>
+        </div>
         </div>
       </div>
     </header>
@@ -44,7 +48,9 @@
     },
     data() {
       return {
-        localSearchQuery: this.searchQuery // Local copy of the search query
+        localSearchQuery: this.searchQuery, // Local copy of the search query
+        showDropdown: false
+
       };
     },
     methods: {
@@ -131,6 +137,12 @@
     font-size: 17px; /* Font size for the profile icon */
   }
   
+  .profile {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+}
   .profile-icon {
     margin-right: 10px; /* Spacing between notification icon and profile icon */
     color: #333; /* Color for the profile icon */
@@ -138,6 +150,41 @@
     font-size: 17px; /* Font size for the profile icon */
   }
   
+  .profile-dropdown {
+  position: relative;
+}
+.dropdown-menu {
+  position: absolute;
+  top: 35px;
+  right: 0;
+  background: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.dropdown-item {
+  padding: 10px;
+  text-align: left;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.dropdown-item:hover {
+  background: #f0f0f0;
+}
+
+.logout {
+  color: red;
+  font-weight: bold;
+}
+
   .search-bar input {
     padding: 8px 30px 8px 30px; /* Adjust padding */
     border: 1px solid #94949400; /* Border for the input */

@@ -22,15 +22,18 @@ import ReportsSms from '@/views/sms/ReportsSMS.vue';
 import SalesReportSMS from '@/views/sms/reports/salesreport.vue';
 import HistoryReportSMS from '@/views/sms/reports/historyreport.vue';
 
-
 //admin
 import Dashboard from '@/views/admin/Dashboard.vue';
 import Users from '@/views/admin/Users.vue';
 
 import Welcome from '@/views/Welcome.vue'; // Import the Welcome page
+import Login from '@/views/Login.vue'; // Import the Login page
+import Profile from '@/views/Profile.vue'; // Import the Profile page
 
 const routes = [
   { path: '/', component: Welcome }, // Set the root path to the Welcome page
+  { path: '/login', component: Login }, // Add the login route
+  { path: '/profile', component: Profile }, // Add the login route
   { path: '/homeims', component: HomeIMS },
   { path: '/inventoryims', component: InventoryIMS },
   { path: '/stocks', component: StockVue },

@@ -26,6 +26,10 @@
             <i class="fas fa-chart-line"></i>
             Admin
           </button>
+          <button @click="goToLogin" class="login-btn">
+            <i class="fas fa-sign-in-alt"></i>
+            Login
+          </button>
         </div>
       </div>
     </header>
@@ -70,6 +74,9 @@ export default {
     },
     goToADMIN() {
       this.$router.push("/dashboard");
+    },
+    goToLogin() {
+      this.$router.push("/login");
     },
   },
 };

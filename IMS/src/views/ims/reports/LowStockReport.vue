@@ -48,7 +48,7 @@
       <div class="totals-container">
         <div class="totals-item">
           <span>Report Date: </span>
-          <span>{{ reportData.date }}</span>
+          <span>{{formatDate (reportData.date) }}</span>
         </div>
         <div class="totals-item">
           <span>Total Items: </span>
