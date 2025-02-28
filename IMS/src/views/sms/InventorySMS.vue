@@ -447,7 +447,7 @@ editItem(product) {
 .floating-btn {
   width: 35px;
   height: 35px;
-  background-color: #4CAF50;
+  background-color: #E54F70;
   color: #0000009d;
   border: none;
   border-radius: 50%;
@@ -461,7 +461,7 @@ editItem(product) {
 }
 
 .floating-btn:hover {
-  background-color: #FF32BA;
+  background-color: #ed9598;
 }
 
 /* Popout Options */

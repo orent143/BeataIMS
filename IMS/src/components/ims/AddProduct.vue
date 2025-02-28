@@ -4,7 +4,7 @@
       <h2>Add Product</h2>
       <button class="close-btn" @click="closeForm">x</button>
     </div>
-    <form @submit.prevent="submit" class="form-container">
+    <form @submit.prevent="confirmAndSubmit" class="form-container">
       <div class="form-group">
         <label for="name">Item Name</label>
         <input id="name" v-model="name" placeholder="Item Name" required />
@@ -70,6 +70,11 @@ export default {
       this.unitPrice = 0;
       this.categoryId = null;
     },
+    async confirmAndSubmit() {
+      if (window.confirm("Are you sure you want to add this product?")) {
+        this.submit();
+      }
+    },
     async submit() {
       try {
         const formData = new FormData();
@@ -106,7 +111,6 @@ export default {
     },
   },
 };
-
 </script>
 
 <style scoped>

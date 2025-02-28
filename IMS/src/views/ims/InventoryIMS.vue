@@ -79,7 +79,7 @@
         <button class="floating-btn" @click="togglePopoutOptions">+</button>
         <div v-if="showPopoutOptions" class="popout-options">
           <button class="popout-option" @click="addLowStock">Add Low Stock</button>
-          <button class="popout-option" @click="addSummary">Add Summary</button>
+          <button class="popout-option" @click="postInventorySummary">Add Summary</button>
         </div>
       </div>
     </div>
@@ -109,6 +109,7 @@ import SideBar from '@/components/ims/SideBar.vue';
 import AddProduct from '@/components/ims/AddProduct.vue';
 import EditProduct from '@/components/ims/EditProduct.vue';
 import Header from '@/components/Header.vue';
+import { useToast } from 'vue-toastification';
 
 export default {
   components: { AddProduct, EditProduct, SideBar, Header },
@@ -127,6 +128,7 @@ export default {
       isLowStockMode: false,
       currentDate: new Date().toISOString().split('T')[0],
       inventorySummaries: [],
+      toast: useToast(), // Initialize toast
     };
   },
 
@@ -217,8 +219,22 @@ export default {
       console.log("Editing product:", product); // Debugging log
       this.selectedItem = { ...product };
       this.showEditForm = true;
-    }
+    },
+    async postInventorySummary() {
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/api/inventory/inventorysummary');
+        
+        let savedReports = JSON.parse(localStorage.getItem("inventorySummaries")) || [];
+        savedReports.push(response.data);
 
+        localStorage.setItem("inventorySummaries", JSON.stringify(savedReports));
+
+        this.toast.success("Inventory summary posted successfully!");
+      } catch (error) {
+        console.error("Error posting inventory summary:", error);
+        this.toast.error("Failed to post inventory summary.");
+      }
+    },
   },
 
   created() {
@@ -237,6 +253,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 /* General Styling */
@@ -445,7 +462,7 @@ export default {
 .floating-btn {
   width: 35px;
   height: 35px;
-  background-color: #4CAF50;
+  background-color: #E54F70;
   color: #0000009d;
   border: none;
   border-radius: 50%;
@@ -459,7 +476,7 @@ export default {
 }
 
 .floating-btn:hover {
-  background-color: #FF32BA;
+  background-color: #ed9598;
 }
 
 /* Popout Options */

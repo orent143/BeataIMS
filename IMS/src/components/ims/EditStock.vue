@@ -4,7 +4,7 @@
       <h2>Edit Stock Item</h2>
       <button @click="closeForm" class="close-btn">x</button>
     </div>
-    <form @submit.prevent="submitForm" class="form-container">
+    <form @submit.prevent="confirmAndSubmit" class="form-container">
       <div class="form-group">
         <label for="name">Name:</label>
         <input v-model="editedItem.StockName" id="name" type="text" placeholder="Item Name" required />
@@ -72,6 +72,11 @@ export default {
     },
     closeForm() {
       this.$emit("close");
+    },
+    async confirmAndSubmit() {
+      if (window.confirm("Are you sure you want to edit this stock?")) {
+        this.submitForm();
+      }
     },
     async submitForm() {
       const toast = useToast();

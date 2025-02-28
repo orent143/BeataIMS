@@ -1,85 +1,86 @@
 <template>
-  <!-- Import Header component -->
   <Header />
-
   <SideBar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Reports</h1>
-      <div class="header-actions">
+    </div>
 
+    <div class="report-cards">
+      <!-- Summary Report Card -->
+      <div class="report-card" @click="goToReport('summary')">
+        <div class="report-card-header">
+          <i class="fas fa-chart-line report-icon"></i>
+          <h3>Summary Report</h3>
+        </div>
+        <div class="report-card-body">
+          <p>Overview of all inventory reports and metrics</p>
+          <div class="report-stats">
+            <span>Total Reports: {{ totalSummaryReports }}</span>
+            <span>Total Amount: ₱{{ totalSummaryAmount }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Low Stock Report Card -->
+      <div class="report-card" @click="goToReport('lowStock')">
+        <div class="report-card-header">
+          <i class="fas fa-box report-icon"></i>
+          <h3>Low Stock Report</h3>
+        </div>
+        <div class="report-card-body">
+          <p>Displays items with low stock levels.</p>
+          <div class="report-stats">
+            <span>Total Reports: {{ totalLowStockReports }}</span>
+            <span>Total Amount: ₱{{ totalLowStockAmount }}</span>
+          </div>
+        </div>
       </div>
     </div>
-    
-      <div class="report-cards">
-        <!-- Summary Report Card -->
-        <div class="report-card" @click="goToReport('summary')">
-          <div class="report-card-header">
-            <i class="fas fa-chart-line report-icon"></i>
-            <h3>Summary Report</h3>
-          </div>
-          <div class="report-card-body">
-            <p>Overview of all inventory reports and metrics</p>
-            <div class="report-stats">
-              <span>Total Reports: {{ summaryReports.length }}</span>
-              <span>Total Amount: ₱{{ calculateTotalSummary() }}</span>
-            </div>
-          </div>
-        </div>
-  
-        <!-- Low Stock Report Card -->
-        <div class="report-card" @click="goToReport('lowStock')">
-          <div class="report-card-header">
-            <i class="fas fa-box report-icon"></i>
-            <h3>Low Stock Report</h3>
-          </div>
-          <div class="report-card-body">
-            <p>Displays items with low stock levels.</p>
-            <div class="report-stats">
-              <span>Total Reports: {{ lowStockReports.length }}</span>
-              <span>Total Amount: ₱{{ calculateTotalLowStock() }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
 import SideBar from '@/components/ims/SideBar.vue';
-import Header from '@/components/Header.vue'; // Import Header component
+import Header from '@/components/Header.vue';
 
 export default {
   components: { SideBar, Header },
   data() {
     return {
-      searchTerm: '',
-      summaryReports: [], // Will store summary reports
-      lowStockReports: [] // Will store low stock reports
+      totalSummaryReports: 0,
+      totalSummaryAmount: 0,
+      totalLowStockReports: 0,
+      totalLowStockAmount: 0
     };
   },
   methods: {
+    async fetchReportData() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/reports/inventory_report');
+        const report = response.data;
+
+        this.totalSummaryReports = report.total_items;
+        this.totalSummaryAmount = parseFloat(report.total_value).toFixed(2);
+
+        // Count low stock items
+      } catch (error) {
+        console.error('Error fetching report data:', error);
+      }
+    },
     goToReport(reportType) {
-      this.$router.push(`/reportsims/${reportType}`);
-    },
-    calculateTotalSummary() {
-      return this.summaryReports.reduce((sum, report) => sum + parseFloat(report.amount), 0).toFixed(2);
-    },
-    calculateTotalLowStock() {
-      return this.lowStockReports.reduce((sum, report) => sum + parseFloat(report.value), 0).toFixed(2);
+      const reportRoutes = {
+        summary: '/reportsims/summary',
+        lowStock: '/reportsims/lowStock'
+      };
+      if (reportRoutes[reportType]) {
+        this.$router.push(reportRoutes[reportType]);
+      }
     }
   },
   created() {
-    // Load reports from localStorage or API (example placeholder)
-    const savedSummaryReports = localStorage.getItem('summaryReports');
-    const savedLowStockReports = localStorage.getItem('lowStockReports');
-
-    if (savedSummaryReports) {
-      this.summaryReports = JSON.parse(savedSummaryReports);
-    }
-    if (savedLowStockReports) {
-      this.lowStockReports = JSON.parse(savedLowStockReports);
-    }
+    this.fetchReportData(); // Fetch data when component is created
   }
 };
 </script>

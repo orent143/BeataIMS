@@ -4,7 +4,7 @@
       <h2>Edit Product</h2>
       <button class="close-btn" @click="closeForm">x</button>
     </div>
-    <form @submit.prevent="updateProduct" class="form-container">
+    <form @submit.prevent="confirmAndSubmit" class="form-container">
       <!-- Form content -->
       <div class="form-group">
         <label for="name">Item Name</label>
@@ -12,7 +12,7 @@
       </div>
       <div class="form-group">
         <label for="quantity">Quantity</label>
-        <input id="quantity" v-model="product.Quantity" type="number" placeholder="Quantity" required min="1" />
+        <input id="quantity" v-model="product.Quantity" type="number" placeholder="Quantity" required min="1" @input="updateStatus" />
       </div>
 
       <div class="form-group">
@@ -54,6 +54,20 @@ export default {
     closeForm() {
       this.$emit('close');
     },
+    async confirmAndSubmit() {
+      if (window.confirm("Are you sure you want to edit this product?")) {
+        this.updateProduct();
+      }
+    },
+    updateStatus() {
+      if (this.product.Quantity === 0) {
+        this.product.Status = 'Out of Stock';
+      } else if (this.product.Quantity <= 10) {
+        this.product.Status = 'Low Stock';
+      } else {
+        this.product.Status = 'In Stock';
+      }
+    },
     async updateProduct() {
       const toast = useToast();
       try {
@@ -85,6 +99,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 .popout-form {

@@ -4,7 +4,7 @@
       <h2>Add Supplier</h2>
       <button @click="closeForm" class="close-btn">x</button>
     </div>
-    <form @submit.prevent="submitForm" class="form-container">
+    <form @submit.prevent="confirmAndSubmit" class="form-container">
       <!-- First Row -->
       <div class="form-group">
         <label for="suppliername">Name:</label>
@@ -49,6 +49,11 @@ export default {
   methods: {
     closeForm() {
       this.$emit('close');
+    },
+    async confirmAndSubmit() {
+      if (window.confirm("Are you sure you want to add this supplier?")) {
+        this.submitForm();
+      }
     },
     async submitForm() {
       const toast = useToast();

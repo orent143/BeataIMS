@@ -66,7 +66,7 @@
 
           <div class="form-actions">
             <button type="button" @click="resetForm" class="reset-btn">Reset</button>
-            <button type="button" @click="submitProduct" class="submit-btn">Create Product</button>
+            <button type="button" @click="confirmAndSubmit" class="submit-btn">Create Product</button>
           </div>
         </div>
       </div>
@@ -146,6 +146,11 @@ export default {
     removeStock(index) {
       this.product.Stocks.splice(index, 1);
       this.toast.warning("Stock entry removed.");
+    },
+    async confirmAndSubmit() {
+      if (window.confirm("Are you sure you want to create this product?")) {
+        this.submitProduct();
+      }
     },
     async submitProduct() {
       this.loading = true;

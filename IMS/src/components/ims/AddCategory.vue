@@ -4,7 +4,7 @@
       <h2>Add Category</h2>
       <button @click="closeForm" class="close-btn">x</button>
     </div>
-    <form @submit.prevent="submitForm" class="form-container">
+    <form @submit.prevent="confirmAndSubmit" class="form-container">
       <div class="form-group">
         <label for="categoryName">Category Name:</label>
         <input v-model="newCategory.CategoryName" id="categoryName" type="text" placeholder="Category Name" required />
@@ -35,6 +35,11 @@ export default {
   methods: {
     closeForm() {
       this.$emit('close'); 
+    },
+    async confirmAndSubmit() {
+      if (window.confirm("Are you sure you want to add this category?")) {
+        this.submitForm();
+      }
     },
     async submitForm() {
       const toast = useToast();

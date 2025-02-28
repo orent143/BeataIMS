@@ -4,7 +4,7 @@
       <h2>Add Stock</h2>
       <button @click="closeForm" class="close-btn">x</button>
     </div>
-    <form @submit.prevent="submitForm" class="form-container">
+    <form @submit.prevent="confirmAndSubmit" class="form-container">
       <!-- First Row -->
       <div class="form-group">
         <label for="name">Name:</label>
@@ -72,6 +72,11 @@ export default {
         }));
       } catch (error) {
         console.error("Error fetching suppliers:", error);
+      }
+    },
+    async confirmAndSubmit() {
+      if (window.confirm("Are you sure you want to add this stock?")) {
+        this.submitForm();
       }
     },
     async submitForm() {

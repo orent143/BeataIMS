@@ -4,7 +4,7 @@
       <h2>Edit Category</h2>
       <button @click="closeForm" class="close-btn">x</button>
     </div>
-    <form @submit.prevent="submitForm" class="form-container">
+    <form @submit.prevent="confirmAndSubmit" class="form-container">
       <div class="form-group">
         <label for="categoryName">Category Name:</label>
         <input v-model="editedCategory.CategoryName" id="categoryName" type="text" placeholder="Category Name" required />
@@ -30,6 +30,11 @@ export default {
     };
   },
   methods: {
+    async confirmAndSubmit() {
+      if (window.confirm("Are you sure you want to edit this category?")) {
+        this.submitForm();
+      }
+    },
     async submitForm() {
       const toast = useToast();
       try {

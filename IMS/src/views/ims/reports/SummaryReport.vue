@@ -1,178 +1,154 @@
 <template>
-  <!-- Import Header component -->
   <Header />
-
   <SideBar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Summary Reports</h1>
       <div class="header-actions">
+        <input 
+          type="date" 
+          v-model="selectedDate" 
+          class="date-picker" 
+          @change="fetchInventoryReport"
+          :max="currentDate"
+        />
         <button class="export-btn" @click="exportSummary">Export CSV</button>
-        <div class="search-container">
-          <input
-            type="text"
-            v-model="searchTerm"
-            placeholder="Search summaries"
-            class="search-bar"
-          />
-          <i class="fas fa-search search-icon"></i>
-        </div>
-        <div class="filter-container">
-          <button class="filter-btn" @click="toggleFilterDropdown">
-            <i class="fas fa-filter"></i>
-          </button>
-          <div v-if="showFilterDropdown" class="dropdown">
-            <select v-model="selectedDate" class="filter-select">
-              <option value="">All Dates</option>
-              <option v-for="date in availableDates" :key="date" :value="date">
-                {{ formatDate(date) }}
-              </option>
-            </select>
-          </div>
-        </div>
       </div>
     </div>
 
-      <div class="inventory-container">
-        <div class="table-container">
-          <table class="stock-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Category</th>
-                <th>Supplier</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <template v-for="summary in filteredSummaries" :key="summary.id">
-                <tr v-for="product in summary.products" :key="product.id">
-                  <td>{{ product.name }}</td>
-                  <td>{{ product.quantity }}</td>
-                  <td>₱{{ product.unitPrice }}</td>
-                  <td>{{ product.category }}</td>
-                  <td>{{ product.supplier }}</td>
-                  <td>
-                    <span :class="'status status-' + product.status.toLowerCase().replace(/ /g, '-')">
-                      {{ product.status }}
-                    </span>
-                  </td>                
-                </tr>
-                <tr class="summary-spacer">
-                  <td colspan="6"></td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-        </div>
+    <div class="inventory-container">
+      <div class="table-container">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="product in filteredInventory" :key="product.ProductID">
+              <td>{{ product.ProductName }}</td>
+              <td>{{ product.Quantity }}</td>
+              <td>₱{{ parseFloat(product.UnitPrice).toFixed(2) }}</td>
+              <td>
+                <span :class="'status status-' + product.Status.toLowerCase().replace(' ', '-')">
+                  {{ product.Status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-        <div class="totals-container">
-          <div class="totals-item">
-            <span>Report Date:</span>
-            <span>{{ formatDate(selectedDate) || 'All Dates' }}</span>
-          </div>
-          <div class="totals-item">
-            <span>Total Items:</span>
-            <span>{{ totalItems }}</span>
-          </div>
-          <div class="totals-item">
-            <span>Total Value:</span>
-            <span>₱{{ totalValue.toFixed(2) }}</span>
-          </div>
+      <!-- Wrap totals in a separate div -->
+      <div class="totals-container">
+        <div class="totals-item">
+          <span>Report Date: </span>
+          <span>{{ formatDate(reportData.date) }}</span>
+        </div>
+        <div class="totals-item">
+          <span>Total Items: </span>
+          <span>{{ reportData.total_items }}</span>
+        </div>
+        <div class="totals-item">
+          <span>Total Value: </span>
+          <span>₱{{ parseFloat(reportData.total_value).toFixed(2) }}</span>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
+
 <script>
-import SideBar from '@/components/ims/SideBar.vue'; // Import Sidebar component
-import Header from '@/components/Header.vue'; // Import Header component
+import SideBar from "@/components/ims/SideBar.vue";
+import Header from "@/components/Header.vue";
+import axios from "axios";
 
 export default {
   components: {
     SideBar,
-    Header
+    Header,
   },
-  name: 'SummaryReport',
+  name: "SummaryReport",
   data() {
     return {
-      searchTerm: '',
-      selectedDate: '', // Empty by default for 'All Dates'
-      showFilterDropdown: false,
-      summaries: [
-        // Sample summaries data here
-        // { id: 1, date: '2025-01-01', totalItems: 100, totalValue: 5000, products: [...] },
-        // Add real data or make an API call to fetch it
-      ]
+      reportData: {
+        date: "",
+        total_items: 0,
+        total_value: 0,
+      },
+      inventoryProducts: [],
+      selectedDate: new Date().toISOString().split("T")[0], // Default to today
+      currentDate: new Date().toISOString().split("T")[0], // Used to limit max date
     };
   },
   computed: {
-    availableDates() {
-      return [...new Set(this.summaries.map(summary => summary.date))].sort().reverse();
+    filteredInventory() {
+      return this.inventoryProducts;
     },
-    filteredSummaries() {
-      return this.summaries.filter(summary => {
-        const matchesDate = this.selectedDate ? summary.date === this.selectedDate : true;
-        const matchesSearchTerm = this.searchTerm ? summary.products.some(product => 
-          product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          product.category.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          product.supplier.toLowerCase().includes(this.searchTerm.toLowerCase())
-        ) : true;
-        return matchesDate && matchesSearchTerm;
-      });
-    },
-    totalItems() {
-      return this.filteredSummaries.reduce((sum, summary) => sum + summary.totalItems, 0);
-    },
-    totalValue() {
-      return this.filteredSummaries.reduce((sum, summary) => sum + summary.totalValue, 0);
-    }
   },
   methods: {
-    toggleFilterDropdown() {
-      this.showFilterDropdown = !this.showFilterDropdown;
+    async fetchInventoryReport() {
+      try {
+        if (this.selectedDate > this.currentDate) {
+          alert("Future dates are not allowed.");
+          this.selectedDate = this.currentDate;
+          return;
+        }
+
+        const response = await axios.get(`http://127.0.0.1:8000/api/reports/inventory_report?date=${this.selectedDate}`);
+        
+        this.reportData = {
+          date: response.data.date,
+          total_items: response.data.total_items,
+          total_value: parseFloat(response.data.total_value),
+        };
+        this.inventoryProducts = response.data.items;
+      } catch (error) {
+        console.error("Error fetching inventory report:", error);
+        alert("Error fetching inventory report. Please try again.");
+      }
     },
     formatDate(dateString) {
-      if (!dateString) return '';
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      return new Date(dateString).toLocaleDateString(undefined, options);
-    },
+  if (!dateString) return "N/A";
+  return new Date(dateString).toLocaleString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true, // Ensures AM/PM format
+  });
+}
+,
     exportSummary() {
-      if (!this.filteredSummaries.length) return;
-      
-      const headers = ['Name', 'Quantity', 'Unit Price', 'Category', 'Supplier', 'Status'];
-      const data = this.filteredSummaries.flatMap(summary => 
-        summary.products.map(product => [
-          product.name,
-          product.quantity,
-          product.unitPrice,
-          product.category,
-          product.supplier,
-          product.status
-        ])
-      );
-      
-      const csvContent = [
-        headers.join(','),
-        ...data.map(row => row.join(','))
-      ].join('\n');
-      
-      const blob = new Blob([csvContent], { type: 'text/csv' });
+      if (!this.inventoryProducts.length) return;
+
+      const headers = ["Name", "Quantity", "Unit Price", "Status"];
+      const data = this.inventoryProducts.map((product) => [
+        product.ProductName,
+        product.Quantity,
+        parseFloat(product.UnitPrice).toFixed(2),
+        product.Status,
+      ]);
+
+      const csvContent = [headers.join(","), ...data.map((row) => row.join(","))].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv" });
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `inventory-summary-${this.selectedDate || 'all'}.csv`;
+      a.download = `inventory-summary-${this.selectedDate || "all"}.csv`;
       a.click();
-    }
+    },
   },
   created() {
-    const savedSummaries = localStorage.getItem('inventorySummaries');
-    if (savedSummaries) {
-      this.summaries = JSON.parse(savedSummaries);
-    }
-  }
+    this.fetchInventoryReport();
+  },
 };
 </script>
 
@@ -290,7 +266,8 @@ export default {
   margin-top: auto; /* Pushes it to the bottom */
   border-bottom-right-radius: 25px;
   border-bottom-left-radius: 25px;
-
+  position: sticky;
+  bottom: 0;
 }
 
 .totals-item {
