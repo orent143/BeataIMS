@@ -1,144 +1,155 @@
 <template>
-  <!-- Import Header component -->
   <Header />
-
   <SideBar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Low Stock Report</h1>
       <div class="header-actions">
-        <button class="export-btn" @click="exportToCSV">Export CSV</button>
-        <div class="search-container">
-          <input
-            type="text"
-            v-model="searchTerm"
-            placeholder="Search products"
-            class="search-bar"
-            @input="filterLowStockItems"
-          />
-          <i class="fas fa-search search-icon"></i>
-        </div>
+        <input 
+          type="date" 
+          v-model="selectedDate" 
+          class="date-picker" 
+          @change="fetchLowStockReport"
+          :max="currentDate"
+        />
+        <button class="export-btn" @click="exportLowStockReport">Export CSV</button>
       </div>
     </div>
 
-      <div class="inventory-container">
-        <div class="table-container">
-          <table class="stock-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Quantity</th>
-                <th>Cost Price</th>
-                <th>Supplier</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="ingredient in filteredLowStockItems" :key="ingredient.id">
-                <td>{{ ingredient.name }}</td>
-                <td>{{ ingredient.quantity }}</td>
-                <td>₱{{ ingredient.costPrice }}</td>
-                <td>{{ ingredient.supplier }}</td>
-                <td>
-  <span :class="'status status-' + ingredient.status.toLowerCase().replace(/ /g, '-')">
-    {{ ingredient.status }}
-  </span>
-</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <div class="inventory-container">
+      <div class="table-container">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>Stock Name</th>
+              <th>Quantity</th>
+              <th>Cost Price</th>
+              <th>Supplier ID</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in lowStockItems" :key="item.ReportID">
+              <td>{{ item.StockName }}</td>
+              <td>{{ item.Quantity }}</td>
+              <td>₱{{ parseFloat(item.CostPrice).toFixed(2) }}</td>
+              <td>{{ item.SupplierID }}</td>
+              <td>
+                <span :class="'status status-' + getStatus(item.Quantity).toLowerCase().replace(' ', '-')">
+                  {{ getStatus(item.Quantity) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-        <div class="totals-container">
-          <div class="totals-item">
-            <span>Low Stock Items:</span>
-            <span>{{ totalLowStockItems }}</span>
-          </div>
-          <div class="totals-item">
-            <span>Total Value:</span>
-            <span>₱{{ totalValue }}</span>
-          </div>
+      <!-- Summary Section -->
+      <div class="totals-container">
+        <div class="totals-item">
+          <span>Report Date: </span>
+          <span>{{ reportData.date }}</span>
+        </div>
+        <div class="totals-item">
+          <span>Total Items: </span>
+          <span>{{ reportData.total_items }}</span>
+        </div>
+        <div class="totals-item">
+          <span>Total Value: </span>
+          <span>₱{{ parseFloat(reportData.total_value).toFixed(2) }}</span>
         </div>
       </div>
+    </div>
   </div>
 </template>
 
 <script>
-import SideBar from '@/components/ims/SideBar.vue'; // Import Sidebar component
-import Header from '@/components/Header.vue'; // Import Header component
+import SideBar from "@/components/ims/SideBar.vue";
+import Header from "@/components/Header.vue";
+import axios from "axios";
 
 export default {
   components: {
     SideBar,
-    Header
+    Header,
   },
+  name: "LowStockReport",
   data() {
     return {
-      lowStockItems: this.$route.state?.lowStockItems || [],
-      searchTerm: '',
-      filteredLowStockItems: [],
+      reportData: {
+        date: "",
+        total_items: 0,
+        total_value: 0,
+      },
+      lowStockItems: [],
+      selectedDate: new Date().toISOString().split("T")[0], // Default to today
+      currentDate: new Date().toISOString().split("T")[0], // Used to limit max date
     };
   },
-  computed: {
-    totalLowStockItems() {
-      return this.filteredLowStockItems.length;
-    },
-    totalValue() {
-      return this.filteredLowStockItems.reduce((sum, item) => sum + (item.quantity * item.costPrice), 0);
-    },
-  },
   methods: {
-    filterLowStockItems() {
-      if (this.searchTerm) {
-        this.filteredLowStockItems = this.lowStockItems.filter(item =>
-          item.name.toLowerCase().includes(this.searchTerm.toLowerCase()) &&
-          item.status === 'Low Stock'
-        );
-      } else {
-        this.filteredLowStockItems = this.lowStockItems.filter(item => item.status === 'Low Stock');
+    async fetchLowStockReport() {
+      try {
+        if (this.selectedDate > this.currentDate) {
+          alert("Future dates are not allowed.");
+          this.selectedDate = this.currentDate;
+          return;
+        }
+
+        const response = await axios.get(`http://127.0.0.1:8000/api/reports/low_stock_report?date=${this.selectedDate}`);
+        
+        this.reportData = {
+          date: response.data.date,
+          total_items: response.data.total_items,
+          total_value: parseFloat(response.data.total_value),
+        };
+        this.lowStockItems = response.data.items;
+      } catch (error) {
+        console.error("Error fetching low stock report:", error);
+        alert("Error fetching low stock report. Please try again.");
       }
     },
+    getStatus(quantity) {
+      return quantity <= 0 ? "Out of Stock" : "Low Stock";
+    },
+    formatDate(dateString) {
+      if (!dateString) return "N/A";
+      return new Date(dateString).toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      });
+    },
+    exportLowStockReport() {
+      if (!this.lowStockItems.length) return;
 
-    exportToCSV() {
-      const headers = ['Name', 'Quantity', 'Cost Price', 'Supplier', 'Status'];
-      const data = this.filteredLowStockItems.map((ingredient) => [
-        ingredient.name,
-        ingredient.quantity,
-        ingredient.costPrice,
-        ingredient.supplier,
-        ingredient.status,
+      const headers = ["Stock Name", "Quantity", "Cost Price", "Supplier ID", "Status"];
+      const data = this.lowStockItems.map((item) => [
+        item.StockName,
+        item.Quantity,
+        parseFloat(item.CostPrice).toFixed(2),
+        item.SupplierID,
+        this.getStatus(item.Quantity),
       ]);
 
-      const csvContent = [
-        headers.join(','),
-        ...data.map((row) => row.join(',')),
-      ].join('\n');
+      const csvContent = [headers.join(","), ...data.map((row) => row.join(","))].join("\n");
 
-      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const blob = new Blob([csvContent], { type: "text/csv" });
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = 'low-stock-report.csv';
+      a.download = `low-stock-report-${this.selectedDate || "all"}.csv`;
       a.click();
     },
   },
   created() {
-    if (this.lowStockItems.length === 0) {
-      const lowStockReports = JSON.parse(localStorage.getItem('lowStockReports')) || [];
-      if (lowStockReports.length > 0) {
-        // Assuming you're storing low stock items in a similar structure
-        this.lowStockItems = lowStockReports[lowStockReports.length - 1].products; 
-      } else {
-        alert('No low stock reports available.');
-      }
-    }
-    this.filterLowStockItems();
+    this.fetchLowStockReport();
   },
 };
 </script>
-
-
-
 
 <style scoped>
 /* General Styling */
@@ -267,6 +278,8 @@ export default {
   margin-top: auto; /* Pushes it to the bottom */
   border-bottom-right-radius: 25px;
   border-bottom-left-radius: 25px;
+  position: sticky;
+  bottom: 0;
 
 }
 

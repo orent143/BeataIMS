@@ -64,8 +64,13 @@ export default {
         this.totalSummaryReports = report.total_items;
         this.totalSummaryAmount = parseFloat(report.total_value).toFixed(2);
 
-        // Count low stock items
-      } catch (error) {
+// Fetch low stock report
+        const lowStockResponse = await axios.get('http://127.0.0.1:8000/api/reports/low_stock_report');
+        const lowStockReport = lowStockResponse.data;
+        this.totalLowStockReports = lowStockReport.items.length;
+        this.totalLowStockAmount = lowStockReport.items
+          .reduce((total, item) => total + parseFloat(item.CostPrice) * item.Quantity, 0)
+          .toFixed(2);      } catch (error) {
         console.error('Error fetching report data:', error);
       }
     },

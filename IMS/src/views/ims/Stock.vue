@@ -67,11 +67,11 @@
     </div>
 
     <add-stock 
-  v-if="showAddForm" 
-  :isVisible="showAddForm" 
-  @close="toggleAddForm" 
-  @update-parent="fetchStocks"
-/>
+      v-if="showAddForm" 
+      :isVisible="showAddForm" 
+      @close="toggleAddForm" 
+      @update-parent="fetchStocks"
+    />
 
     <edit-stock
       v-if="showEditForm"
@@ -165,42 +165,21 @@ export default {
         toast.error('Error adding stock.');
       }
     },
-    editItem(item) {
-      this.selectedItem = item;
-      this.toggleEditForm();
-    },
-    async updateItem(updatedItem) {
-    const toast = useToast();
-    try {
-      await axios.put(`http://127.0.0.1:8000/api/stock/stocks/${updatedItem.StockID}/`, updatedItem);
-      
-      // 🔄 **Update stock list locally instead of fetching all stocks again**
-      const index = this.stocks.findIndex(stock => stock.StockID === updatedItem.StockID);
-      if (index !== -1) {
-        this.stocks[index] = updatedItem;
-      }
-      this.filteredItems = [...this.stocks]; // Refresh list
-      this.showEditForm = false;
-      
-      toast.success('Stock updated successfully!');
-    } catch (error) {
-      console.error('Error updating stock:', error);
-      toast.error('Error updating stock.');
-    }
-  },
-    async removeItem(stockID) {
+    async addLowStock() {
       const toast = useToast();
       try {
-        await axios.delete(`http://127.0.0.1:8000/api/stock/stocks/${stockID}/`);
-        await this.fetchStocks(); // 🔄 Refresh stocks after deletion
-        toast.success('Stock removed successfully!');
+        // Make POST request to backend to add low stock items
+        const response = await axios.post('http://127.0.0.1:8000/api/stock/stocks/low_stock');
+        
+        // Provide feedback to the user
+        toast.success('Low stock items have been successfully added to the stock report!');
+        
+        // Refresh the list of stocks after adding the low stock items
+        await this.fetchStocks(); // 🔄 Refresh stocks
       } catch (error) {
-        console.error('Error removing stock:', error);
-        toast.error('Error removing stock.');
+        console.error('Error adding low stock:', error);
+        toast.error('Error adding low stock items.');
       }
-    },
-    addLowStock() {
-      // Logic to add low stock
     },
     filterLowStock() {
       this.filteredItems = this.stocks.filter(stock => stock.Quantity <= 10);
@@ -412,7 +391,7 @@ export default {
 .floating-btn {
   width: 35px;
   height: 35px;
-  background-color: #4CAF50;
+  background-color: #E54F70;
   color: #0000009d;
   border: none;
   border-radius: 50%;
@@ -426,7 +405,7 @@ export default {
 }
 
 .floating-btn:hover {
-  background-color: #FF32BA;
+  background-color: #ed9598;
 }
 
 /* Popout Options */
@@ -439,17 +418,15 @@ export default {
   right: 40px;
 }
 .popout-option {
-    display: flex;
-    align-items: center;
-    background-color: #FFFFFF;
-    color: rgb(34, 34, 34);
-    padding: 10px;
-    margin: 5px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 10px;
-    width: 100px;
+  background-color: #FFFFFF;
+  color: rgb(34, 34, 34);
+  padding: 10px;
+  margin: 5px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 10px;
+  width: 100px;
   }
 
   .popout-option input[type="checkbox"] {
