@@ -188,7 +188,11 @@ export default {
       if (quantity === 0) return "Out of Stock";
       if (quantity <= 10) return "Low Stock";
       return "In Stock";
-    }
+    },
+    editItem(stock) {
+    this.selectedItem = stock;
+    this.showEditForm = true;
+  },
   },
   mounted() {
     this.fetchStocks();

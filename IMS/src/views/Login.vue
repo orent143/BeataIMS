@@ -1,11 +1,11 @@
 <template>
   <div class="login-page">
     <div class="login-container">
-      <h1>Login</h1>
+      <h1>Cafe Beata</h1>
       <form @submit.prevent="handleLogin">
         <div class="input-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" v-model="email" required />
+          <label for="username">Username</label>
+          <input type="text" id="username" v-model="username" required />
         </div>
         <div class="input-group">
           <label for="password">Password</label>
@@ -13,27 +13,49 @@
         </div>
         <button type="submit" class="login-btn">Login</button>
       </form>
+      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     </div>
   </div>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
-  name: "Login",
   data() {
     return {
-      email: "",
-      password: ""
+      username: "",  // Changed from email to username
+      password: "",
+      errorMessage: "",
     };
   },
   methods: {
-    handleLogin() {
-      // Handle login logic here
-      console.log("Email:", this.email);
-      console.log("Password:", this.password);
-      // Example: this.$router.push("/dashboard");
+    async handleLogin() {
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/Auth/login/', {
+      username: this.username,
+      password: this.password,
+    });
+
+    localStorage.setItem("user", JSON.stringify(response.data));
+
+    const redirectPath = this.$route.query.redirect; // Get redirect parameter
+
+    if (response.data.role === "admin") {
+      this.$router.push('/dashboard');
+    } else if (response.data.role === "cafe_staff") {
+      // Redirect based on query parameter
+      if (redirectPath === "homesms") {
+        this.$router.push('/homesms'); // Sales Management
+      } else {
+        this.$router.push('/homeims'); // Default to Inventory Management
+      }
     }
+  } catch (error) {
+    this.errorMessage = error.response?.data?.detail || "Invalid username or password";
   }
+},
+  },
 };
 </script>
 
@@ -54,10 +76,10 @@ export default {
 }
 
 .login-container {
-  background: white;
+  background: rgba(255, 255, 255, 0.979);
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.795);
   text-align: center;
   max-width: 400px;
   width: 100%;
@@ -66,9 +88,9 @@ export default {
 
 .login-container h1 {
   margin-bottom: 2rem;
-  color: var(--primary-color);
-  font-family: 'Poppins', sans-serif;
-  font-size: 2rem;
+  color: #333;
+  font-family: 'Inknut Antiqua', serif;
+    font-size: 50px;
 }
 
 .input-group {
@@ -81,12 +103,14 @@ export default {
   margin-bottom: 0.5rem;
   color: var(--primary-color);
   font-family: 'Poppins', sans-serif;
+  font-weight: bolder;
 }
 
 .input-group input {
-  width: 100%;
+  width: 95%;
   padding: 0.75rem;
-  border: 1px solid #ccc;
+  border: 1px solid #ffffff;
+  background-color: #D9D9D9;
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s;
@@ -102,8 +126,8 @@ export default {
   padding: 1rem 2rem;
   border: none;
   border-radius: 8px;
-  background-color: var(--primary-color);
-  color: white;
+  background-color:#E54F70 ;
+  color: #ffffff;
   font-size: 1.1rem;
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;

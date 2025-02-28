@@ -1,136 +1,203 @@
 <template>
-    <Header />
+  <div class="overlay" v-if="isProfileOpen">
+    <div class="modal-profile">
+      <div class="modal-header">
+        <h2>User Profile</h2>
+        <button class="close-btn" @click="closeProfile">&times;</button>
+      </div>
 
-    <div class="header-container">
-      <h1>Profile</h1>
-      <div class="profile-container">
-        <div class="profile-card">
-            <h2>User Information</h2>
-          <div class="profile-content">
-            <!-- Left: User Info -->
-            <div class="profile-left">
-              <p><strong>Email:</strong> {{ user.email }}</p>
-              <p><strong>Role:</strong> {{ user.role }}</p>
-              <p><strong>Joined:</strong> {{ user.joinDate }}</p>
-            </div>
-  
-            <!-- Right: Profile Picture -->
-            <div class="profile-right">
-              <img :src="user.profilePicture" alt="Profile Picture" class="profile-pic" />
-              <h2>{{ user.name }}</h2>
-            </div>
+      <div class="modal-content">
+        <div v-if="user" class="profile-content">
+          <div class="profile-left">
+            <p><strong>Email:</strong> {{ user.username }}</p>
+            <p><strong>Role:</strong> {{ user.role }}</p>
+            <p><strong>Joined:</strong> {{ formatDate(user.date_added) }}</p>
           </div>
-  
-          <!-- Action Buttons -->
-          <div class="profile-actions">
-            <button @click="editProfile">Edit Profile</button>
-            <button @click="logout" class="logout">Logout</button>
+
+          <div class="profile-right">
+            <img :src="profileImage" alt="Profile Picture" class="profile-pic" />
+            <h3>{{ user.username }}</h3>
           </div>
+        </div>
+
+        <div class="profile-actions">
+          <button @click="editProfile">Edit Profile</button>
+          <button @click="logout" class="logout">Logout</button>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import Header from "@/components/Header.vue";
+  </div>
+</template>
 
-  
-  export default {
-    components: { Header },
-    data() {
-      return {
-        user: {
-          name: "John Doe",
-          email: "john.doe@example.com",
-          role: "Student",
-          joinDate: "January 15, 2023",
-          profilePicture: "https://www.pngmart.com/files/22/User-Avatar-Profile-PNG.png"
-        }
-      };
-    },
-    methods: {
-      editProfile() {
-        alert("Edit profile functionality coming soon!");
-      },
-      logout() {
-        console.log("Logging out...");
-        this.$router.push("/");
-      }
+<script>
+import axios from "axios";
+
+export default {
+  name: 'Profile',
+  props: {
+    isProfileOpen: {
+      type: Boolean,
+      default: false
     }
-  };
-  </script>
-  
-  <style scoped>
-  .header-container {
-    margin-left: 18px;
-    padding: 20px;
+  },
+  data() {
+    return {
+      user: null
+    };
+  },
+  computed: {
+    profileImage() {
+    if (this.user?.profile_pic) {
+      return this.user.profile_pic.startsWith("http") 
+        ? this.user.profile_pic 
+        : `http://127.0.0.1:8000/uploads/profile_pics/${this.user.profile_pic}`;
+    }
+    return "https://www.pngmart.com/files/22/User-Avatar-Profile-PNG.png";
+  }
+  },
+  methods: {
+    async fetchUserProfile() {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      if (!storedUser) {
+        this.logout();
+        return;
+      }
 
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/users/users/${storedUser.user_id}`);
+        this.user = response.data;
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        this.logout();
+      }
+    },
+    closeProfile() {
+      this.$emit('close-profile');
+    },
+    editProfile() {
+      alert("Edit profile functionality coming soon!");
+    },
+    logout() {
+      localStorage.removeItem("user");
+      this.$router.push("/");
+    },
+    formatDate(dateString) {
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+    }
+  },
+  mounted() {
+    this.fetchUserProfile();
   }
-  
-  .profile-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
+};
+</script>
+
+<style scoped>
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-profile {
+  background: white;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
   }
-  
-  .profile-card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 90%;
-    max-width: 600px;
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
-  .profile-card h2{
-    color: #333;
-  }
-  /* Arrange profile content into a row */
-  .profile-content {
-    display: flex;
-    justify-content: space-between;
-    text-align: left;
-    gap: 20px;
-  }
-  
-  /* Left side: User info */
-  .profile-left {
-    flex: 1;
-  }
-  
-  /* Right side: Profile Picture */
-  .profile-right {
-    flex-shrink: 0;
-    align-items: center;
-  }
-  
-  .profile-pic {
-    margin-top: 10px;
-    width: 100%;
-    height: 120px;
-    border-radius: 50%;
-  }
-  
-  /* Centered buttons */
-  .profile-actions {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  
-  button {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .logout {
-    background: red;
-  }
-  </style>
-  
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-content {
+  padding: 20px;
+}
+
+.profile-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.profile-left {
+  flex: 1;
+  text-align: left;
+}
+
+.profile-right {
+  text-align: center;
+}
+
+.profile-pic {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.logout {
+  background: #dc3545;
+}
+
+.open-profile {
+  margin: 20px;
+}
+</style>

@@ -121,7 +121,7 @@ export default {
       this.loading = true;
       this.errorMessage = "";
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/createproduct/products/prepopulate');
+        const response = await axios.get('http://127.0.0.1:8000/api/products/products/prepopulate');
         if (response.data.categories && response.data.stocks) {
           this.categories = response.data.categories;
           this.stocks = response.data.stocks;
@@ -164,7 +164,7 @@ export default {
 
         console.log("Submitting product:", this.product);
 
-        const response = await axios.post("http://127.0.0.1:8000/api/createproduct/products/", formData, {
+        const response = await axios.post('http://127.0.0.1:8000/api/products/products/', formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
 

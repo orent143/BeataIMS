@@ -43,7 +43,7 @@ export default {
         this.loading = true;
         console.log("Fetching menu items...");
         
-        const response = await axios.get('http://127.0.0.1:8000/api/createorder/menu_items');
+        const response = await axios.get('http://127.0.0.1:8000/api/orders/menu_items');
         
         console.log("Menu items received:", response.data);
         

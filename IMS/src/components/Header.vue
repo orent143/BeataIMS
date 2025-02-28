@@ -24,18 +24,26 @@
           <div class="profile-dropdown">
             <i class="pi pi-user profile-icon" @mouseenter="showDropdown = true"></i> 
             <div v-if="showDropdown" class="dropdown-menu" @mouseleave="showDropdown = false">
-              <router-link to="/profile" class="dropdown-item">View Profile</router-link>
-              <router-link to="/"  class="dropdown-item logout" @click="logout">Logout</router-link>
+              <a class="dropdown-item" @click="openProfile">View Profile</a>
+              <router-link to="/" class="dropdown-item logout" @click="logout">Logout</router-link>
             </div>
           </div>
         </div>
         </div>
       </div>
     </header>
+    <Profile 
+      :isProfileOpen="isProfileOpen" 
+      @close-profile="closeProfile"
+    />
   </template>
   
   <script>
+  import Profile from '@/views/Profile.vue';
   export default {
+    components: {
+    Profile
+  },
     props: {
       searchQuery: {
         type: String,
@@ -49,11 +57,21 @@
     data() {
       return {
         localSearchQuery: this.searchQuery, // Local copy of the search query
-        showDropdown: false
+        showDropdown: false,
+        isProfileOpen: false
 
       };
     },
     methods: {
+      openProfile() {
+      this.isProfileOpen = true;
+      this.showDropdown = false;
+      document.body.style.overflow = 'hidden';
+    },
+    closeProfile() {
+      this.isProfileOpen = false;
+      document.body.style.overflow = 'auto';
+    },
       toggleSidebar() {
         this.$emit('toggleSidebar');
       },
@@ -229,4 +247,3 @@
     line-height: 1.2; /* Adjust line-height for better spacing */
   }
   </style>
-

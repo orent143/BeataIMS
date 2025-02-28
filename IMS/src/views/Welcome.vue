@@ -14,21 +14,16 @@
         <h1>Welcome to Cafe Beata</h1>
         <p>Streamline your operations with our comprehensive management system</p>
         <div class="cta-buttons">
-          <button @click="goToIMS" class="primary-btn">
-            <i class="fas fa-boxes"></i>
-            Inventory Management
-          </button>
-          <button @click="goToSMS" class="secondary-btn">
-            <i class="fas fa-chart-line"></i>
-            Sales Management
-          </button>
-          <button @click="goToADMIN" class="third-btn">
+          <button @click="redirectToLogin('homeims')" class="primary-btn">
+  <i class="fas fa-boxes"></i> Inventory Management
+</button>
+<button @click="redirectToLogin('homesms')" class="secondary-btn">
+  <i class="fas fa-chart-line"></i> Sales Management
+</button>
+
+          <button @click="redirectToLogin('dashboard')" class="third-btn">
             <i class="fas fa-chart-line"></i>
             Admin
-          </button>
-          <button @click="goToLogin" class="login-btn">
-            <i class="fas fa-sign-in-alt"></i>
-            Login
           </button>
         </div>
       </div>
@@ -66,19 +61,13 @@
 export default {
   name: "Welcome",
   methods: {
-    goToIMS() {
-      this.$router.push("/homeims");  // or '/stock' if you want to start with stock page
-    },
-    goToSMS() {
-      this.$router.push("/homesms");
-    },
-    goToADMIN() {
-      this.$router.push("/dashboard");
-    },
+    redirectToLogin(targetRoute) {
+    this.$router.push({ path: '/login', query: { redirect: targetRoute } });
+  },
     goToLogin() {
       this.$router.push("/login");
-    },
-  },
+    }
+  }
 };
 </script>
 

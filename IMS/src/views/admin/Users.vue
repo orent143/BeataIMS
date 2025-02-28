@@ -1,148 +1,169 @@
 <template>
-  <!-- Import Header component -->
   <Header />
-    <sidebar />
-    <div class="app-container">
-      <div class="dashboard-container">  
-          <div class="user-management-container">
-            <h2>User Management</h2>
-  
-            <!-- Add User Form -->
-            <div class="add-user-form">
-              <h3>Add New User</h3>
-              <form @submit.prevent="addUser">
-                <input v-model="newUser.username" type="text" placeholder="Username" required />
-                <input v-model="newUser.password" type="password" placeholder="Password" required />
-                <button type="submit">Add User</button>
-              </form>
-            </div>
-  
-            <!-- Notification -->
-            <div v-if="showNotification" class="notification">
-              User added successfully!
-            </div>
-  
-            <!-- User List Table -->
-            <table class="user-table">
-              <thead>
-                <tr>
-                  <th>User ID</th>
-                  <th>Username</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="user in filteredUsers" :key="user.id">
-                  <td>{{ user.id }}</td>
-                  <td>{{ user.username }}</td>
-                  <td>
-                    <button @click="toggleStatus(user)">Toggle Status</button>
-                    <button @click="viewUserDetails(user)">View Details</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-  
-            <!-- User Details Modal -->
-            <div v-if="selectedUser" class="user-details-modal">
-              <div class="modal-content">
-                <h3>User Details</h3>
-                <p><strong>Username:</strong> {{ selectedUser.username }}</p>
-                <button @click="closeModal">Close</button>
-              </div>
-            </div>
+  <sidebar />
+  <div class="app-container">
+    <div class="dashboard-container">  
+      <div class="user-management-container">
+        <h2>User Management</h2>
+
+        <!-- Add User Form -->
+        <div class="add-user-form">
+          <h3>Add New User</h3>
+          <form @submit.prevent="addUser" enctype="multipart/form-data">
+            <input v-model="newUser.username" type="text" placeholder="Username" required />
+            <input v-model="newUser.password" type="password" placeholder="Password" required />
+            <select v-model="newUser.role" required>
+              <option value="admin">Admin</option>
+              <option value="cafe_staff">Cafe Staff</option>
+            </select>
+            <input type="file" @change="handleFileUpload" />
+            <button type="submit">Add User</button>
+          </form>
+        </div>
+
+        <!-- Notification -->
+        <div v-if="showNotification" class="notification">
+          User added successfully!
+        </div>
+
+        <!-- User List Table -->
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Profile Picture</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="user in filteredUsers" :key="user.id">
+              <td>{{ user.id }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.role }}</td>
+              <td>
+                <img v-if="user.profile_pic" :src="user.profile_pic" alt="Profile Picture" class="profile-pic" />
+                <span v-else>No Image</span>
+              </td>
+              <td>
+                <button @click="toggleStatus(user)">Toggle Status</button>
+                <button @click="viewUserDetails(user)">View Details</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- User Details Modal -->
+        <div v-if="selectedUser" class="user-details-modal">
+          <div class="modal-content">
+            <h3>User Details</h3>
+            <p><strong>Username:</strong> {{ selectedUser.username }}</p>
+            <p><strong>Role:</strong> {{ selectedUser.role }}</p>
+            <img v-if="selectedUser.profile_pic" :src="selectedUser.profile_pic" alt="Profile Picture" class="profile-pic" />
+            <button @click="closeModal">Close</button>
           </div>
+        </div>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import axios from 'axios';
-  import sidebar from '@/components/admin/sidebar.vue';
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+import sidebar from '@/components/admin/sidebar.vue';
 import Header from '@/components/Header.vue';
-  
-  export default {
-    name: 'UserManagement',
-    components: {
-      sidebar,
-      Header
-    },
-    data() {
-      return {
-        searchQuery: '',
-        selectedUser: null,
-        users: [],
-        newUser: {
-          username: '',
-          password: '',
-        },
-        showNotification: false, 
-      };
-    },
-  
-    computed: {
-      filteredUsers() {
-        return this.users.filter((user) =>
-          user.username.toLowerCase().includes(this.searchQuery.toLowerCase())
-        );
+
+export default {
+  name: 'UserManagement',
+  components: {
+    sidebar,
+    Header
+  },
+  data() {
+    return {
+      searchQuery: '',
+      selectedUser: null,
+      users: [],
+      newUser: {
+        username: '',
+        password: '',
+        role: '',
+        profile_pic: null
       },
+      showNotification: false,
+    };
+  },
+
+  computed: {
+    filteredUsers() {
+      return this.users.filter((user) =>
+        user.username.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
     },
-  
-    created() {
-      this.getUsers(); 
+  },
+
+  created() {
+    this.getUsers(); 
+  },
+
+  methods: {
+    async getUsers() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/users/'); 
+        this.users = response.data;
+      } catch (error) {
+        console.error('There was an error fetching the users:', error);
+      }
     },
-  
-    methods: {
-      async getUsers() {
-        try {
-          const response = await axios.get('http://127.0.0.1:8000/api/'); 
-          this.users = response.data;
-        } catch (error) {
-          console.error('There was an error fetching the users:', error);
+
+    toggleStatus(user) {
+      user.status = user.status === 'Active' ? 'Inactive' : 'Active';
+    },
+
+    viewUserDetails(user) {
+      this.selectedUser = user; 
+    },
+
+    closeModal() {
+      this.selectedUser = null; 
+    },
+
+    handleFileUpload(event) {
+      this.newUser.profile_pic = event.target.files[0];
+    },
+
+    async addUser() {
+      try {
+        const formData = new FormData();
+        formData.append('username', this.newUser.username);
+        formData.append('password', this.newUser.password);
+        formData.append('role', this.newUser.role);
+        if (this.newUser.profile_pic) {
+          formData.append('profile_pic', this.newUser.profile_pic);
         }
-      },
-  
-      toggleStatus(user) {
-        user.status = user.status === 'Active' ? 'Inactive' : 'Active';
-      },
-  
-      viewUserDetails(user) {
-        this.selectedUser = user; 
-      },
-  
-      closeModal() {
-        this.selectedUser = null; 
-      },
-  
-      async addUser() {
-        try {
-          const formData = new FormData();
-          formData.append('username', this.newUser.username);
-          formData.append('password', this.newUser.password);
-  
-          const response = await axios.post('http://localhost:8000/api/users/', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
-  
-          this.users.push(response.data);
-  
-          this.newUser = { username: '', password: '' };
-  
-          // Show success notification
-          this.showNotification = true;
-          setTimeout(() => {
-            this.showNotification = false; 
-          }, 3000);
-        } catch (error) {
-          console.error('There was an error creating the user:', error);
-        }
-      },
+
+        const response = await axios.post('http://127.0.0.1:8000/api/users/users/', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        this.users.push(response.data);
+        this.newUser = { username: '', password: '', role: '', profile_pic: null };
+
+        this.showNotification = true;
+        setTimeout(() => {
+          this.showNotification = false; 
+        }, 3000);
+      } catch (error) {
+        console.error('There was an error creating the user:', error);
+      }
     },
-  };
-  </script>
-  
+  },
+};
+</script>
+
   <style scoped>
 .app-container {
   display: flex;

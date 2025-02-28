@@ -2,60 +2,58 @@
   <Header />
   <Sidebar />
   <div class="app-container">
-    <div class="header-container">
-      <h1 class="header">Create Order</h1>
-    </div>
-
-    <div class="content-wrapper">
-      <div class="main-content">
-        <!-- Menu Items -->
-        <OrderItemSelector 
-  :items="order.items"
-  :menuItems="menuItems"
-  @update:items="updateOrderItems"
-  @update:menuItems="menuItems = $event"
-/>
-
-
+      <div class="header-container">
+        <h1 class="header">Create Order</h1>
       </div>
 
-      <!-- Customer Details and Order Summary -->
-      <div class="order-details-section">
-        <div class="customer-details">
-          <h2>Customer Details</h2>
-          <div class="form-group">
-            <label>Customer Name</label>
-            <input v-model="order.customerName" type="text" required class="form-input" />
-          </div>
-
-          <div class="form-group">
-            <label>Table Number</label>
-            <input v-model.number="order.tableNumber" type="number" required class="form-input" />
-          </div>
-
-          <!-- Payment Method Selection -->
-          <div class="form-group">
-            <label>Payment Method</label>
-            <select v-model="order.paymentMethod" class="form-input">
-              <option value="CASH">Cash</option>
-              <option value="TALLY">Tally</option>
-            </select>
-          </div>
+      <div class="content-wrapper">
+        <div class="main-content">
+          <!-- Menu Items -->
+          <OrderItemSelector 
+            :items="order.items"
+            :menuItems="menuItems"
+            @update:items="updateOrderItems"
+            @update:menuItems="menuItems = $event"
+          />
         </div>
 
-        <!-- Order Summary -->
-        <OrderSummary 
-          :items="order.items"
-          :paymentMethod="order.paymentMethod"
-        />
+        <!-- Customer Details and Order Summary -->
+        <div class="order-details-section">
+          <div class="customer-details">
+            <h2>Customer Details</h2>
+            <div class="form-group">
+              <label>Customer Name</label>
+              <input v-model="order.customerName" type="text" required class="form-input" />
+            </div>
 
-        <div class="form-actions">
-          <button type="button" @click="resetForm" class="reset-btn">Reset</button>
-          <button type="submit" @click.prevent="submitOrder" class="submit-btn">Create Order</button>
+            <div class="form-group">
+              <label>Table Number</label>
+              <input v-model.number="order.tableNumber" type="number" required class="form-input" />
+            </div>
+
+            <!-- Payment Method Selection -->
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select v-model="order.paymentMethod" class="form-input">
+                <option value="CASH">Cash</option>
+                <option value="TALLY">Tally</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Order Summary -->
+          <OrderSummary 
+            :items="order.items"
+            :paymentMethod="order.paymentMethod"
+          />
+
+          <div class="form-actions">
+            <button type="button" @click="resetForm" class="reset-btn">Reset</button>
+            <button type="submit" @click.prevent="submitOrder" class="submit-btn">Create Order</button>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+    </div> <!-- End of new container -->
 </template>
 
 <script>
@@ -192,11 +190,12 @@ export default {
 .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 230px; /* Make space for sidebar, adjust as needed */
-  height: 100%; /* Full height of the page */
+  flex-grow: 1;
+  margin-left: 230px;
+  height: 100%; /* Ensure full viewport height */
 }
-  
+
+
 .header-container {
   display: flex;
   align-items: center;
