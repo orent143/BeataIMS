@@ -154,7 +154,7 @@ export default {
     console.log("Submitting Order:", JSON.stringify(orderPayload, null, 2));
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/createorder/create_order', orderPayload);
+      const response = await axios.post('http://127.0.0.1:8000/api/orders/create_order', orderPayload);
       console.log('Order Created:', response.data);
       alert('Order created successfully!');
       this.resetForm();

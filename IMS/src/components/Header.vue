@@ -25,7 +25,6 @@
             <i class="pi pi-user profile-icon" @mouseenter="showDropdown = true"></i> 
             <div v-if="showDropdown" class="dropdown-menu" @mouseleave="showDropdown = false">
               <a class="dropdown-item" @click="openProfile">View Profile</a>
-              <router-link to="/" class="dropdown-item logout" @click="logout">Logout</router-link>
             </div>
           </div>
         </div>

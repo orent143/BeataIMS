@@ -315,4 +315,5 @@ import Header from '@/components/Header.vue';
   button:hover {
     opacity: 0.9;
   }
+  
   </style>

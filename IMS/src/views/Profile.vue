@@ -9,7 +9,7 @@
       <div class="modal-content">
         <div v-if="user" class="profile-content">
           <div class="profile-left">
-            <p><strong>Email:</strong> {{ user.username }}</p>
+            <p><strong>Name:</strong> {{ user.username }}</p>
             <p><strong>Role:</strong> {{ user.role }}</p>
             <p><strong>Joined:</strong> {{ formatDate(user.date_added) }}</p>
           </div>
@@ -21,7 +21,6 @@
         </div>
 
         <div class="profile-actions">
-          <button @click="editProfile">Edit Profile</button>
           <button @click="logout" class="logout">Logout</button>
         </div>
       </div>
@@ -134,7 +133,17 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
+  color: white;
+  background: linear-gradient(to right, #e54f6f7e, #ed959821, rgba(0, 0, 0, 0.863)),
+              url('@/assets/background.jpg') center/cover no-repeat;
   border-bottom: 1px solid #eee;
+  border-top-left-radius: 10px;  /* Adjust the value as per your design */
+  border-top-right-radius: 10px; /* Adjust the value as per your design */
+}
+
+.modal-header h2{
+  color: white;
+
 }
 
 .close-btn {
@@ -169,9 +178,7 @@ export default {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  margin-bottom: 10px;
 }
-
 .profile-actions {
   display: flex;
   justify-content: center;

@@ -88,7 +88,18 @@ export default {
 
 .login-container h1 {
   margin-bottom: 2rem;
-  color: #333;
+  color: #E54F70;
+
+    text-shadow: 
+      1px 1px 0#fbf1f3, 
+      -1px 1px 0 #fbf1f3,
+      1px -1px 0 #fbf1f3,
+      -1px -1px 0 #fbf1f3,
+      0px 1px 0 #fbf1f3,
+      0px -1px 0 #fbf1f3,
+      1px 0px 0 #fbf1f3,
+      -1px 0px 0 #fbf1f3;
+    line-height: 1.2; /* Adjust line-height for better spacing */
   font-family: 'Inknut Antiqua', serif;
     font-size: 50px;
 }
@@ -139,14 +150,4 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 </style>
