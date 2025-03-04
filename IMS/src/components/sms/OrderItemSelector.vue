@@ -67,17 +67,22 @@ export default {
       return this.items.some(item => item.id === menuItem.id);
     },
     addOrUpdateItem(menuItem) {
-      const updatedItems = [...this.items];
-      const existingItem = updatedItems.find(item => item.id === menuItem.id);
+  const updatedItems = [...this.items];
+  const existingItem = updatedItems.find(item => item.id === menuItem.id);
 
-      if (existingItem) {
-        existingItem.quantity = this.getItemQuantity(menuItem);
-      } else {
-        updatedItems.push({ id: menuItem.id, name: menuItem.name, quantity: 1 });
-      }
+  if (existingItem) {
+    existingItem.quantity = this.getItemQuantity(menuItem);
+  } else {
+    updatedItems.push({ 
+      id: menuItem.id, 
+      name: menuItem.name, 
+      price: Number(menuItem.price),  // ✅ Ensure price is added as a number
+      quantity: 1 
+    });
+  }
 
-      this.$emit('update:items', updatedItems);
-    },
+  this.$emit('update:items', updatedItems);
+},
     updateQuantity(menuItem, quantity) {
       const updatedItems = this.items.map(item =>
         item.id === menuItem.id ? { ...item, quantity } : item

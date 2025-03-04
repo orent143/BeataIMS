@@ -18,13 +18,14 @@
           class="quantity-input"
         />
         <button 
-          class="add-btn"
-          @click="$emit('add', item)"
-          :class="{ 'selected': selected }"
-          :disabled="item.stock <= 0"
-        >
-          {{ selected ? 'Update' : 'Add' }}
-        </button>
+  class="add-btn"
+  @click="$emit('add', { ...item, price: Number(item.price) })"
+  :class="{ 'selected': selected }"
+  :disabled="item.stock <= 0"
+>
+  {{ selected ? 'Update' : 'Add' }}
+</button>
+
       </div>
     </div>
   </div>

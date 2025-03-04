@@ -36,11 +36,8 @@ export default {
       return this.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
     },
     totalAmount() {
-      return this.items
-        .map(item => item.quantity * (item.price || 0))
-        .reduce((sum, price) => sum + price, 0)
-        .toFixed(2);
-    }
+    return this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  }
   },
   methods: {
     getItemPrice(item) {

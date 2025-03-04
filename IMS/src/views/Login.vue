@@ -20,44 +20,57 @@
 
 <script>
 import axios from "axios";
+import { useToast } from "vue-toastification"; // Import toast
 
 export default {
   data() {
     return {
-      username: "",  // Changed from email to username
+      username: "",
       password: "",
       errorMessage: "",
     };
   },
+  setup() {
+    const toast = useToast(); // Initialize toast
+    return { toast };
+  },
   methods: {
     async handleLogin() {
-  try {
-    const response = await axios.post('http://127.0.0.1:8000/Auth/login/', {
-      username: this.username,
-      password: this.password,
-    });
+      try {
+        const response = await axios.post("http://127.0.0.1:8000/Auth/login/", {
+          username: this.username,
+          password: this.password,
+        });
 
-    localStorage.setItem("user", JSON.stringify(response.data));
+        // Store user data
+        localStorage.setItem("user", JSON.stringify(response.data));
 
-    const redirectPath = this.$route.query.redirect; // Get redirect parameter
+        // Success toast
+        this.toast.success("Login successful!", {
+          position: "top-right",
+          timeout: 3000,
+        });
 
-    if (response.data.role === "admin") {
-      this.$router.push('/dashboard');
-    } else if (response.data.role === "cafe_staff") {
-      // Redirect based on query parameter
-      if (redirectPath === "homesms") {
-        this.$router.push('/homesms'); // Sales Management
-      } else {
-        this.$router.push('/homeims'); // Default to Inventory Management
+        // Redirect based on user role
+        const redirectPath = this.$route.query.redirect; 
+        if (response.data.role === "admin") {
+          this.$router.push("/dashboard");
+        } else if (response.data.role === "cafe_staff") {
+          if (redirectPath === "homesms") {
+            this.$router.push("/homesms");
+          } else {
+            this.$router.push("/homeims");
+          }
+        }
+      } catch (error) {
+        this.errorMessage = error.response?.data?.detail || "Invalid username or password";
+        this.toast.error(this.errorMessage, { position: "top-right", timeout: 3000 });
       }
-    }
-  } catch (error) {
-    this.errorMessage = error.response?.data?.detail || "Invalid username or password";
-  }
-},
+    },
   },
 };
 </script>
+
 
 <style scoped>
 :root {

@@ -214,6 +214,7 @@ export default {
 .stock-table {
   width: 100%;
   border-collapse: collapse;
+  
 }
 
 .stock-table th,
@@ -226,12 +227,14 @@ export default {
 .stock-table tbody {
   font-family: 'Arial', sans-serif;
   font-size: 15px;
+  
 }
 
 .stock-table th {
   background-color: #f4f4f4;
   padding: 13px;
   font-weight: bold;
+
 }
 
 /* Main Content */
