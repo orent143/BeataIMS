@@ -9,7 +9,6 @@
       </div>
     </div>
 
-    <!-- Add Category Form -->
     <AddCategory 
       v-if="showAddForm" 
       @add="addCategory" 
@@ -17,11 +16,10 @@
       @close="toggleAddForm"
       class="add-category-form" 
     />
-
+    <div class="category-container">
     <div class="category-list">
-      <!-- Categories Grid -->
       <div v-for="category in filteredCategories" :key="category.id" class="category-card">
-        <h3>{{ category.CategoryName }}</h3> <!-- Display CategoryName -->
+        <h3>{{ category.CategoryName }}</h3> 
         <div class="category-actions">
           <button @click="setEditCategory(category)" class="action-btn edit-btn">
             <i class="pi pi-pencil"></i>
@@ -32,8 +30,8 @@
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Edit Category Form -->
     <EditCategory 
   v-if="editingCategory" 
   :category="editingCategory" 
@@ -59,7 +57,7 @@ export default {
   },
   data() {
     return {
-      categories: [],  // Categories fetched from API
+      categories: [],  
       showAddForm: false,
       editingCategory: null,
       searchTerm: ''
@@ -73,7 +71,7 @@ export default {
     }
   },
   created() {
-    this.fetchCategories();  // Fetch categories when the component is created
+    this.fetchCategories(); 
   },
   methods: {
     toggleEditForm() {
@@ -91,7 +89,7 @@ export default {
     }
   },
   async addCategory(newCategory) {
-    await this.fetchCategories(); // Refresh categories after adding
+    await this.fetchCategories(); 
     this.toggleAddForm();
   },
   setEditCategory(category) {
@@ -102,17 +100,16 @@ export default {
     if (index !== -1) {
       this.categories[index] = updatedCategory;
     }
-    this.editingCategory = null; // Close the form
+    this.editingCategory = null; 
   },
   
   async removeCategory(categoryId) {
   try {
-    console.log("Deleting category with ID:", categoryId); // Debugging log
+    console.log("Deleting category with ID:", categoryId); 
 
-    // Use categoryId instead of id
     const response = await axios.delete(`http://127.0.0.1:8000/api/categories/categories/${categoryId}`);
     
-    console.log(response.data); // Log backend response
+    console.log(response.data);
     this.categories = this.categories.filter(cat => cat.id !== categoryId);
   } catch (error) {
     console.error("Error deleting category:", error.response?.data || error.message);
@@ -128,9 +125,9 @@ export default {
 .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 230px; /* Make space for sidebar, adjust as needed */
-  height: 100%; /* Full height of the page */
+  flex-grow: 1;
+  margin-left: 230px;
+  height: 100%; 
 }
 
 .header-container {
@@ -140,7 +137,28 @@ export default {
   margin-left: 18px;
   width: 95%;
 }
+.category-container {
+  flex-grow: 1;
+  background-color: #EFEFEF;
+  border-radius: 25px;
+  overflow-y: auto; 
+  margin-left: 5px;
+  padding: 20px;
+  height: calc(100vh - 120px); 
+  max-height: 40dvw;
+}
+.category-container::-webkit-scrollbar {
+  width: 6px;
+}
 
+.category-container::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 3px;
+}
+
+.category-container::-webkit-scrollbar-track {
+  background: transparent;
+}
 .products-header {
   color: #333;
   font-size: 30px;
@@ -155,16 +173,17 @@ export default {
 }
 
 .main-content {
-  flex-grow: 1; /* Allow the content to take the remaining space */
-  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
-  height: calc(100vh - 60px); /* Account for header height */
-  overflow-y: auto; /* Enable scrolling if content overflows */
+  flex-grow: 1; 
+  transition: margin-left 0.3s ease; 
+  height: calc(100vh - 60px); 
+  overflow-y: auto; 
 }
 
 .category-list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns layout */
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
+  overflow-y: auto; 
 }
 
 .category-card {

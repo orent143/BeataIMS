@@ -58,8 +58,8 @@
 import axios from 'axios';
 import AddSupplier from '@/components/ims/AddSupplier.vue';
 import EditSupplier from '@/components/ims/EditSupplier.vue';
-import SideBar from '@/components/ims/SideBar.vue'; // Import Sidebar component
-import Header from '@/components/Header.vue'; // Import Header component
+import SideBar from '@/components/ims/SideBar.vue'; 
+import Header from '@/components/Header.vue'; 
 
 export default {
   components: {
@@ -76,38 +76,33 @@ export default {
       showAddForm: false,
       showEditForm: false,
       selectedSupplier: null,
-      suppliers: [],  // Changed from supplierItems to suppliers
-      filteredSuppliers: []   // Changed from filteredItems to filteredSuppliers
+      suppliers: [],  
+      filteredSuppliers: []   
     };
   },
   methods: {
-  // Toggle Filter Dropdown
   toggleFilterDropdown() {
     this.showFilterDropdown = !this.showFilterDropdown;
   },
 
-  // Toggle Add Supplier Form
   toggleAddForm() {
     this.showAddForm = !this.showAddForm;
   },
 
-  // Toggle Edit Supplier Form
   toggleEditForm() {
       this.showEditForm = !this.showEditForm;
     },
 
-  // Fetch Suppliers from API
   async fetchSuppliers() {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/suppliers/');  // Correct endpoint
-      this.suppliers = response.data; // Assign fetched suppliers to suppliers array
-      this.filterSuppliers();  // Update filteredSuppliers
+      const response = await axios.get('http://127.0.0.1:8000/api/suppliers/');  
+      this.suppliers = response.data; 
+      this.filterSuppliers();  
     } catch (error) {
       console.error("Error fetching suppliers:", error);
     }
   },
 
-  // Filter Suppliers based on search term or selected status (you can adjust this to your needs)
   filterSuppliers() {
     this.filteredSuppliers = this.suppliers.filter((supplier) => {
       const matchesSearchTerm = supplier.suppliername.toLowerCase().includes(this.searchTerm.toLowerCase());
@@ -116,9 +111,8 @@ export default {
     });
   },
 
-  // Additional method to handle adding, editing, and removing suppliers
   async addSupplier(newSupplier) {
-    await this.fetchSuppliers(); // Refresh supplier list after adding
+    await this.fetchSuppliers(); 
     this.toggleAddForm();
   },
 
@@ -130,8 +124,8 @@ export default {
   saveSupplier(updatedSupplier) {
     const index = this.suppliers.findIndex(supplier => supplier.id === updatedSupplier.id);
     if (index !== -1) {
-      this.suppliers[index] = updatedSupplier; // Update supplier in the list
-      this.filterSuppliers(); // Update the filtered list
+      this.suppliers[index] = updatedSupplier; 
+      this.filterSuppliers(); 
     }
     this.toggleEditForm();
   },
@@ -140,20 +134,19 @@ export default {
   if (confirm("Are you sure you want to delete this supplier?")) {
     try {
       await axios.delete(`http://127.0.0.1:8000/api/suppliers/suppliers/${supplierId}`);
-      this.fetchSuppliers(); // Refresh the supplier list after deletion
+      this.fetchSuppliers();
     } catch (error) {
       console.error("Error deleting supplier:", error);
     }
   }
 },
 closeForm() {
-      this.selectedSupplier = null; // Reset the selected supplier
-      this.toggleEditForm(); // Close the edit form
+      this.selectedSupplier = null; 
+      this.toggleEditForm(); 
     }
   },
 
 
-// When the component is created, fetch the suppliers
 created() {
   this.fetchSuppliers();
 },
@@ -169,9 +162,9 @@ created() {
 .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 230px; /* Make space for sidebar, adjust as needed */
-  height: 100%; /* Full height of the page */
+  flex-grow: 1; 
+  margin-left: 230px; 
+  height: 100%; 
 }
 
 .header-container {

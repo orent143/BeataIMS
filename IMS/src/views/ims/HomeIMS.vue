@@ -1,5 +1,4 @@
 <template>
-  <!-- Import Header component -->
   <Header />
 
   <SideBar />
@@ -9,91 +8,90 @@
       <h1 class="products-header">Dashboard</h1>
       <div class="header-actions">
         <div class="date-display">
-    <i class="pi pi-calendar"></i>
-    <span>{{ currentDate }}</span>
-  </div>
+          <i class="pi pi-calendar"></i>
+          <span>{{ currentDate }}</span>
+        </div>
       </div>
     </div>
 
-      <div class="dashboard-container">
-        <!-- Summary Cards -->
-        <div class="summary-cards">
-          <div class="card total-sales">
-    <div class="card-icon">
-      <i class="pi pi-chart-line"></i>
-    </div>
-            <div class="card-content">
-              <h3>Total Sales</h3>
-              <p class="amount">₱{{ totalSales.toFixed(2) }}</p>
-              <p class="subtitle">Today's Revenue</p>
-            </div>
+    <div class="dashboard-container">
+      <div class="summary-cards">
+        <div class="card total-sales">
+          <div class="card-icon">
+            <i class="pi pi-chart-line"></i>
           </div>
-
-          <div class="card total-products">
-    <div class="card-icon">
-      <i class="pi pi-box"></i>
-    </div>
-            <div class="card-content">
-              <h3>Total Products</h3>
-              <p class="amount">{{ totalProducts }}</p>
-              <p class="subtitle">In Inventory</p>
-            </div>
-          </div>
-
-          <div class="card low-stock">
-    <div class="card-icon">
-      <i class="pi pi-exclamation-triangle"></i>
-    </div>
-            <div class="card-content">
-              <h3>Low Stock</h3>
-              <p class="amount">{{ lowStockCount }}</p>
-              <p class="subtitle">Items Need Restock</p>
-            </div>
-          </div>
-
-          <div class="card top-selling">
-    <div class="card-icon">
-      <i class="pi pi-star-fill"></i>
-    </div>
-            <div class="card-content">
-              <h3>Top Selling</h3>
-              <p class="product-name">{{ topSellingProduct }}</p>
-              <p class="subtitle">Most Popular Item</p>
-            </div>
+          <div class="card-content">
+            <h3>Total Cost</h3>
+            <p class="amount">₱{{ totalCost.toFixed(2) }}</p>
+            <p class="subtitle">Overall Cost</p>
           </div>
         </div>
 
-        <!-- Recent Activity -->
-        <div class="recent-activity">
-          <h2>Recent Activity</h2>
-          <div class="activity-list">
-            <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
-              <div class="activity-icon">
-                <i :class="activity.icon"></i>
-              </div>
-              <div class="activity-details">
-                <p class="activity-title">{{ activity.title }}</p>
-                <p class="activity-time">{{ activity.time }}</p>
-              </div>
-              <div class="activity-status" :class="activity.status.toLowerCase()">
-                {{ activity.status }}
-              </div>
+        <div class="card total-products">
+          <div class="card-icon">
+            <i class="pi pi-box"></i>
+          </div>
+          <div class="card-content">
+            <h3>Total Products</h3>
+            <p class="amount">{{ totalProducts }}</p>
+            <p class="subtitle">In Inventory</p>
+          </div>
+        </div>
+
+        <div class="card low-stock">
+          <div class="card-icon">
+            <i class="pi pi-exclamation-triangle"></i>
+          </div>
+          <div class="card-content">
+            <h3>Low Stock</h3>
+            <p class="amount">{{ lowStockCount }}</p>
+            <p class="subtitle">Items Need Restock</p>
+          </div>
+        </div>
+
+        <div class="card top-selling">
+          <div class="card-icon">
+            <i class="pi pi-star-fill"></i>
+          </div>
+          <div class="card-content">
+            <h3>Top Selling</h3>
+            <p class="product-name">{{ topSellingProduct }}</p>
+            <p class="subtitle">Most Popular Item</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="recent-activity">
+        <h2>Recent Activity</h2>
+        <div class="activity-list">
+          <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
+            <div class="activity-icon">
+              <i :class="activity.icon"></i>
+            </div>
+            <div class="activity-details">
+              <p class="activity-title">{{ activity.title }}</p>
+              <p class="activity-time">{{ activity.time }}</p>
+            </div>
+            <div class="activity-status" :class="activity.status.toLowerCase()">
+              {{ activity.status }}
             </div>
           </div>
         </div>
       </div>
+    </div>
   </div>
 </template>
 
 <script>
-// Import Header and Sidebar components
-import SideBar from '@/components/ims/SideBar.vue'; // Import Sidebar component
-import Header from '@/components/Header.vue'; // Import Header component
+import SideBar from '@/components/ims/SideBar.vue';
+import Header from '@/components/Header.vue';
+import axios from 'axios';
 
 export default {
   components: {
     SideBar,
-    Header, // Register Header component
+    Header,
   },
   name: 'Home',
   data() {
@@ -104,52 +102,65 @@ export default {
         month: 'long',
         day: 'numeric'
       }),
-      totalSales: 25850.75,
+      totalCost: 0,
       totalProducts: 156,
       lowStockCount: 8,
       topSellingProduct: 'Espresso',
-      recentActivities: [
-      {
-          id: 1,
-          icon: 'pi pi-shopping-cart',
-          title: 'New sale recorded',
-          time: '5 minutes ago',
-          status: 'Completed'
-        },
-        {
-          id: 2,
-          icon: 'pi pi-box',
-          title: 'Inventory updated',
-          time: '15 minutes ago',
-          status: 'Success'
-        },
-        {
-          id: 3,
-          icon: 'pi pi-exclamation-circle',
-          title: 'Low stock alert',
-          time: '1 hour ago',
-          status: 'Warning'
-        },
-        {
-          id: 4,
-          icon: 'pi pi-truck',
-          title: 'New supplier order',
-          time: '2 hours ago',
-          status: 'Pending'
-        }
-      ]
+      recentActivities: []
+    };
+  },
+  methods: {
+    async fetchTotalCost() {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/stock/total_cost");
+        this.totalCost = parseFloat(response.data.total_cost);
+      } catch (error) {
+        console.error("Error fetching total cost:", error);
+      }
+    },
+    async fetchTotalProducts() {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/inventory/inventoryproduct/total");
+        this.totalProducts = parseFloat(response.data.total_products);
+      } catch (error) {
+        console.error("Error fetching total products:", error);
+      }
+    },
+    async fetchTotalLowStocks() {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/stock/stocks/low_stock/total");
+        this.lowStockCount = parseFloat(response.data.total_low_stock);
+      } catch (error) {
+        console.error("Error fetching total stocks:", error);
+      }
+    },
+    async fetchActivityLogs() {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/activity_logs");
+        this.recentActivities = response.data;
+      } catch (error) {
+        console.error("Error fetching activity logs:", error);
+      }
     }
+  },
+  mounted() {
+    this.fetchTotalCost(); 
+    this.fetchTotalProducts();
+    this.fetchTotalLowStocks();
+    this.fetchActivityLogs();
+    
+
   }
-}
+};
 </script>
 
 <style scoped>
 .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 230px; /* Make space for sidebar, adjust as needed */
-  height: 100%; /* Full height of the page */
+  flex-grow: 1; 
+  margin-left: 230px; 
+  height: 100%; 
 }
 
 .header-container {
@@ -186,7 +197,6 @@ export default {
   padding: 20px;
 }
 
-/* Summary Cards */
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -256,13 +266,16 @@ export default {
   color: #888;
 }
 
-/* Recent Activity */
 .recent-activity {
   background: white;
   border-radius: 15px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 25dvw; 
+  display: flex;
+  flex-direction: column;
 }
+
 
 .recent-activity h2 {
   margin: 0 0 20px 0;
@@ -274,8 +287,22 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  overflow-y: auto;
+  max-height: 100%; 
+  padding-right: 10px; 
+}
+.activity-list::-webkit-scrollbar {
+  width: 6px;
 }
 
+.activity-list::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 3px;
+}
+
+.activity-list::-webkit-scrollbar-track {
+  background: transparent;
+}
 .activity-item {
   display: flex;
   align-items: center;

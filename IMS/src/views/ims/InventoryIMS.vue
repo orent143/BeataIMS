@@ -1,16 +1,13 @@
 <template>
-  <!-- Import Header component -->
   <Header />
 
   <SideBar />
 
   <div class="app-container">
-    <!-- Header Section -->
     <div class="header-container">
       <h1 class="products-header">Product List</h1>
       <div class="header-actions">
 
-        <!-- Filter Dropdown -->
         <div class="filter-container">
           <button class="filter-btn" @click="toggleFilterDropdown">
             <i class="fas fa-filter"></i>
@@ -25,12 +22,10 @@
           </div>
         </div>
 
-        <!-- Add Stock Button -->
         <button @click="toggleAddForm" class="add-product-btn">Add</button>
       </div>
     </div>
 
-    <!-- Main Content Section -->
     <div class="inventory-container">
       <table class="stock-table">
         <thead>
@@ -74,7 +69,6 @@
         </tbody>
       </table>
 
-      <!-- Floating Button and Popout Options -->
       <div class="floating-btn-container">
         <button class="floating-btn" @click="togglePopoutOptions">+</button>
         <div v-if="showPopoutOptions" class="popout-options">
@@ -84,7 +78,6 @@
       </div>
     </div>
 
-    <!-- Add or Edit Item Form -->
     <add-product
       v-if="showAddForm"
       :isVisible="showAddForm"
@@ -92,7 +85,6 @@
       @add="addItem"
     />
 
-    <!-- Edit Item Form -->
     <edit-product
       v-if="showEditForm"
       :isVisible="showEditForm"
@@ -128,7 +120,7 @@ export default {
       isLowStockMode: false,
       currentDate: new Date().toISOString().split('T')[0],
       inventorySummaries: [],
-      toast: useToast(), // Initialize toast
+      toast: useToast(), 
     };
   },
 
@@ -170,7 +162,7 @@ export default {
     addItem(newProduct) {
       this.productItems.push(newProduct);
       this.filterItems();
-      this.showAddForm = false; // Close the form
+      this.showAddForm = false; 
     },
     async fetchProductItems() {
       try {
@@ -200,13 +192,12 @@ export default {
           updatedProduct
         );
 
-        // Ensure the product list updates properly
         const index = this.productItems.findIndex(
           (item) => item.id === updatedProduct.id
         );
         if (index !== -1) {
           this.productItems[index] = { ...updatedProduct };
-          this.productItems = [...this.productItems]; // Force Vue to detect changes
+          this.productItems = [...this.productItems]; 
         }
 
         this.filterItems();
@@ -216,7 +207,7 @@ export default {
       }
     },
     editItem(product) {
-      console.log("Editing product:", product); // Debugging log
+      console.log("Editing product:", product); 
       this.selectedItem = { ...product };
       this.showEditForm = true;
     },
@@ -256,13 +247,12 @@ export default {
 
 
 <style scoped>
-/* General Styling */
 .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 230px; /* Make space for sidebar, adjust as needed */
-  height: 100%; /* Full height of the page */
+  flex-grow: 1; 
+  margin-left: 230px; 
+  height: 100%; 
 }
 
 .header-container {
@@ -286,8 +276,6 @@ export default {
   gap: 10px;
 }
 
-/* Main Content */
-
 
 .inventory-container {
   position: relative;
@@ -302,7 +290,6 @@ export default {
   padding: 0;
 }
 
-/* Stock Table Styling */
 .stock-table {
   width: 100%;
   border-collapse: collapse;
@@ -333,8 +320,6 @@ export default {
   cursor: pointer;
 }
 
-/* Modify header for low stock mode */
-/* Search Bar */
 .search-container {
   position: relative;
   margin-right: 3px;
@@ -360,7 +345,6 @@ export default {
   background-color: #D9D9D9;
 }
 
-/* Filter Button */
 .filter-btn {
   padding: 8px;
   background-color: transparent;
@@ -396,7 +380,6 @@ export default {
   margin-bottom: 10px;
 }
 
-/* Add Product Button */
 .add-product-btn {
   padding: 8px 12px;
   background-color: #E54F70;
@@ -413,7 +396,6 @@ export default {
   background-color: #ed9598;
 }
 
-/* Action Buttons */
 .action-btn {
   padding: 8px;
   background-color: transparent;
@@ -450,13 +432,13 @@ export default {
 }
 
 .floating-btn-container {
-  position: fixed; /* Change from absolute to fixed */
+  position: fixed; 
   bottom: 20px;
   right: 20px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  z-index: 10; /* Ensure it's above other content */
+  z-index: 10; 
 }
 
 .floating-btn {
@@ -479,7 +461,6 @@ export default {
   background-color: #ed9598;
 }
 
-/* Popout Options */
 .popout-options {
   display: flex;
   flex-direction: column;
@@ -508,27 +489,26 @@ export default {
 .popout-option:active {
   background-color: #004080;
 }
-/* General Status Styles */
+
 .status {
   padding: 4px 8px;
   border-radius: 15px;
   font-size: 12px;
-  display: inline-block; /* Ensure it behaves like a block element */
+  display: inline-block;
 }
 
-/* Specific Status Styles */
 .status-in-stock {
-  background: #E8F5E9; /* Light green */
-  color: #4CAF50; /* Dark green */
+  background: #E8F5E9; 
+  color: #4CAF50;
 }
 
 .status-low-stock {
-  background: #FFF3E0; /* Light yellow */
-  color: #FF9800; /* Dark yellow */
+  background: #FFF3E0; 
+  color: #FF9800; 
 }
 
 .status-out-of-stock {
-  background: #F8D7DA; /* Light red */
-  color: #721c24; /* Dark red */
+  background: #F8D7DA; 
+  color: #721c24; 
 }
 </style>

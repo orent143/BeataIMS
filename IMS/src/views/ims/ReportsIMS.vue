@@ -7,7 +7,6 @@
     </div>
 
     <div class="report-cards">
-      <!-- Summary Report Card -->
       <div class="report-card" @click="goToReport('summary')">
         <div class="report-card-header">
           <i class="fas fa-chart-line report-icon"></i>
@@ -22,7 +21,6 @@
         </div>
       </div>
 
-      <!-- Low Stock Report Card -->
       <div class="report-card" @click="goToReport('lowStock')">
         <div class="report-card-header">
           <i class="fas fa-box report-icon"></i>
@@ -64,7 +62,6 @@ export default {
         this.totalSummaryReports = report.total_items;
         this.totalSummaryAmount = parseFloat(report.total_value).toFixed(2);
 
-// Fetch low stock report
         const lowStockResponse = await axios.get('http://127.0.0.1:8000/api/reports/low_stock_report');
         const lowStockReport = lowStockResponse.data;
         this.totalLowStockReports = lowStockReport.items.length;
@@ -85,7 +82,7 @@ export default {
     }
   },
   created() {
-    this.fetchReportData(); // Fetch data when component is created
+    this.fetchReportData(); 
   }
 };
 </script>

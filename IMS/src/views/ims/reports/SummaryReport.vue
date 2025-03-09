@@ -42,7 +42,6 @@
         </table>
       </div>
 
-      <!-- Wrap totals in a separate div -->
       <div class="totals-container">
         <div class="totals-item">
           <span>Report Date: </span>
@@ -81,8 +80,8 @@ export default {
         total_value: 0,
       },
       inventoryProducts: [],
-      selectedDate: new Date().toISOString().split("T")[0], // Default to today
-      currentDate: new Date().toISOString().split("T")[0], // Used to limit max date
+      selectedDate: new Date().toISOString().split("T")[0], 
+      currentDate: new Date().toISOString().split("T")[0], 
     };
   },
   computed: {
@@ -121,7 +120,7 @@ export default {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    hour12: true, // Ensures AM/PM format
+    hour12: true, 
   });
 }
 ,
@@ -153,7 +152,6 @@ export default {
 </script>
 
 <style scoped>
-/* General Styling */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -183,7 +181,6 @@ export default {
   gap: 10px;
 }
 
-/* Filter Styles */
 .filter-container {
   position: relative;
 }
@@ -210,7 +207,6 @@ export default {
   padding: 8px;
 }
 
-/* Table Styles */
 .stock-table {
   width: 100%;
   border-collapse: collapse;
@@ -237,9 +233,6 @@ export default {
 
 }
 
-/* Main Content */
-
-
 .inventory-container {
   position: relative;
   flex-grow: 1;
@@ -253,20 +246,18 @@ export default {
   padding: 0;
 }
 
-/* Table Container takes available space */
 .table-container {
   flex-grow: 1;
   overflow-y: auto;
   border-radius: 25px;
 }
 
-/* Totals Container Positioned at the Bottom */
 .totals-container {
   display: flex;
   justify-content: space-between;
   padding: 15px;
   background-color: #f4f4f4;
-  margin-top: auto; /* Pushes it to the bottom */
+  margin-top: auto; 
   border-bottom-right-radius: 25px;
   border-bottom-left-radius: 25px;
   position: sticky;
@@ -277,8 +268,6 @@ export default {
   width: 30%;
   font-weight: bold;
 }
-
-/* Button Styles */
 .export-btn {
   background-color: #E54F70;
   color: white;
@@ -288,7 +277,6 @@ export default {
   cursor: pointer;
 }
 
-/* Search Bar */
 .search-container {
   position: relative;
 }
@@ -316,27 +304,25 @@ export default {
 .summary-spacer {
   height: 5px;
 }
-/* General Status Styles */
 .status {
   padding: 4px 8px;
   border-radius: 15px;
   font-size: 12px;
-  display: inline-block; /* Ensure it behaves like a block element */
+  display: inline-block; 
 }
 
-/* Specific Status Styles */
 .status-in-stock {
-  background: #E8F5E9; /* Light green */
-  color: #4CAF50; /* Dark green */
+  background: #E8F5E9; 
+  color: #4CAF50;
 }
 
 .status-low-stock {
-  background: #FFF3E0; /* Light yellow */
-  color: #FF9800; /* Dark yellow */
+  background: #FFF3E0; 
+  color: #FF9800;
 }
 
 .status-out-of-stock {
-  background: #F8D7DA; /* Light red */
-  color: #721c24; /* Dark red */
+  background: #F8D7DA; 
+  color: #721c24; 
 }
 </style>

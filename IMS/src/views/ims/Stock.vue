@@ -123,7 +123,7 @@ export default {
       try {
         const response = await axios.get('http://127.0.0.1:8000/api/stock/');
         this.stocks = response.data;
-        this.filteredItems = [...this.stocks]; // Refresh filtered list
+        this.filteredItems = [...this.stocks]; 
       } catch (error) {
         console.error('Error fetching stocks:', error);
       }
@@ -157,7 +157,7 @@ export default {
           SupplierID: newItem.SupplierID
         });
 
-        await this.fetchStocks(); // 🔄 Refresh stocks
+        await this.fetchStocks(); 
         this.showAddForm = false;
         toast.success('Stock added successfully!');
       } catch (error) {
@@ -168,17 +168,28 @@ export default {
     async addLowStock() {
       const toast = useToast();
       try {
-        // Make POST request to backend to add low stock items
         const response = await axios.post('http://127.0.0.1:8000/api/stock/stocks/low_stock');
         
-        // Provide feedback to the user
         toast.success('Low stock items have been successfully added to the stock report!');
         
-        // Refresh the list of stocks after adding the low stock items
-        await this.fetchStocks(); // 🔄 Refresh stocks
+        await this.fetchStocks(); 
       } catch (error) {
         console.error('Error adding low stock:', error);
         toast.error('Error adding low stock items.');
+      }
+    },
+    async removeItem(stockID) {
+      const toast = useToast();
+      if (!confirm('Are you sure you want to delete this stock?')) {
+        return;
+      }
+      try {
+        await axios.delete(`http://127.0.0.1:8000/api/stock/stocks/${stockID}`);
+        this.fetchStocks(); 
+        toast.success('Stock deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting stock:', error);
+        toast.error('Error deleting stock.');
       }
     },
     filterLowStock() {
@@ -201,13 +212,12 @@ export default {
 </script>
 
   <style scoped>
-  /* Use same styles as Inventory page */
   .app-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   margin-left: 230px; 
-  height: 100%; /* Full height of the page */
+  height: 100%; 
 }
 .header-container {
   display: flex;
@@ -244,7 +254,6 @@ export default {
   padding: 0;
 }
   
-  /* Styling for the stock table */
   .stock-table {
     width: 100%;
     border-collapse: collapse;
@@ -334,7 +343,7 @@ export default {
 }
 
 .name-with-checkbox input[type="checkbox"] {
-  margin-right: 10px; /* Add space between checkbox and name */
+  margin-right: 10px;
 }
 .add-product-btn {
   padding: 8px 12px;
@@ -351,7 +360,6 @@ export default {
 .add-product-btn:hover {
   background-color: #ed9598;
 }
-/* Add a gap between the action buttons */
 .action-btn {
   padding: 8px;
   background-color: transparent;
@@ -383,13 +391,13 @@ export default {
   background-color: rgba(0, 0, 0, 0.2);
 }
 .floating-btn-container {
-  position: fixed; /* Change from absolute to fixed */
+  position: fixed; 
   bottom: 20px;
   right: 20px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  z-index: 10; /* Ensure it's above other content */
+  z-index: 10; 
 }
 
 .floating-btn {
@@ -412,7 +420,6 @@ export default {
   background-color: #ed9598;
 }
 
-/* Popout Options */
 .popout-options {
   display: flex;
   flex-direction: column;
@@ -434,11 +441,11 @@ export default {
   }
 
   .popout-option input[type="checkbox"] {
-    margin-right: 10px; /* Add space between checkbox and label */
+    margin-right: 10px;
   }
 
   .checkbox-label {
-    font-size: 14px; /* Adjust font size */
+    font-size: 14px;
     color: #333;
   }
 
@@ -449,27 +456,26 @@ export default {
   .popout-option:active {
     background-color: #004080;
   }
-  /* General Status Styles */
+
 .status {
   padding: 4px 8px;
   border-radius: 15px;
   font-size: 12px;
-  display: inline-block; /* Ensure it behaves like a block element */
+  display: inline-block; 
 }
 
-/* Specific Status Styles */
 .status-in-stock {
-  background: #E8F5E9; /* Light green */
-  color: #4CAF50; /* Dark green */
+  background: #E8F5E9; 
+  color: #4CAF50; 
 }
 
 .status-low-stock {
-  background: #FFF3E0; /* Light yellow */
-  color: #FF9800; /* Dark yellow */
+  background: #FFF3E0; 
+  color: #FF9800;
 }
 
 .status-out-of-stock {
-  background: #F8D7DA; /* Light red */
-  color: #721c24; /* Dark red */
+  background: #F8D7DA; 
+  color: #721c24; 
 }
 </style>

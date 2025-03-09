@@ -95,7 +95,7 @@ export default {
       stocks: [],
       loading: false,
       errorMessage: "",
-      toast: useToast(), // Initialize Toast
+      toast: useToast(), 
     };
   },
   computed: {
@@ -252,8 +252,8 @@ export default {
 }
 
 .form-input:focus {
-  border-color: #FF32BA; /* Bold focus color */
-  box-shadow: 0 0 5px rgba(255, 50, 186, 0.5); /* Focus shadow */
+  border-color: #FF32BA; 
+  box-shadow: 0 0 5px rgba(255, 50, 186, 0.5); 
   outline: none;
 }
 
@@ -280,7 +280,7 @@ textarea.form-input {
 }
 
 .submit-btn:hover {
-  background-color: #c0425d; /* Darker hover color */
+  background-color: #c0425d; 
 }
 
 .reset-btn {
@@ -295,7 +295,7 @@ textarea.form-input {
 }
 
 .reset-btn:hover {
-  background-color: #5a6268; /* Darker reset button hover */
+  background-color: #5a6268; 
 }
 
 button:focus {
