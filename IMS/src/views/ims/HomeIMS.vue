@@ -22,8 +22,8 @@
           </div>
           <div class="card-content">
             <h3>Total Cost</h3>
-            <p class="amount">₱{{ totalCost.toFixed(2) }}</p>
-            <p class="subtitle">Overall Cost</p>
+            <p class="amount">₱{{ animatedTotalCost.toFixed(2) }}</p>
+            <p class="subtitle">Overall Stock Cost</p>
           </div>
         </div>
 
@@ -33,7 +33,7 @@
           </div>
           <div class="card-content">
             <h3>Total Products</h3>
-            <p class="amount">{{ totalProducts }}</p>
+            <p class="amount">{{ Math.round(animatedTotalProducts) }}</p>
             <p class="subtitle">In Inventory</p>
           </div>
         </div>
@@ -44,7 +44,7 @@
           </div>
           <div class="card-content">
             <h3>Low Stock</h3>
-            <p class="amount">{{ lowStockCount }}</p>
+            <p class="amount">{{ Math.round(animatedLowStockCount) }}</p>
             <p class="subtitle">Items Need Restock</p>
           </div>
         </div>
@@ -103,10 +103,13 @@ export default {
         day: 'numeric'
       }),
       totalCost: 0,
-      totalProducts: 156,
-      lowStockCount: 8,
+      totalProducts: 0,
+      lowStockCount: 0,
       topSellingProduct: 'Espresso',
-      recentActivities: []
+      recentActivities: [],
+      animatedTotalCost: 0,
+      animatedTotalProducts: 0,
+      animatedLowStockCount: 0,
     };
   },
   methods: {
@@ -121,7 +124,7 @@ export default {
     async fetchTotalProducts() {
       try {
         const response = await axios.get("http://127.0.0.1:8000/api/inventory/inventoryproduct/total");
-        this.totalProducts = parseFloat(response.data.total_products);
+        this.totalProducts = parseInt(response.data.total_products);
       } catch (error) {
         console.error("Error fetching total products:", error);
       }
@@ -129,7 +132,7 @@ export default {
     async fetchTotalLowStocks() {
       try {
         const response = await axios.get("http://127.0.0.1:8000/api/stock/stocks/low_stock/total");
-        this.lowStockCount = parseFloat(response.data.total_low_stock);
+        this.lowStockCount = parseInt(response.data.total_low_stock);
       } catch (error) {
         console.error("Error fetching total stocks:", error);
       }
@@ -141,6 +144,31 @@ export default {
       } catch (error) {
         console.error("Error fetching activity logs:", error);
       }
+    },
+    animateValue(property, targetValue) {
+      let start = this[property];
+      let increment = (targetValue - start) / 50;
+      let count = 0;
+
+      const interval = setInterval(() => {
+        this[property] += increment;
+        count++;
+        if (count >= 50) {
+          this[property] = targetValue;
+          clearInterval(interval);
+        }
+      }, 20);
+    }
+  },
+  watch: {
+    totalCost(newVal) {
+      this.animateValue('animatedTotalCost', newVal);
+    },
+    totalProducts(newVal) {
+      this.animateValue('animatedTotalProducts', newVal);
+    },
+    lowStockCount(newVal) {
+      this.animateValue('animatedLowStockCount', newVal);
     }
   },
   mounted() {
@@ -148,10 +176,9 @@ export default {
     this.fetchTotalProducts();
     this.fetchTotalLowStocks();
     this.fetchActivityLogs();
-    
-
   }
 };
+
 </script>
 
 <style scoped>

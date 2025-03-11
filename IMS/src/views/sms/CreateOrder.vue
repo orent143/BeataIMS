@@ -186,15 +186,14 @@ export default {
 </script>
 
   
-  <style scoped>
+<style scoped>
 .app-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   margin-left: 230px;
-  height: 100%; /* Ensure full viewport height */
+  height: 100vh; /* Ensure full viewport height */
 }
-
 
 .header-container {
   display: flex;
@@ -203,95 +202,97 @@ export default {
   margin-left: 18px;
   width: 95%;
 }
+
 h1 {
-    color: #333;
-    font-size: 30px;
-    font-family: 'Arial', sans-serif;
-    font-weight: 900;
-  }
-  .content-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 20px;
-    
-  }
-  
-  .main-content {
-  background-color: transparent;
-  flex-grow: 1; /* Allow the content to take the remaining space */
-  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
+  color: #333;
+  font-size: 30px;
+  font-family: 'Arial', sans-serif;
+  font-weight: 900;
+}
+
+.content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 20px;
   height: calc(100vh - 60px); /* Account for header height */
   overflow-y: auto; /* Enable scrolling if content overflows */
 }
-  
-  .order-details-section {
-    border-radius: 8px;
-    padding: 0px;
-    top: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .customer-details {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  h2 {
-    color: #333;
-    margin-bottom: 10px;
-    font-size: 1.5em;
-  }
-  
-  .form-group {
-    margin-bottom: 20px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #555;
-  }
-  
-  .form-input {
-    width: 95%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-bottom: 10px;
-  }
-  
-  .form-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    margin-top: 30px;
-  }
-  
-  .submit-btn {
-    background: #E54F70;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  
-  .reset-btn {
-    background: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    opacity: 0.9;
-  }
-  </style>
+
+.main-content {
+  background-color: transparent;
+  flex-grow: 1; /* Allow the content to take the remaining space */
+  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
+  overflow-y: auto; /* Enable scrolling if content overflows */
+}
+
+.order-details-section {
+  border-radius: 8px;
+  padding: 0px;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.customer-details {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 1.5em;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+.form-input {
+  width: 95%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.submit-btn {
+  background: #E54F70;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.reset-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+</style>

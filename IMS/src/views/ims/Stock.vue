@@ -39,7 +39,7 @@
             <td>{{ stock.StockName }}</td>
             <td>{{ stock.Quantity }}</td>
             <td>₱{{ stock.CostPrice }}</td>
-            <td>{{ stock.SupplierID }}</td>
+            <td>{{ getSupplierName(stock.SupplierID) }}</td>
             <td>
               <span :class="'status status-' + getStatus(stock.Quantity).toLowerCase().replace(/ /g, '-')">
                 {{ getStatus(stock.Quantity) }}
@@ -123,6 +123,7 @@ export default {
       selectedItem: null,
       selectedStockID: null,
       showPopoutOptions: false,
+      suppliers: [], // Add this to store suppliers
       toast: useToast(), 
     };
   },
@@ -144,6 +145,19 @@ export default {
         console.error('Error fetching stocks:', error);
       }
     },
+    async fetchSuppliers() {
+   try {
+      const response = await axios.get('http://127.0.0.1:8000/api/suppliers/');
+      this.suppliers = response.data;
+      console.log("Suppliers fetched:", this.suppliers);
+   } catch (error) {
+      console.error('Error fetching suppliers:', error);
+   }
+},
+    getSupplierName(supplierId) {
+   const supplier = this.suppliers.find(sup => sup.id === supplierId);
+   return supplier ? supplier.suppliername : 'Unknown'; 
+},
     filterItems() {
       if (this.selectedStatus) {
         this.filteredItems = this.stocks.filter(stock => this.getStatus(stock.Quantity) === this.selectedStatus);
@@ -231,6 +245,8 @@ export default {
   },
   mounted() {
     this.fetchStocks();
+    this.fetchSuppliers(); // Fetch suppliers on component creation
+
   }
 };
 </script>

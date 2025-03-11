@@ -14,6 +14,7 @@
         <button type="submit" class="login-btn">Login</button>
       </form>
       <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+      <p class="forgot-password" @click="handleForgotPassword">Forgot Password?</p>
     </div>
   </div>
 </template>
@@ -67,10 +68,26 @@ export default {
         this.toast.error(this.errorMessage, { position: "top-right", timeout: 3000 });
       }
     },
+    async handleForgotPassword() {
+      try {
+        const email = prompt("Please enter your email address:");
+        if (email) {
+          await axios.post("http://127.0.0.1:8000/Auth/forgot-password/", { email });
+          this.toast.success("Password reset email sent!", {
+            position: "top-right",
+            timeout: 3000,
+          });
+        }
+      } catch (error) {
+        this.toast.error("Failed to send password reset email.", {
+          position: "top-right",
+          timeout: 3000,
+        });
+      }
+    },
   },
 };
 </script>
-
 
 <style scoped>
 :root {
@@ -82,7 +99,7 @@ export default {
 .login-page {
   height: 100vh;
   background: linear-gradient(to right, #e54f6f7e, #ed959821, rgba(0, 0, 0, 0.863)),
-              url('@/assets/background.jpg') center/cover no-repeat;
+              url('@/assets/Image_20250311_143559_347.jpeg') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -165,4 +182,15 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.forgot-password {
+  margin-top: 1rem;
+  color: var(--primary-color);
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  text-decoration: underline;
+}
+
+.forgot-password:hover {
+  color: var(--accent-color);
+}
 </style>

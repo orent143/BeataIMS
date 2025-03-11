@@ -129,7 +129,7 @@ export default {
 .hero {
   height: 100vh;
   background: linear-gradient(to right, #e54f6f7e, #ed959821, rgba(0, 0, 0, 0.863)),
-              url('@/assets/background.jpg') center/cover no-repeat;
+              url('@/assets/Image_20250311_143559_347.jpeg') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;

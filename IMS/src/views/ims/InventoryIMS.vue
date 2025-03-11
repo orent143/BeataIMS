@@ -47,7 +47,7 @@
             <td>{{ product.ProductName }}</td>
             <td>{{ product.Quantity }}</td>
             <td>₱{{ product.UnitPrice }}</td>
-            <td>{{ product.CategoryID }}</td>
+            <td>{{ getCategoryName(product.CategoryID) }}</td>
             <td>
               <span :class="'status status-' + product.Status.toLowerCase().replace(/ /g, '-')">
                 {{ product.Status }}
@@ -132,6 +132,7 @@ export default {
       inventorySummaries: [],
       showConfirmModal: false,
       selectedProductId: null,
+      categories: [], // Add this to store categories
       toast: useToast(), 
     };
   },
@@ -207,6 +208,18 @@ export default {
         this.toast.error("Failed to delete product.");
       }
     },
+    async fetchCategories() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/categories/');
+        this.categories = response.data;
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    },
+    getCategoryName(categoryId) {
+      const category = this.categories.find(cat => cat.id === categoryId);
+      return category ? category.CategoryName : 'Unknown';
+    },
     async handleUpdateProduct(updatedProduct) {
       try {
         console.log("Updating product in parent:", updatedProduct);
@@ -254,6 +267,8 @@ export default {
 
   created() {
     this.fetchProductItems();
+    this.fetchCategories(); // Fetch categories on component creation
+
   },
 
   watch: {
