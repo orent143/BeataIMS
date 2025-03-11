@@ -28,13 +28,26 @@
               <button class="action-btn edit" @click="editSupplier(supplier)">
                 <i class="pi pi-pencil"></i>
               </button>
-              <button class="action-btn delete" @click="removeSupplier(supplier.id)">
+              <button class="action-btn delete" @click="confirmDelete(supplier.id)">
                 <i class="pi pi-trash"></i>
               </button>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="modal-overlay" v-if="showConfirmModal">
+      <div class="confirmation-modal">
+        <div class="modal-content">
+          <h3>Confirm Deletion</h3>
+          <p>Are you sure you want to delete this supplier?</p>
+          <div class="modal-actions">
+            <button @click="confirmSubmit" class="confirm-btn">Yes</button>
+            <button @click="cancelSubmit" class="cancel-btn">No</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <add-supplier 
@@ -60,6 +73,7 @@ import AddSupplier from '@/components/ims/AddSupplier.vue';
 import EditSupplier from '@/components/ims/EditSupplier.vue';
 import SideBar from '@/components/ims/SideBar.vue'; 
 import Header from '@/components/Header.vue'; 
+import { useToast } from 'vue-toastification';
 
 export default {
   components: {
@@ -75,88 +89,94 @@ export default {
       showFilterDropdown: false,
       showAddForm: false,
       showEditForm: false,
+      showConfirmModal: false,
       selectedSupplier: null,
+      selectedSupplierID: null,
       suppliers: [],  
-      filteredSuppliers: []   
+      filteredSuppliers: [],
+      toast: useToast(),   
     };
   },
   methods: {
-  toggleFilterDropdown() {
-    this.showFilterDropdown = !this.showFilterDropdown;
-  },
-
-  toggleAddForm() {
-    this.showAddForm = !this.showAddForm;
-  },
-
-  toggleEditForm() {
+    toggleFilterDropdown() {
+      this.showFilterDropdown = !this.showFilterDropdown;
+    },
+    toggleAddForm() {
+      this.showAddForm = !this.showAddForm;
+    },
+    toggleEditForm() {
       this.showEditForm = !this.showEditForm;
     },
-
-  async fetchSuppliers() {
-    try {
-      const response = await axios.get('http://127.0.0.1:8000/api/suppliers/');  
-      this.suppliers = response.data; 
-      this.filterSuppliers();  
-    } catch (error) {
-      console.error("Error fetching suppliers:", error);
-    }
-  },
-
-  filterSuppliers() {
-    this.filteredSuppliers = this.suppliers.filter((supplier) => {
-      const matchesSearchTerm = supplier.suppliername.toLowerCase().includes(this.searchTerm.toLowerCase());
-      const matchesStatus = this.selectedStatus ? supplier.status === this.selectedStatus : true;
-      return matchesSearchTerm && matchesStatus;
-    });
-  },
-
-  async addSupplier(newSupplier) {
-    await this.fetchSuppliers(); 
-    this.toggleAddForm();
-  },
-
-  editSupplier(supplier) {
-    this.selectedSupplier = supplier;
-    this.toggleEditForm();
-  },
-
-  saveSupplier(updatedSupplier) {
-    const index = this.suppliers.findIndex(supplier => supplier.id === updatedSupplier.id);
-    if (index !== -1) {
-      this.suppliers[index] = updatedSupplier; 
-      this.filterSuppliers(); 
-    }
-    this.toggleEditForm();
-  },
-
-  async removeSupplier(supplierId) {
-  if (confirm("Are you sure you want to delete this supplier?")) {
-    try {
-      await axios.delete(`http://127.0.0.1:8000/api/suppliers/suppliers/${supplierId}`);
-      this.fetchSuppliers();
-    } catch (error) {
-      console.error("Error deleting supplier:", error);
-    }
-  }
-},
-closeForm() {
+    async fetchSuppliers() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/suppliers/');  
+        this.suppliers = response.data; 
+        this.filterSuppliers();  
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+      }
+    },
+    filterSuppliers() {
+      this.filteredSuppliers = this.suppliers.filter((supplier) => {
+        const matchesSearchTerm = supplier.suppliername.toLowerCase().includes(this.searchTerm.toLowerCase());
+        const matchesStatus = this.selectedStatus ? supplier.status === this.selectedStatus : true;
+        return matchesSearchTerm && matchesStatus;
+      });
+    },
+    async addSupplier(newSupplier) {
+      await this.fetchSuppliers(); 
+      this.toggleAddForm();
+    },
+    editSupplier(supplier) {
+      this.selectedSupplier = supplier;
+      this.toggleEditForm();
+    },
+    saveSupplier(updatedSupplier) {
+      const index = this.suppliers.findIndex(supplier => supplier.id === updatedSupplier.id);
+      if (index !== -1) {
+        this.suppliers[index] = updatedSupplier; 
+        this.filterSuppliers(); 
+      }
+      this.toggleEditForm();
+    },
+    confirmDelete(supplierID) {
+      this.selectedSupplierID = supplierID;
+      this.showConfirmModal = true;
+    },
+    cancelSubmit() {
+      this.showConfirmModal = false;
+      this.selectedSupplierID = null;
+    },
+    confirmSubmit() {
+      this.showConfirmModal = false;
+      this.removeSupplier(this.selectedSupplierID);
+    },
+    async removeSupplier(supplierId) {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/api/suppliers/suppliers/${supplierId}`);
+        this.fetchSuppliers();
+        this.toast.success('Supplier deleted successfully!');
+      } catch (error) {
+        console.error("Error deleting supplier:", error);
+        this.toast.error('Error deleting supplier.');
+      }
+    },
+    closeForm() {
       this.selectedSupplier = null; 
       this.toggleEditForm(); 
     }
   },
-
-
-created() {
-  this.fetchSuppliers();
-},
+  created() {
+    this.fetchSuppliers();
+  },
   watch: {
     searchTerm: 'filterSuppliers',
     selectedStatus: 'filterSuppliers'
   }
 };
-
 </script>
+
+
 
 <style scoped>
 .app-container {
@@ -333,5 +353,85 @@ created() {
 
 .action-btn:active {
   background-color: rgba(0, 0, 0, 0.2);
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmation-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.modal-content p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancel-btn, .confirm-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background-color: #f3f3f3;
+  color: #666;
+}
+
+.confirm-btn {
+  background-color: #E54F70;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #e7e7e7;
+}
+
+.confirm-btn:hover {
+  background-color: #d84666;
 }
 </style>

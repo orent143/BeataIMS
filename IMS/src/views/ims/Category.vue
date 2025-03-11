@@ -17,27 +17,40 @@
       class="add-category-form" 
     />
     <div class="category-container">
-    <div class="category-list">
-      <div v-for="category in filteredCategories" :key="category.id" class="category-card">
-        <h3>{{ category.CategoryName }}</h3> 
-        <div class="category-actions">
-          <button @click="setEditCategory(category)" class="action-btn edit-btn">
-            <i class="pi pi-pencil"></i>
-          </button>
-          <button @click="removeCategory(category.id)" class="action-btn remove-btn">
-            <i class="pi pi-trash"></i>
-          </button>
+      <div class="category-list">
+        <div v-for="category in filteredCategories" :key="category.id" class="category-card">
+          <h3>{{ category.CategoryName }}</h3> 
+          <div class="category-actions">
+            <button @click="setEditCategory(category)" class="action-btn edit-btn">
+              <i class="pi pi-pencil"></i>
+            </button>
+            <button @click="confirmDelete(category.id)" class="action-btn remove-btn">
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+
+    <div class="modal-overlay" v-if="showConfirmModal">
+      <div class="confirmation-modal">
+        <div class="modal-content">
+          <h3>Confirm Deletion</h3>
+          <p>Are you sure you want to delete this category?</p>
+          <div class="modal-actions">
+            <button @click="confirmSubmit" class="confirm-btn">Yes</button>
+            <button @click="cancelSubmit" class="cancel-btn">No</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <EditCategory 
-  v-if="editingCategory" 
-  :category="editingCategory" 
-  @save="saveCategory" 
-  @close="toggleEditForm"
-/>
+      v-if="editingCategory" 
+      :category="editingCategory" 
+      @save="saveCategory" 
+      @close="toggleEditForm"
+    />
   </div>
 </template>
 
@@ -47,6 +60,7 @@ import AddCategory from '@/components/ims/AddCategory.vue';
 import EditCategory from '@/components/ims/EditCategory.vue';
 import SideBar from '@/components/ims/SideBar.vue';
 import Header from '@/components/Header.vue';
+import { useToast } from 'vue-toastification';
 
 export default {
   components: {
@@ -60,7 +74,10 @@ export default {
       categories: [],  
       showAddForm: false,
       editingCategory: null,
-      searchTerm: ''
+      searchTerm: '',
+      showConfirmModal: false,
+      selectedCategoryId: null,
+      toast: useToast(),
     };
   },
   computed: {
@@ -75,51 +92,58 @@ export default {
   },
   methods: {
     toggleEditForm() {
-    this.editingCategory = null;
-  },
+      this.editingCategory = null;
+    },
     toggleAddForm() {
       this.showAddForm = !this.showAddForm;
     },
     async fetchCategories() {
-    try {
-      const response = await axios.get('http://127.0.0.1:8000/api/categories/');
-      this.categories = response.data;
-    } catch (error) {
-      console.error("Error fetching categories:", error);
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/categories/');
+        this.categories = response.data;
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    },
+    async addCategory(newCategory) {
+      await this.fetchCategories(); 
+      this.toggleAddForm();
+    },
+    setEditCategory(category) {
+      this.editingCategory = { ...category };
+    },
+    async saveCategory(updatedCategory) {
+      const index = this.categories.findIndex(cat => cat.id === updatedCategory.id);
+      if (index !== -1) {
+        this.categories[index] = updatedCategory;
+      }
+      this.editingCategory = null; 
+    },
+    confirmDelete(categoryId) {
+      this.selectedCategoryId = categoryId;
+      this.showConfirmModal = true;
+    },
+    cancelSubmit() {
+      this.showConfirmModal = false;
+      this.selectedCategoryId = null;
+    },
+    confirmSubmit() {
+      this.showConfirmModal = false;
+      this.removeCategory(this.selectedCategoryId);
+    },
+    async removeCategory(categoryId) {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/api/categories/categories/${categoryId}`);
+        this.categories = this.categories.filter(cat => cat.id !== categoryId);
+        this.toast.success('Category deleted successfully!');
+      } catch (error) {
+        console.error("Error deleting category:", error.response?.data || error.message);
+        this.toast.error('Error deleting category.');
+      }
     }
-  },
-  async addCategory(newCategory) {
-    await this.fetchCategories(); 
-    this.toggleAddForm();
-  },
-  setEditCategory(category) {
-    this.editingCategory = { ...category };
-  },
-  async saveCategory(updatedCategory) {
-    const index = this.categories.findIndex(cat => cat.id === updatedCategory.id);
-    if (index !== -1) {
-      this.categories[index] = updatedCategory;
-    }
-    this.editingCategory = null; 
-  },
-  
-  async removeCategory(categoryId) {
-  try {
-    console.log("Deleting category with ID:", categoryId); 
-
-    const response = await axios.delete(`http://127.0.0.1:8000/api/categories/categories/${categoryId}`);
-    
-    console.log(response.data);
-    this.categories = this.categories.filter(cat => cat.id !== categoryId);
-  } catch (error) {
-    console.error("Error deleting category:", error.response?.data || error.message);
   }
-}
-
-},
 };
 </script>
-
 
 <style scoped>
 .app-container {
@@ -269,7 +293,83 @@ export default {
 .add-product-btn:hover {
   background-color: #ed9598;
 }
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.confirmation-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+}
 
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 
+.modal-content {
+  text-align: center;
+}
 
+.modal-content h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.modal-content p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancel-btn, .confirm-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background-color: #f3f3f3;
+  color: #666;
+}
+
+.confirm-btn {
+  background-color: #E54F70;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #e7e7e7;
+}
+
+.confirm-btn:hover {
+  background-color: #d84666;
+}
 </style>

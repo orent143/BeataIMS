@@ -49,7 +49,7 @@
               <button class="action-btn edit" @click="editItem(stock)">
                 <i class="pi pi-pencil"></i>
               </button>
-              <button class="action-btn delete" @click="removeItem(stock.StockID)">
+              <button class="action-btn delete" @click="confirmDelete(stock.StockID)">
                 <i class="pi pi-trash"></i>
               </button>
             </td>
@@ -62,6 +62,19 @@
         <div v-if="showPopoutOptions" class="popout-options">
           <button class="popout-option" @click="addLowStock">Add Low Stock</button>
           <button class="popout-option" @click="filterLowStock">Low Stock</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" v-if="showConfirmModal">
+      <div class="confirmation-modal">
+        <div class="modal-content">
+          <h3>Confirm Deletion</h3>
+          <p>Are you sure you want to delete this product?</p>
+          <div class="modal-actions">
+            <button @click="confirmSubmit" class="confirm-btn">Yes</button>
+            <button @click="cancelSubmit" class="cancel-btn">No</button>
+          </div>
         </div>
       </div>
     </div>
@@ -106,8 +119,11 @@ export default {
       showFilterDropdown: false,
       showAddForm: false,
       showEditForm: false,
+      showConfirmModal: false,
       selectedItem: null,
-      showPopoutOptions: false
+      selectedStockID: null,
+      showPopoutOptions: false,
+      toast: useToast(), 
     };
   },
   watch: {
@@ -178,18 +194,26 @@ export default {
         toast.error('Error adding low stock items.');
       }
     },
+    confirmDelete(stockID) {
+      this.selectedStockID = stockID;
+      this.showConfirmModal = true;
+    },
+    cancelSubmit() {
+      this.showConfirmModal = false;
+      this.selectedStockID = null;
+    },
+    confirmSubmit() {
+      this.showConfirmModal = false;
+      this.removeItem(this.selectedStockID);
+    },
     async removeItem(stockID) {
-      const toast = useToast();
-      if (!confirm('Are you sure you want to delete this stock?')) {
-        return;
-      }
       try {
         await axios.delete(`http://127.0.0.1:8000/api/stock/stocks/${stockID}`);
         this.fetchStocks(); 
-        toast.success('Stock deleted successfully!');
+        this.toast.success('Stock deleted successfully!');
       } catch (error) {
         console.error('Error deleting stock:', error);
-        toast.error('Error deleting stock.');
+        this.toast.error('Error deleting stock.');
       }
     },
     filterLowStock() {
@@ -201,9 +225,9 @@ export default {
       return "In Stock";
     },
     editItem(stock) {
-    this.selectedItem = stock;
-    this.showEditForm = true;
-  },
+      this.selectedItem = stock;
+      this.showEditForm = true;
+    },
   },
   mounted() {
     this.fetchStocks();
@@ -477,5 +501,85 @@ export default {
 .status-out-of-stock {
   background: #F8D7DA; 
   color: #721c24; 
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmation-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.modal-content p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancel-btn, .confirm-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background-color: #f3f3f3;
+  color: #666;
+}
+
+.confirm-btn {
+  background-color: #E54F70;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #e7e7e7;
+}
+
+.confirm-btn:hover {
+  background-color: #d84666;
 }
 </style>
