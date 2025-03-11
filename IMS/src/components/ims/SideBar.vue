@@ -19,7 +19,6 @@
           <i :class="['pi', link.icon]"></i> {{ link.name }}
         </router-link>
 
-        <!-- Submenu that stays open when toggled -->
         <ul v-if="link.submenu && link.isOpen" class="submenu">
           <li v-for="(subLink, subIndex) in link.submenu" :key="subIndex">
             <router-link
@@ -43,7 +42,6 @@
       </li>
     </ul>
 
-    <!-- Logout at the bottom with margin -->
     <div class="sidebar-footer">
       <router-link to="/" class="sidebar-link" @click="logout">
         <i class="pi pi-sign-out"></i> Logout
@@ -67,7 +65,7 @@ export default {
             { name: 'Products', path: '/inventoryims', icon: 'pi-box' },
             { name: 'Stock', path: '/stocks', icon: 'pi-box' }
           ],
-          isOpen: false // Initially, the submenu is closed
+          isOpen: false 
         },
         { name: 'Create Product', path: '/create', icon: 'pi-plus-circle' },
         { name: 'Suppliers', path: '/suppliers', icon: 'pi-truck' },
@@ -86,7 +84,6 @@ export default {
       }
     },
     stayOpen() {
-      // Prevent submenu from closing when a submenu item is clicked
     },
     checkActiveSubmenu() {
       this.links.forEach(link => {

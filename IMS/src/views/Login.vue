@@ -80,12 +80,14 @@ export default {
 }
 
 .login-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   height: 100vh;
   background: linear-gradient(to right, #e54f6f7e, #ed959821, rgba(0, 0, 0, 0.863)),
               url('@/assets/background.jpg') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 5%;
 }
 
 .login-container {

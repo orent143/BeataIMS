@@ -5,7 +5,6 @@
       <button @click="closeForm" class="close-btn">x</button>
     </div>
     <form @submit.prevent="confirmAndSubmit" class="form-container">
-      <!-- First Row -->
       <div class="form-group">
         <label for="suppliername">Name:</label>
         <input v-model="newSupplier.suppliername" id="suppliername" type="text" placeholder="Supplier Name" required />
@@ -21,11 +20,23 @@
         <input v-model="newSupplier.email" id="email" type="email" placeholder="Email" required />
       </div>
 
-      <!-- Form Actions -->
       <div class="form-actions">
         <button type="submit" class="add-item-btn">Add Supplier</button>
       </div>
     </form>
+  </div>
+
+  <div class="modal-overlay" v-if="showConfirmModal">
+    <div class="confirmation-modal">
+      <div class="modal-content">
+        <h3>Confirm Addition</h3>
+        <p>Are you sure you want to add this supplier?</p>
+        <div class="modal-actions">
+          <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
+          <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -43,7 +54,8 @@ export default {
         suppliername: '',
         contactinfo: '',
         email: ''
-      }
+      },
+      showConfirmModal: false
     };
   },
   methods: {
@@ -51,9 +63,14 @@ export default {
       this.$emit('close');
     },
     async confirmAndSubmit() {
-      if (window.confirm("Are you sure you want to add this supplier?")) {
-        this.submitForm();
-      }
+      this.showConfirmModal = true;
+    },
+    cancelSubmit() {
+      this.showConfirmModal = false;
+    },
+    confirmSubmit() {
+      this.showConfirmModal = false;
+      this.submitForm();
     },
     async submitForm() {
       const toast = useToast();
@@ -64,7 +81,7 @@ export default {
         }
 
         const response = await axios.post(
-          'http://127.0.0.1:8000/api/suppliers/suppliers/',  // Removed extra "/suppliers/"
+          'http://127.0.0.1:8000/api/suppliers/suppliers/',  
           new URLSearchParams({
             suppliername: this.newSupplier.suppliername.trim(),
             contactinfo: this.newSupplier.contactinfo.trim(),
@@ -179,5 +196,85 @@ select {
 
 .add-item-btn:focus {
   outline: none;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmation-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.modal-content p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancel-btn, .confirm-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background-color: #f3f3f3;
+  color: #666;
+}
+
+.confirm-btn {
+  background-color: #E54F70;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #e7e7e7;
+}
+
+.confirm-btn:hover {
+  background-color: #d84666;
 }
 </style>
