@@ -4,6 +4,8 @@
       <h2>Edit Product</h2>
       <button class="close-btn" @click="closeForm">x</button>
     </div>
+
+
     <form @submit.prevent="confirmAndSubmit" class="form-container">
       <div class="form-group">
         <label for="name">Item Name</label>
@@ -18,6 +20,7 @@
         <label for="unitPrice">Unit Price</label>
         <input id="unitPrice" v-model="product.UnitPrice" type="number" placeholder="Unit Price" required min="0" step="0.01" />
       </div>
+      
       <div class="form-group">
         <label for="category">Category</label>
         <select id="category" v-model="product.CategoryID" required>
@@ -25,7 +28,13 @@
           <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.CategoryName }}</option>
         </select>
       </div>
-
+      <div class="image-upload-container">
+      <label for="image" class="image-upload">
+        <input type="file" id="image" @change="handleFileUpload" />
+        <img v-if="imagePreview" :src="imagePreview" class="preview-image" />
+        <span v-if="!imagePreview" class="upload-text">Upload New Image</span>
+      </label>
+    </div>
       <div class="form-actions">
         <button type="submit" class="add-item-btn">Update Product</button>
       </div>
@@ -35,8 +44,8 @@
   <div class="modal-overlay" v-if="showConfirmModal">
     <div class="confirmation-modal">
       <div class="modal-content">
-        <h3>Confirm Addition</h3>
-        <p>Are you sure you want to edit this product?</p>
+        <h3>Confirm Update</h3>
+        <p>Are you sure you want to update this product?</p>
         <div class="modal-actions">
           <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
           <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
@@ -57,9 +66,11 @@ export default {
   },
   data() {
     return {
-      product: { ...this.itemToEdit },
+      product: { ...this.itemToEdit }, // Ensure reactivity
       categories: [],
-      showConfirmModal: false  
+      showConfirmModal: false,
+      selectedImage: null,
+      imagePreview: this.itemToEdit?.Image || null
     };
   },
   methods: {
@@ -76,6 +87,13 @@ export default {
       this.showConfirmModal = false;
       this.updateProduct();
     },
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.selectedImage = file;
+        this.imagePreview = URL.createObjectURL(file);
+      }
+    },
     updateStatus() {
       if (this.product.Quantity === 0) {
         this.product.Status = 'Out of Stock';
@@ -86,36 +104,56 @@ export default {
       }
     },
     async updateProduct() {
-      const toast = useToast();
-      try {
-        console.log("Updating product:", this.product);
-
-        if (!this.product.id) {
-          throw new Error("Product ID is missing!");
-        }
-
-        await axios.put(
-          `http://127.0.0.1:8000/api/inventory/inventoryproduct/${this.product.id}`,
-          this.product
-        );
-
-        this.$emit("update", { ...this.product }); // Emit updated product
-        toast.success("Product updated successfully!");
-        this.closeForm();
-      } catch (error) {
-        console.error("Error updating product:", error);
-        toast.error("Failed to update product");
-      }
+  const toast = useToast();
+  try {
+    if (!this.product.id) {
+      throw new Error("Product ID is missing!");
     }
+
+    let formData = new FormData();
+    formData.append("ProductName", this.product.ProductName);
+    formData.append("Quantity", this.product.Quantity);
+    formData.append("UnitPrice", this.product.UnitPrice);
+    formData.append("CategoryID", this.product.CategoryID);
+    formData.append("Status", this.product.Status);
+
+    if (this.selectedImage) {
+      formData.append("Image", this.selectedImage);
+    }
+
+    await axios.put(
+      `http://127.0.0.1:8000/api/inventory/inventoryproduct/${this.product.id}`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    toast.success("Product updated successfully!");
+    this.$emit("update", this.product); // Fix: Emit the updated product data
+    this.closeForm();
+  } catch (error) {
+    console.error("Error updating product:", error);
+    toast.error("Failed to update product");
+  }
+}
+
   },
   created() {
-    // Fetch categories data
     axios.get('http://127.0.0.1:8000/api/categories').then(response => {
       this.categories = response.data;
     });
+  },
+  watch: {
+    itemToEdit: {
+      deep: true,
+      handler(newValue) {
+        this.product = { ...newValue };
+        this.imagePreview = newValue?.Image || null;
+      }
+    }
   }
 };
 </script>
+
 
 
 <style scoped>
@@ -140,8 +178,9 @@ export default {
 
 .form-header h2 {
   font-size: 25px;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   font-weight: 1000;
+  color: #000000;
 }
 
 .close-btn {
@@ -150,6 +189,7 @@ export default {
   font-size: 17px;
   color: #333;
   cursor: pointer;
+  font-weight: 1000;
 }
 
 .form-container {
@@ -166,6 +206,27 @@ label {
   font-weight: 600;
   font-size: 14px;
 }
+.image-upload-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+  width: 205%;
+}
+.image-upload {
+  position: relative;
+  width: 100%;
+  max-width: 210%; /* Adjust width as needed */
+  height: 120px; /* Increased height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: #f9f9f9;
+}
+
 
 input,
 select {
@@ -175,6 +236,27 @@ select {
   width: 85%;
   border: 1px solid #ccc;
 }
+
+.image-upload input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.preview-image {
+  width: 100%;
+  max-height: 100px; /* Adjust as needed */
+  object-fit: contain; /* Ensures the whole image is visible */
+  border-radius: 5px;
+  background-color: white; /* Optional for better visibility */
+}
+.upload-text {
+  font-size: 14px;
+  color: #666;
+}
+
 
 .form-actions {
   display: flex;

@@ -1,16 +1,10 @@
 <template>
-  <!-- Import Header component -->
   <Header />
-
   <SideBar />
-
   <div class="app-container">
-    <!-- Header Section -->
     <div class="header-container">
       <h1 class="products-header">Product List</h1>
       <div class="header-actions">
-
-        <!-- Filter Dropdown -->
         <div class="filter-container">
           <button class="filter-btn" @click="toggleFilterDropdown">
             <i class="fas fa-filter"></i>
@@ -24,19 +18,16 @@
             </select>
           </div>
         </div>
-
-        <!-- Add Stock Button -->
-        <button @click="toggleAddForm" class="add-product-btn">Add</button>
+       
       </div>
     </div>
 
-    <!-- Main Content Section -->
     <div class="inventory-container">
       <table class="stock-table">
         <thead>
           <tr>
             <th v-if="isLowStockMode">Select</th>
-            <th>Name</th>
+            <th>Product Name</th>
             <th>Quantity</th>
             <th>Unit Price</th>
             <th>Category</th>
@@ -53,10 +44,15 @@
                 v-model="selectedLowStockItems"
               />
             </td>
-            <td>{{ product.ProductName }}</td>
+            <td>
+              <div class="product-info">
+                <img :src="product.Image || 'https://via.placeholder.com/50'" alt="Product Image" class="product-image" />
+                <span class="product-name">{{ product.ProductName }}</span>
+              </div>
+            </td>
             <td>{{ product.Quantity }}</td>
             <td>₱{{ product.UnitPrice }}</td>
-            <td>{{ product.CategoryID }}</td>
+            <td>{{ getCategoryName(product.CategoryID) }}</td>
             <td>
               <span :class="'status status-' + product.Status.toLowerCase().replace(/ /g, '-')">
                 {{ product.Status }}
@@ -66,7 +62,7 @@
               <button class="action-btn edit" @click="editItem(product)">
                 <i class="pi pi-pencil"></i>
               </button>
-              <button class="action-btn delete" @click="removeItem(product.id)">
+              <button class="action-btn delete" @click="confirmDelete(product.id)">
                 <i class="pi pi-trash"></i>
               </button>
             </td>
@@ -74,41 +70,47 @@
         </tbody>
       </table>
 
-      <!-- Floating Button and Popout Options -->
-      <div class="floating-btn-container">
-        <button class="floating-btn" @click="togglePopoutOptions">+</button>
-        <div v-if="showPopoutOptions" class="popout-options">
-          <button class="popout-option" @click="addLowStock">Add Low Stock</button>
-          <button class="popout-option" @click="addSummary">Add Summary</button>
+
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" v-if="showConfirmModal">
+      <div class="confirmation-modal">
+        <div class="modal-content">
+          <h3>Confirm Deletion</h3>
+          <p>Are you sure you want to delete this product?</p>
+          <div class="modal-actions">
+            <button @click="confirmSubmit" class="confirm-btn">Yes</button>
+            <button @click="cancelSubmit" class="cancel-btn">No</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Add or Edit Item Form -->
     <add-product
-  v-if="showAddForm"
-  :isVisible="showAddForm"
-  @close="toggleAddForm"
-  @add="addItem"
-/>
+      v-if="showAddForm"
+      :isVisible="showAddForm"
+      @close="toggleAddForm"
+      @add="addItem"
+    />
 
-    <!-- Edit Item Form -->
     <edit-product
-  v-if="showEditForm"
-  :isVisible="showEditForm"
-  :itemToEdit="selectedItem"
-  @close="toggleEditForm"
-  @update="handleUpdateProduct"
-/>
+      v-if="showEditForm"
+      :isVisible="showEditForm"
+      :itemToEdit="selectedItem"
+      @close="toggleEditForm"
+      @update="handleUpdateProduct"
+    />
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import SideBar from '@/components/sms/Sidebar.vue';
+import SideBar from '@/components/ims/SideBar.vue';
 import AddProduct from '@/components/ims/AddProduct.vue';
 import EditProduct from '@/components/ims/EditProduct.vue';
 import Header from '@/components/Header.vue';
+import { useToast } from 'vue-toastification';
 
 export default {
   components: { AddProduct, EditProduct, SideBar, Header },
@@ -123,10 +125,12 @@ export default {
       selectedItem: null,
       productItems: [],
       filteredItems: [],
-      selectedLowStockItems: [],
       isLowStockMode: false,
       currentDate: new Date().toISOString().split('T')[0],
-      inventorySummaries: [],
+      showConfirmModal: false,
+      selectedProductId: null,
+      categories: [], // Add this to store categories
+      toast: useToast(), 
     };
   },
 
@@ -134,9 +138,7 @@ export default {
     toggleFilterDropdown() {
       this.showFilterDropdown = !this.showFilterDropdown;
     },
-    toggleAddForm() {
-      this.showAddForm = !this.showAddForm;
-    },
+
     toggleEditForm() {
       this.showEditForm = !this.showEditForm;
     },
@@ -155,7 +157,6 @@ export default {
       }
       this.filteredItems = filtered;
     },
-
     getStatusByQuantity(quantity) {
       if (quantity === 0) {
         return 'Out of Stock';
@@ -166,63 +167,78 @@ export default {
       }
     },
     addItem(newProduct) {
-    this.productItems.push(newProduct);
-    this.filterItems();
-    this.showAddForm = false; // Close the form
-  },
-  async fetchProductItems() {
-    try {
-      const response = await axios.get('http://127.0.0.1:8000/api/inventory/');
-      this.productItems = response.data;
+      this.productItems.push(newProduct);
       this.filterItems();
-    } catch (error) {
-      console.error('Error fetching product items:', error);
-    }
-  },
-  async removeItem(productId) {
+      this.showAddForm = false; 
+    },
+    async fetchProductItems() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/inventory/');
+        this.productItems = response.data;
+        this.filterItems();
+      } catch (error) {
+        console.error('Error fetching product items:', error);
+      }
+    },
+    confirmDelete(productId) {
+      this.selectedProductId = productId;
+      this.showConfirmModal = true;
+    },
+    cancelSubmit() {
+      this.showConfirmModal = false;
+      this.selectedProductId = null;
+    },
+    confirmSubmit() {
+      this.showConfirmModal = false;
+      this.removeItem(this.selectedProductId);
+    },
+    async removeItem(productId) {
       try {
         await axios.delete(`http://127.0.0.1:8000/api/inventory/inventoryproduct/${productId}`);
         this.productItems = this.productItems.filter(item => item.id !== productId);
         this.filterItems();
+        this.toast.success("Product deleted successfully!");
       } catch (error) {
         console.error('Error deleting product:', error);
+        this.toast.error("Failed to delete product.");
       }
     },
+    async fetchCategories() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/categories/');
+        this.categories = response.data;
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    },
+    getCategoryName(categoryId) {
+      const category = this.categories.find(cat => cat.id === categoryId);
+      return category ? category.CategoryName : 'Unknown';
+    },
+    async handleUpdateProduct(updatedProduct) {
+      try {
+        console.log("Updating product in parent:", updatedProduct);
 
-async handleUpdateProduct(updatedProduct) {
-  try {
-    console.log("Updating product in parent:", updatedProduct);
-
-    await axios.put(
-      `http://127.0.0.1:8000/api/inventory/inventoryproduct/${updatedProduct.id}`,
-      updatedProduct
-    );
-
-    // Ensure the product list updates properly
-    const index = this.productItems.findIndex(
-      (item) => item.id === updatedProduct.id
-    );
-    if (index !== -1) {
-      this.productItems[index] = { ...updatedProduct };
-      this.productItems = [...this.productItems]; // Force Vue to detect changes
-    }
-
-    this.filterItems();
-    this.showEditForm = false;
-  } catch (error) {
-    console.error("Error updating product:", error);
-  }
-},
-editItem(product) {
-  console.log("Editing product:", product); // Debugging log
-  this.selectedItem = { ...product };
-  this.showEditForm = true;
-}
-
+        // Refetch the product list to ensure it updates correctly
+        await this.fetchProductItems();
+        
+        this.showEditForm = false;
+      } catch (error) {
+        console.error("Error updating product:", error);
+      }
+    },
+    editItem(product) {
+      console.log("Editing product:", product); 
+      this.selectedItem = { ...product };
+      this.showEditForm = true;
+    },
+    
   },
 
   created() {
     this.fetchProductItems();
+    this.fetchCategories(); // Fetch categories on component creation
+
   },
 
   watch: {
@@ -238,16 +254,13 @@ editItem(product) {
 };
 </script>
 
-
-
 <style scoped>
-/* General Styling */
 .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 230px; /* Make space for sidebar, adjust as needed */
-  height: 100%; /* Full height of the page */
+  flex-grow: 1; 
+  margin-left: 230px; 
+  height: 100%; 
 }
 
 .header-container {
@@ -271,15 +284,11 @@ editItem(product) {
   gap: 10px;
 }
 
-/* Main Content */
-
-
 .inventory-container {
   position: relative;
   flex-grow: 1;
   height: 37dvw;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-
   background-color: #ffffff;
   border-radius: 25px;
   overflow-y: auto;
@@ -287,7 +296,6 @@ editItem(product) {
   padding: 0;
 }
 
-/* Stock Table Styling */
 .stock-table {
   width: 100%;
   border-collapse: collapse;
@@ -312,14 +320,29 @@ editItem(product) {
   padding: 13px;
   font-weight: bold;
 }
+
 .stock-table input[type="checkbox"] {
   margin: 0;
   padding: 0;
   cursor: pointer;
 }
 
-/* Modify header for low stock mode */
-/* Search Bar */
+.product-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+
+
+.product-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
 .search-container {
   position: relative;
   margin-right: 3px;
@@ -345,7 +368,6 @@ editItem(product) {
   background-color: #D9D9D9;
 }
 
-/* Filter Button */
 .filter-btn {
   padding: 8px;
   background-color: transparent;
@@ -381,7 +403,6 @@ editItem(product) {
   margin-bottom: 10px;
 }
 
-/* Add Product Button */
 .add-product-btn {
   padding: 8px 12px;
   background-color: #E54F70;
@@ -398,7 +419,6 @@ editItem(product) {
   background-color: #ed9598;
 }
 
-/* Action Buttons */
 .action-btn {
   padding: 8px;
   background-color: transparent;
@@ -430,18 +450,14 @@ editItem(product) {
   background-color: rgba(0, 0, 0, 0.2);
 }
 
-.action-btn:active {
-  background-color: #004080;
-}
-
 .floating-btn-container {
-  position: fixed; /* Change from absolute to fixed */
+  position: fixed; 
   bottom: 20px;
   right: 20px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  z-index: 10; /* Ensure it's above other content */
+  z-index: 10; 
 }
 
 .floating-btn {
@@ -464,7 +480,6 @@ editItem(product) {
   background-color: #ed9598;
 }
 
-/* Popout Options */
 .popout-options {
   display: flex;
   flex-direction: column;
@@ -493,27 +508,107 @@ editItem(product) {
 .popout-option:active {
   background-color: #004080;
 }
-/* General Status Styles */
+
 .status {
   padding: 4px 8px;
   border-radius: 15px;
   font-size: 12px;
-  display: inline-block; /* Ensure it behaves like a block element */
+  display: inline-block;
 }
 
-/* Specific Status Styles */
 .status-in-stock {
-  background: #E8F5E9; /* Light green */
-  color: #4CAF50; /* Dark green */
+  background: #E8F5E9; 
+  color: #4CAF50;
 }
 
 .status-low-stock {
-  background: #FFF3E0; /* Light yellow */
-  color: #FF9800; /* Dark yellow */
+  background: #FFF3E0; 
+  color: #FF9800; 
 }
 
 .status-out-of-stock {
-  background: #F8D7DA; /* Light red */
-  color: #721c24; /* Dark red */
+  background: #F8D7DA; 
+  color: #721c24; 
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmation-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.modal-content p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancel-btn, .confirm-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background-color: #f3f3f3;
+  color: #666;
+}
+
+.confirm-btn {
+  background-color: #E54F70;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #e7e7e7;
+}
+
+.confirm-btn:hover {
+  background-color: #d84666;
 }
 </style>

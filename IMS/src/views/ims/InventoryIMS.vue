@@ -27,7 +27,7 @@
         <thead>
           <tr>
             <th v-if="isLowStockMode">Select</th>
-            <th>Name</th>
+            <th>Product Name</th>
             <th>Quantity</th>
             <th>Unit Price</th>
             <th>Category</th>
@@ -44,7 +44,12 @@
                 v-model="selectedLowStockItems"
               />
             </td>
-            <td>{{ product.ProductName }}</td>
+            <td>
+              <div class="product-info">
+                <img :src="product.Image || 'https://via.placeholder.com/50'" alt="Product Image" class="product-image" />
+                <span class="product-name">{{ product.ProductName }}</span>
+              </div>
+            </td>
             <td>{{ product.Quantity }}</td>
             <td>₱{{ product.UnitPrice }}</td>
             <td>{{ getCategoryName(product.CategoryID) }}</td>
@@ -224,20 +229,9 @@ export default {
       try {
         console.log("Updating product in parent:", updatedProduct);
 
-        await axios.put(
-          `http://127.0.0.1:8000/api/inventory/inventoryproduct/${updatedProduct.id}`,
-          updatedProduct
-        );
-
-        const index = this.productItems.findIndex(
-          (item) => item.id === updatedProduct.id
-        );
-        if (index !== -1) {
-          this.productItems[index] = { ...updatedProduct };
-          this.productItems = [...this.productItems]; 
-        }
-
-        this.filterItems();
+        // Refetch the product list to ensure it updates correctly
+        await this.fetchProductItems();
+        
         this.showEditForm = false;
       } catch (error) {
         console.error("Error updating product:", error);
@@ -284,7 +278,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .app-container {
   display: flex;
@@ -315,15 +308,13 @@ export default {
   gap: 10px;
 }
 
-
 .inventory-container {
   position: relative;
   flex-grow: 1;
   height: 37dvw;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-
   background-color: #ffffff;
-  border-radius: 25px;
+  border-radius: 15px;
   overflow-y: auto;
   margin-left: 5px;
   padding: 0;
@@ -351,12 +342,30 @@ export default {
 .stock-table th {
   background-color: #f4f4f4;
   padding: 13px;
+  color: #333;
   font-weight: bold;
 }
+
 .stock-table input[type="checkbox"] {
   margin: 0;
   padding: 0;
   cursor: pointer;
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+
+
+.product-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
 }
 
 .search-container {
@@ -466,10 +475,6 @@ export default {
   background-color: rgba(0, 0, 0, 0.2);
 }
 
-.action-btn:active {
-  background-color: #004080;
-}
-
 .floating-btn-container {
   position: fixed; 
   bottom: 20px;
@@ -550,6 +555,7 @@ export default {
   background: #F8D7DA; 
   color: #721c24; 
 }
+
 .modal-overlay {
   position: fixed;
   top: 0;

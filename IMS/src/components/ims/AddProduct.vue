@@ -26,6 +26,13 @@
           </option>
         </select>
       </div>
+      <div class="image-upload-container">
+      <label for="image" class="image-upload">
+        <input type="file" id="image" @change="handleImageUpload" />
+        <img v-if="imagePreview" :src="imagePreview" class="preview-image" />
+        <span v-if="!imagePreview" class="upload-text">Upload New Image</span>
+      </label>
+    </div>
       <div class="form-actions">
         <button type="submit" class="add-item-btn">Add Product</button>
       </div>
@@ -61,6 +68,8 @@ export default {
       unitPrice: 0,
       categoryId: null,
       categories: [],
+      imageFile: null, 
+      imagePreview: null, 
       showConfirmModal: false,
       toast: useToast(), 
     };
@@ -94,6 +103,14 @@ export default {
       this.showConfirmModal = false;
       this.submit();
     },
+    handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    this.imageFile = file;
+    this.imagePreview = URL.createObjectURL(file); 
+  }
+}
+,
     async submit() {
       try {
         const formData = new FormData();
@@ -102,6 +119,9 @@ export default {
         formData.append("UnitPrice", this.unitPrice);
         if (this.categoryId) {
           formData.append("CategoryID", this.categoryId);
+        }
+        if (this.imageFile) {
+          formData.append("Image", this.imageFile); 
         }
 
         const response = await axios.post(
@@ -120,7 +140,6 @@ export default {
         this.closeForm();
       } catch (error) {
         console.error("Error adding product:", error.response?.data || error);
-        
         this.toast.error("Failed to add product!", {
           timeout: 3000,
         });
@@ -170,7 +189,6 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
-  width: 100%;
 }
 
 .form-group {
@@ -179,11 +197,27 @@ export default {
 
 label {
   font-weight: 600;
-  font-family: "Arial", sans-serif;
   font-size: 14px;
-  margin-bottom: 5px;
-  display: block;
-  color: #272727;
+}
+.image-upload-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+  width: 205%;
+}
+.image-upload {
+  position: relative;
+  width: 100%;
+  max-width: 210%; /* Adjust width as needed */
+  height: 120px; /* Increased height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: #f9f9f9;
 }
 
 input,
@@ -195,16 +229,36 @@ select {
   border: 1px solid #ccc;
 }
 
+
+.image-upload input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.preview-image {
+  width: 100%;
+  max-height: 100px; /* Adjust as needed */
+  object-fit: contain; /* Ensures the whole image is visible */
+  border-radius: 5px;
+  background-color: white; /* Optional for better visibility */
+}
+.upload-text {
+  font-size: 14px;
+  color: #666;
+}
 select {
   padding-right: 10px;
 }
 
 .form-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   width: 100%;
   margin-top: 20px;
-  margin-left: 50px;
+  grid-column: span 2;
 }
 
 .add-item-btn {

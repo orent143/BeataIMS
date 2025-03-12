@@ -26,7 +26,7 @@
       <table class="stock-table">
         <thead>
           <tr>
-            <th>Name</th>
+            <th>Stock Name</th>
             <th>Quantity</th>
             <th>Cost Price</th>
             <th>Supplier</th>
@@ -288,7 +288,7 @@ export default {
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 
   background-color: #ffffff;
-  border-radius: 25px;
+  border-radius: 15px;
   overflow-y: auto;
   margin-left: 5px;
   padding: 0;
@@ -315,6 +315,7 @@ export default {
   .stock-table th {
     background-color: #f4f4f4;
     padding: 13px;
+    color: #333;
     font-weight: bold;
   }
  

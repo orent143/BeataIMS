@@ -239,6 +239,7 @@ export default {
 .stock-table th {
   background-color: #f4f4f4;
   padding: 13px;
+  color: #333;
   font-weight: bold;
 }
 
@@ -249,7 +250,7 @@ export default {
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 
   background-color: #ffffff;
-  border-radius: 25px;
+  border-radius: 15px;
   overflow-y: auto;
   margin-left: 5px;
   padding: 0;
@@ -258,7 +259,7 @@ export default {
 .table-container {
   flex-grow: 1;
   overflow-y: auto;
-  border-radius: 25px;
+  border-radius: 15px;
 }
 
 .totals-container {
@@ -267,8 +268,8 @@ export default {
   padding: 15px;
   background-color: #f4f4f4;
   margin-top: auto; 
-  border-bottom-right-radius: 25px;
-  border-bottom-left-radius: 25px;
+  border-bottom-right-radius: 15px;
+  border-bottom-left-radius: 15px;
   position: sticky;
   bottom: 0;
 

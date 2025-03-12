@@ -21,7 +21,7 @@
         <table class="stock-table">
           <thead>
             <tr>
-              <th>Name</th>
+              <th>Product Name</th>
               <th>Quantity</th>
               <th>Unit Price</th>
               <th>Status</th>
@@ -29,7 +29,17 @@
           </thead>
           <tbody>
             <tr v-for="product in filteredInventory" :key="product.ProductID">
-              <td>{{ product.ProductName }}</td>
+              <td>
+                <div class="product-info">
+                  <img 
+                    v-if="product.Image" 
+                    :src="product.Image" 
+                    alt="Product Image" 
+                    class="product-image"
+                  />
+                  <span class="product-name">{{ product.ProductName }}</span>
+                </div>
+              </td>
               <td>{{ product.Quantity }}</td>
               <td>₱{{ parseFloat(product.UnitPrice).toFixed(2) }}</td>
               <td>
@@ -59,7 +69,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import SideBar from "@/components/ims/SideBar.vue";
@@ -105,25 +114,27 @@ export default {
           total_items: response.data.total_items,
           total_value: parseFloat(response.data.total_value),
         };
-        this.inventoryProducts = response.data.items;
+        this.inventoryProducts = response.data.items.map(item => ({
+          ...item,
+          Image: item.Image ? `http://127.0.0.1:8000${item.Image}` : null
+        }));
       } catch (error) {
         console.error("Error fetching inventory report:", error);
         alert("Error fetching inventory report. Please try again.");
       }
     },
     formatDate(dateString) {
-  if (!dateString) return "N/A";
-  return new Date(dateString).toLocaleString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true, 
-  });
-}
-,
+      if (!dateString) return "N/A";
+      return new Date(dateString).toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true, 
+      });
+    },
     exportSummary() {
       if (!this.inventoryProducts.length) return;
 
@@ -175,6 +186,21 @@ export default {
   font-weight: 900;
 }
 
+.product-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+
+.product-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -210,7 +236,6 @@ export default {
 .stock-table {
   width: 100%;
   border-collapse: collapse;
-  
 }
 
 .stock-table th,
@@ -223,14 +248,13 @@ export default {
 .stock-table tbody {
   font-family: 'Arial', sans-serif;
   font-size: 15px;
-  
 }
 
 .stock-table th {
   background-color: #f4f4f4;
   padding: 13px;
+  color: #333;
   font-weight: bold;
-
 }
 
 .inventory-container {
@@ -238,9 +262,8 @@ export default {
   flex-grow: 1;
   height: 37dvw;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-
   background-color: #ffffff;
-  border-radius: 25px;
+  border-radius: 15px;
   overflow-y: auto;
   margin-left: 5px;
   padding: 0;
@@ -249,7 +272,7 @@ export default {
 .table-container {
   flex-grow: 1;
   overflow-y: auto;
-  border-radius: 25px;
+  border-radius: 15px;
 }
 
 .totals-container {
@@ -258,8 +281,8 @@ export default {
   padding: 15px;
   background-color: #f4f4f4;
   margin-top: auto; 
-  border-bottom-right-radius: 25px;
-  border-bottom-left-radius: 25px;
+  border-bottom-right-radius: 15px;
+  border-bottom-left-radius: 15px;
   position: sticky;
   bottom: 0;
 }
@@ -268,6 +291,7 @@ export default {
   width: 30%;
   font-weight: bold;
 }
+
 .export-btn {
   background-color: #E54F70;
   color: white;
@@ -304,6 +328,7 @@ export default {
 .summary-spacer {
   height: 5px;
 }
+
 .status {
   padding: 4px 8px;
   border-radius: 15px;
