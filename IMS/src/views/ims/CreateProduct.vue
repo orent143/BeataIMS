@@ -32,6 +32,29 @@
           </div>
 
           <div class="form-group">
+            <label>Product Image</label>
+            <div class="image-upload-container">
+              <div class="image-preview" v-if="imagePreview">
+                <img :src="imagePreview" alt="Preview" />
+                <button class="remove-image-btn" @click="removeImage">-</button>
+              </div>
+              <div class="upload-area" v-else>
+                <input
+                  type="file"
+                  @change="handleImageUpload"
+                  accept="image/*"
+                  class="file-input"
+                  id="imageInput"
+                />
+                <label for="imageInput" class="upload-label">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <span>Click to upload image</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
             <label>Stocks (Optional, Add Multiple)</label>
             <div v-for="(stockEntry, index) in product.Stocks" :key="index" class="stock-entry">
               <select v-model.number="stockEntry.StockID" class="form-input">
@@ -68,7 +91,6 @@
             <button type="button" @click="resetForm" class="reset-btn">Reset</button>
             <button type="button" @click="confirmAndSubmit" class="submit-btn">Create Product</button>
           </div>
-
         </div>
       </div>
     </div>
@@ -104,13 +126,15 @@ export default {
         Quantity: 1,
         UnitPrice: 0,
         Stocks: [],
+        Image: null,
       },
       categories: [],
       stocks: [],
       loading: false,
       errorMessage: "",
       showConfirmModal: false,
-      toast: useToast(), 
+      toast: useToast(),
+      imagePreview: null,
     };
   },
   computed: {
@@ -162,6 +186,20 @@ export default {
       this.product.Stocks.splice(index, 1);
       this.toast.warning("Stock entry removed.");
     },
+    handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.product.Image = file;
+        this.imagePreview = URL.createObjectURL(file);
+      }
+    },
+
+    removeImage() {
+      this.product.Image = null;
+      this.imagePreview = null;
+      const input = document.getElementById('imageInput');
+      if (input) input.value = '';
+    },
     async confirmAndSubmit() {
       this.showConfirmModal = true;
     },
@@ -181,7 +219,9 @@ export default {
         formData.append("Quantity", this.product.Quantity);
         formData.append("UnitPrice", this.product.UnitPrice);
         formData.append("Stocks", JSON.stringify(this.product.Stocks));
-
+        if (this.product.Image) {
+          formData.append("Image", this.product.Image); // Add this line
+        }
         console.log("Submitting product:", this.product);
 
         const response = await axios.post('http://127.0.0.1:8000/api/products/products/', formData, {
@@ -198,6 +238,8 @@ export default {
         this.loading = false;
       }
     },
+
+
     resetForm() {
       this.product = {
         ProductName: "",
@@ -205,7 +247,9 @@ export default {
         Quantity: 1,
         UnitPrice: 0,
         Stocks: [],
+        Image: null, // Add this line
       };
+      this.imagePreview = null; // Add this line
       this.toast.info("Form reset.");
     },
   },
@@ -222,6 +266,12 @@ export default {
   flex-grow: 1;
   margin-left: 230px;
   padding: 0px 20px;
+}
+.header{  
+  color: #333;
+  font-size: 30px;
+  font-family: 'Arial', sans-serif;
+  font-weight: 900;
 }
 
 .content-wrapper {
@@ -470,6 +520,80 @@ button:focus {
 
 .confirm-btn:hover {
   background-color: #d84666;
+}
+
+.image-upload-container {
+  width: 100%;
+  min-height: 200px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.image-preview {
+  position: relative;
+  width: 100%;
+  height: 200px;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 16px;
+  color: #E54F70;
+}
+
+.remove-image-btn:hover {
+  background: rgba(229, 79, 112, 0.8);
+  color: white;
+}
+
+.upload-area {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: #666;
+}
+
+.upload-label i {
+  font-size: 2rem;
+  color: #E54F70;
+}
+
+.upload-label:hover {
+  color: #E54F70;
 }
 
 @media (max-width: 768px) {

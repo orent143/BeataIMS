@@ -282,9 +282,9 @@ export default {
 .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; 
-  margin-left: 230px; 
-  height: 100%; 
+  flex-grow: 1;
+  margin-left: 230px;
+  height: 100%;
 }
 
 .header-container {
@@ -329,13 +329,10 @@ export default {
 .stock-table td {
   padding: 10px;
   text-align: center;
-  border-bottom: 1px solid #ddd;
-  padding: 10px;
   border-bottom: 1px solid #eee;
 }
 
 .stock-table tbody {
-  font-family: 'Arial', sans-serif;
   font-size: 15px;
 }
 
@@ -352,46 +349,27 @@ export default {
   cursor: pointer;
 }
 
+
+.product-name {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
 .product-info {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
-
-
-
 .product-image {
   width: 50px;
   height: 50px;
   object-fit: cover;
-  border-radius: 5px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
 }
 
-.search-container {
-  position: relative;
-  margin-right: 3px;
-}
-
-.search-icon {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #333;
-  pointer-events: none;
-}
-
-.search-bar {
-  padding: 8px 30px 8px 8px;
-  border: 1px solid #94949400;
-  border-radius: 10px;
-  width: 130px;
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
-  background-color: #D9D9D9;
-}
 
 .filter-btn {
   padding: 8px;
@@ -542,18 +520,18 @@ export default {
 }
 
 .status-in-stock {
-  background: #E8F5E9; 
+  background: #E8F5E9;
   color: #4CAF50;
 }
 
 .status-low-stock {
-  background: #FFF3E0; 
-  color: #FF9800; 
+  background: #FFF3E0;
+  color: #FF9800;
 }
 
 .status-out-of-stock {
-  background: #F8D7DA; 
-  color: #721c24; 
+  background: #F8D7DA;
+  color: #721c24;
 }
 
 .modal-overlay {
@@ -635,5 +613,10 @@ export default {
 
 .confirm-btn:hover {
   background-color: #d84666;
+}
+.stock-table td {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
 }
 </style>

@@ -232,7 +232,6 @@ export default {
 }
 
 .stock-table tbody {
-  font-family: 'Arial', sans-serif;
   font-size: 15px;
 }
 

@@ -28,6 +28,8 @@
           <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.CategoryName }}</option>
         </select>
       </div>
+      <div class="form-group image-section">
+      <label for="image">Product Image</label>
       <div class="image-upload-container">
       <label for="image" class="image-upload">
         <input type="file" id="image" @change="handleFileUpload" />
@@ -35,6 +37,7 @@
         <span v-if="!imagePreview" class="upload-text">Upload New Image</span>
       </label>
     </div>
+  </div>
       <div class="form-actions">
         <button type="submit" class="add-item-btn">Update Product</button>
       </div>
@@ -206,12 +209,21 @@ label {
   font-weight: 600;
   font-size: 14px;
 }
+.image-section {
+  display: flex;
+  flex-direction: column;
+  grid-column: span 2;
+  gap: 10px;
+  width: 100%;
+}
+
 .image-upload-container {
   display: flex;
   justify-content: center;
+  width: 100%;
   margin-bottom: 15px;
-  width: 205%;
 }
+
 .image-upload {
   position: relative;
   width: 100%;
@@ -237,32 +249,49 @@ select {
   border: 1px solid #ccc;
 }
 
+.image-upload:hover {
+  border-color: #E54F70;
+  background: #fff5f7;
+}
+
 .image-upload input[type="file"] {
   position: absolute;
   width: 100%;
   height: 100%;
+  top: 0;
+  left: 0;
   opacity: 0;
   cursor: pointer;
 }
-
 .preview-image {
   width: 100%;
-  max-height: 100px; /* Adjust as needed */
-  object-fit: contain; /* Ensures the whole image is visible */
-  border-radius: 5px;
-  background-color: white; /* Optional for better visibility */
-}
-.upload-text {
-  font-size: 14px;
-  color: #666;
+  height: 100%;
+  object-fit: contain;
 }
 
+.upload-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+}
+.upload-text::before {
+  content: '+';
+  display: block;
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: #E54F70;
+}
 
 .form-actions {
   display: flex;
   justify-content: center;
   width: 100%;
-  margin-top: 10px;
+  margin-top: 20px;
   grid-column: span 2;
 }
 

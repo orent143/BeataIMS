@@ -227,6 +227,7 @@ export default {
 .category-card h3 {
   font-size: 18px;
   margin-bottom: 20px;
+  color: #333;
 }
 
 .category-actions {

@@ -152,7 +152,6 @@ export default {
   text-decoration: none;
   font-weight: 450;
   font-size: 15px;
-  font-family: 'Arial', sans-serif;
   display: flex;
   align-items: center;
   padding: 5px 10px;
@@ -204,7 +203,6 @@ export default {
 .sidebar-footer .sidebar-link {
   color:rgba(14, 14, 14, 0.54);
     font-size: 15px;
-  font-family: 'Arial', sans-serif;
   padding: 10px 20px;
   border-radius: 25px;
   display: flex;

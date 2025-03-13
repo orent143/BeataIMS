@@ -375,22 +375,22 @@ export default {
 }
 
 .activity-status.completed {
-  background-color: #e8f5e9;
-  color: #43a047;
+  background: #E8F5E9;
+  color: #4CAF50;
 }
 
 .activity-status.success {
   background-color: #e3f2fd;
-  color: #1976d2;
+  color: #43a047;
 }
 
-.activity-status.warning {
-  background-color: #fff3e0;
-  color: #ef6c00;
+.activity-status.deleted {
+  background: #F8D7DA;
+  color: #721c24;
 }
 
-.activity-status.pending {
-  background-color: #f3e5f5;
-  color: #8e24aa;
+.activity-status.updated {
+  background: #FFF3E0;
+  color: #FF9800;
 }
 </style>

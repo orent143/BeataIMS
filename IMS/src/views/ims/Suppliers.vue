@@ -238,7 +238,6 @@ export default {
 }
 
 .supplier-table tbody {
-  font-family: 'Arial', sans-serif;
   font-size: 15px;
 }
 

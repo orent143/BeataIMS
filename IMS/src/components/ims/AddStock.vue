@@ -6,8 +6,8 @@
     </div>
     <form @submit.prevent="confirmAndSubmit" class="form-container">
       <div class="form-group">
-        <label for="name">Name:</label>
-        <input v-model="newItem.StockName" id="name" type="text" placeholder="Item Name" required />
+        <label for="name">Stock Name:</label>
+        <input v-model="newItem.StockName" id="name" type="text" placeholder="Stock Name" required />
       </div>
       <div class="form-group">
         <label for="quantity">Quantity:</label>
@@ -27,7 +27,16 @@
           </option>
         </select>
       </div>
-
+      <div class="form-group image-section">
+  <label for="image">Product Image</label>
+  <div class="image-upload-container">
+    <label for="image" class="image-upload">
+      <input type="file" id="image" @change="handleImageUpload" accept="image/*" />
+      <img v-if="imagePreview" :src="imagePreview" class="preview-image" />
+      <span v-if="!imagePreview" class="upload-text">Upload New Image</span>
+    </label>
+  </div>
+</div>
       <div class="form-actions">
         <button type="submit" class="add-item-btn" :disabled="loading">
           {{ loading ? "Adding..." : "Add Stock" }}
@@ -64,13 +73,16 @@ export default {
         StockName: "",
         Quantity: null,
         CostPrice: null,
-        SupplierID: ""
+        SupplierID: "",
+        Image: null // Add this line
+
       },
       suppliers: [], 
       showConfirmModal: false,
       loading: false,
       errorMessage: "",
-      successMessage: ""
+      successMessage: "",
+      imagePreview: null,
     };
   },
   methods: {
@@ -85,6 +97,14 @@ export default {
         console.error("Error fetching suppliers:", error);
       }
     },
+    handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    this.newItem.Image = file; 
+    this.imagePreview = URL.createObjectURL(file);
+  }
+},
+
     async confirmAndSubmit() {
       this.showConfirmModal = true;
     },
@@ -96,32 +116,52 @@ export default {
       this.submitForm();
     },
     async submitForm() {
-      const toast = useToast();
-      this.loading = true;
-      this.errorMessage = "";
-      this.successMessage = "";
+  const toast = useToast();
+  this.loading = true;
+  this.errorMessage = "";
+  this.successMessage = "";
 
-      try {
-        await axios.post('http://127.0.0.1:8000/api/stock/stocks/', new URLSearchParams({
-          StockName: this.newItem.StockName,
-          Quantity: this.newItem.Quantity,
-          CostPrice: this.newItem.CostPrice,
-          SupplierID: this.newItem.SupplierID
-        }));
+  try {
+    const formData = new FormData();
+    formData.append("StockName", this.newItem.StockName);
+    formData.append("Quantity", this.newItem.Quantity);
+    formData.append("CostPrice", this.newItem.CostPrice);
+    
+    if (this.newItem.SupplierID) {
+      formData.append("SupplierID", this.newItem.SupplierID);
+    }
 
-        this.successMessage = "Stock added successfully!";
-        toast.success(this.successMessage);
-        this.$emit("update-parent");
-        this.$emit("close");
-      } catch (error) {
-        this.errorMessage = "Error adding stock.";
-        toast.error(this.errorMessage);
-        console.error("Error adding stock:", error);
-      } finally {
-        this.loading = false;
+    if (this.newItem.Image) {
+  formData.append("Image", this.newItem.Image); 
+}
+
+    await axios.post("http://127.0.0.1:8000/api/stock/stocks/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
       }
-    },
+    });
+
+    this.successMessage = "Stock added successfully!";
+    toast.success(this.successMessage);
+    this.$emit("update-parent");
+    this.$emit("close");
+  } catch (error) {
+    this.errorMessage = "Error adding stock.";
+    toast.error(this.errorMessage);
+    console.error("Error adding stock:", error);
+  } finally {
+    this.loading = false;
+  }
+},
     closeForm() {
+      this.newItem = {
+        StockName: "",
+        Quantity: null,
+        CostPrice: null,
+        SupplierID: "",
+        Image: null
+      };
+      this.imagePreview = null;
       this.$emit("close");
     }
   },
@@ -130,8 +170,6 @@ export default {
   }
 };
 </script>
-
-
 
 <style scoped>
 .popout-form {
@@ -180,14 +218,9 @@ export default {
   width: 100%; 
 }
 
-.status-group {
-  grid-column: span 2; 
-  text-align: center; 
-}
 
 label {
   font-weight: 600;
-  font-family: 'Arial', sans-serif;
   font-size: 14px;
   margin-bottom: 5px;
   display: block;
@@ -314,4 +347,71 @@ select {
 .confirm-btn:hover {
   background-color: #d84666;
 }
+.image-section {
+  display: flex;
+  flex-direction: column;
+  grid-column: span 2;
+  gap: 10px;
+  width: 100%;
+}
+
+.image-upload-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 15px;
+}
+.image-upload {
+  position: relative;
+  width: 100%;
+  max-width: 210%; /* Adjust width as needed */
+  height: 120px; /* Increased height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: #f9f9f9;
+}
+
+.image-upload:hover {
+  border-color: #E54F70;
+  background: #fff5f7;
+}
+.image-upload input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.upload-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+}
+.upload-text::before {
+  content: '+';
+  display: block;
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: #E54F70;
+}
+
 </style>

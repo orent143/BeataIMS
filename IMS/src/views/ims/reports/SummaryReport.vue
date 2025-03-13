@@ -246,7 +246,6 @@ export default {
 }
 
 .stock-table tbody {
-  font-family: 'Arial', sans-serif;
   font-size: 15px;
 }
 
@@ -349,5 +348,10 @@ export default {
 .status-out-of-stock {
   background: #F8D7DA; 
   color: #721c24; 
+}
+.stock-table td {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
 }
 </style>

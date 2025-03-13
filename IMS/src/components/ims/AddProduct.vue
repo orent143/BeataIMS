@@ -6,26 +6,29 @@
     </div>
     <form @submit.prevent="confirmAndSubmit" class="form-container">
       <div class="form-group">
-        <label for="name">Item Name</label>
-        <input id="name" v-model="name" placeholder="Item Name" required />
+        <label for="name">Product Name:</label>
+        <input id="name" v-model="name" placeholder="Product Name" required />
       </div>
       <div class="form-group">
-        <label for="quantity">Quantity</label>
+        <label for="quantity">Quantity:</label>
         <input id="quantity" v-model="quantity" type="number" placeholder="Quantity" required min="1" />
       </div>
       <div class="form-group">
-        <label for="unitPrice">Unit Price</label>
+        <label for="unitPrice">Unit Price:</label>
         <input id="unitPrice" v-model="unitPrice" type="number" placeholder="Unit Price" required min="0" step="0.01" />
       </div>
       <div class="form-group">
-        <label for="category">Category</label>
-        <select id="category" v-model="categoryId" required>
+        <label for="category">Category:</label>
+        <select id="category" v-model="categoryId" class="form-control" required>
+          
           <option value="" disabled>Select Category</option>
           <option v-for="category in categories" :key="category.id" :value="category.id">
             {{ category.CategoryName }}
           </option>
         </select>
       </div>
+      <div class="form-group image-section">
+      <label for="image">Product Image</label>
       <div class="image-upload-container">
       <label for="image" class="image-upload">
         <input type="file" id="image" @change="handleImageUpload" />
@@ -33,6 +36,7 @@
         <span v-if="!imagePreview" class="upload-text">Upload New Image</span>
       </label>
     </div>
+  </div>
       <div class="form-actions">
         <button type="submit" class="add-item-btn">Add Product</button>
       </div>
@@ -109,8 +113,7 @@ export default {
     this.imageFile = file;
     this.imagePreview = URL.createObjectURL(file); 
   }
-}
-,
+},
     async submit() {
       try {
         const formData = new FormData();
@@ -149,6 +152,8 @@ export default {
 };
 </script>
 
+
+
 <style scoped>
 .popout-form {
   background-color: #ffffff;
@@ -159,8 +164,8 @@ export default {
   right: 50%;
   top: 50%;
   transform: translate(50%, -50%);
-  width: 400px;
-  max-width: 100%;
+  width: 400px; 
+  max-width: 100%; 
 }
 
 .form-header {
@@ -171,7 +176,7 @@ export default {
 
 .form-header h2 {
   font-size: 25px;
-  font-family: "Arial", sans-serif;
+  font-family: 'Arial', sans-serif;
   font-weight: 1000;
   color: #000000;
 }
@@ -189,35 +194,20 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
+  width: 100%;
 }
 
 .form-group {
-  width: 100%;
+  width: 100%; 
 }
+
 
 label {
   font-weight: 600;
   font-size: 14px;
-}
-.image-upload-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-  width: 205%;
-}
-.image-upload {
-  position: relative;
-  width: 100%;
-  max-width: 210%; /* Adjust width as needed */
-  height: 120px; /* Increased height */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 2px dashed #ccc;
-  border-radius: 8px;
-  cursor: pointer;
-  overflow: hidden;
-  background-color: #f9f9f9;
+  margin-bottom: 5px;
+  display: block;
+  color: #272727;
 }
 
 input,
@@ -229,40 +219,20 @@ select {
   border: 1px solid #ccc;
 }
 
-
-.image-upload input[type="file"] {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.preview-image {
-  width: 100%;
-  max-height: 100px; /* Adjust as needed */
-  object-fit: contain; /* Ensures the whole image is visible */
-  border-radius: 5px;
-  background-color: white; /* Optional for better visibility */
-}
-.upload-text {
-  font-size: 14px;
-  color: #666;
-}
 select {
   padding-right: 10px;
 }
 
 .form-actions {
   display: flex;
-  justify-content: center;
+  justify-content: center; 
   width: 100%;
-  margin-top: 20px;
+  margin-top: 10px; 
   grid-column: span 2;
 }
 
 .add-item-btn {
-  padding: 10px 10px;
+  padding: 10px 20px;
   background-color: #E54F70;
   color: #dbdbdb;
   border: none;
@@ -280,7 +250,6 @@ select {
 .add-item-btn:focus {
   outline: none;
 }
-
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -361,4 +330,71 @@ select {
 .confirm-btn:hover {
   background-color: #d84666;
 }
+.image-section {
+  display: flex;
+  flex-direction: column;
+  grid-column: span 2;
+  gap: 10px;
+  width: 100%;
+}
+
+.image-upload-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 15px;
+}
+.image-upload {
+  position: relative;
+  width: 100%;
+  max-width: 210%; /* Adjust width as needed */
+  height: 120px; /* Increased height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: #f9f9f9;
+}
+
+.image-upload:hover {
+  border-color: #E54F70;
+  background: #fff5f7;
+}
+.image-upload input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.upload-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+}
+.upload-text::before {
+  content: '+';
+  display: block;
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: #E54F70;
+}
+
 </style>

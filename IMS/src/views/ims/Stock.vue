@@ -36,16 +36,33 @@
         </thead>
         <tbody>
           <tr v-for="stock in filteredItems" :key="stock.StockID">
-            <td>{{ stock.StockName }}</td>
-            <td>{{ stock.Quantity }}</td>
-            <td>₱{{ stock.CostPrice }}</td>
-            <td>{{ getSupplierName(stock.SupplierID) }}</td>
-            <td>
-              <span :class="'status status-' + getStatus(stock.Quantity).toLowerCase().replace(/ /g, '-')">
-                {{ getStatus(stock.Quantity) }}
-              </span>
-            </td>
-            <td>
+        <td v-if="isLowStockMode">
+          <input
+            type="checkbox"
+            :value="stock.StockID"
+            v-model="selectedLowStockItems"
+          />
+        </td>
+        <td>
+          <div class="stock-info">
+            <img 
+  :src="stock.Image" 
+  :alt="stock.StockName"
+  @error="handleImageError"
+  class="stock-image"
+/>
+      <span class="stock-name">{{ stock.StockName }}</span>
+    </div>
+        </td>
+        <td>{{ stock.Quantity }}</td>
+        <td>₱{{ stock.CostPrice }}</td>
+        <td>{{ getSupplierName(stock.SupplierID) }}</td>
+        <td>
+          <span :class="'status status-' + getStatus(stock.Quantity).toLowerCase().replace(/ /g, '-')">
+            {{ getStatus(stock.Quantity) }}
+          </span>
+        </td>
+        <td>
               <button class="action-btn edit" @click="editItem(stock)">
                 <i class="pi pi-pencil"></i>
               </button>
@@ -122,6 +139,8 @@ export default {
       showConfirmModal: false,
       selectedItem: null,
       selectedStockID: null,
+      isLowStockMode: false,
+      selectedLowStockItems: [],
       showPopoutOptions: false,
       suppliers: [], // Add this to store suppliers
       toast: useToast(), 
@@ -137,14 +156,29 @@ export default {
   },
   methods: {
     async fetchStocks() {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/api/stock/');
-        this.stocks = response.data;
-        this.filteredItems = [...this.stocks]; 
-      } catch (error) {
-        console.error('Error fetching stocks:', error);
+  try {
+    const response = await axios.get("http://127.0.0.1:8000/api/stock/");
+    this.stocks = response.data.map(stock => {
+      let imageUrl = stock.Image;
+      if (!imageUrl) {
+        imageUrl = 'https://via.placeholder.com/50';
+      } else if (!imageUrl.startsWith('http')) {
+        imageUrl = `http://127.0.0.1:8000${imageUrl}`;  // Ensure full URL
       }
-    },
+      
+      return {
+        ...stock,
+        Image: imageUrl
+      };
+    });
+    
+    this.filteredItems = [...this.stocks];
+    console.log("Fetched stocks:", this.stocks); // Debugging
+  } catch (error) {
+    console.error("Error fetching stocks:", error);
+    this.toast.error("Failed to fetch stocks");
+  }
+},
     async fetchSuppliers() {
    try {
       const response = await axios.get('http://127.0.0.1:8000/api/suppliers/');
@@ -180,11 +214,21 @@ export default {
     async addItem(newItem) {
       const toast = useToast();
       try {
-        await axios.post('http://127.0.0.1:8000/api/stock/stocks/', {
-          StockName: newItem.StockName,
-          Quantity: newItem.Quantity,
-          CostPrice: newItem.CostPrice,
-          SupplierID: newItem.SupplierID
+        // Create FormData for multipart/form-data
+        const formData = new FormData();
+        formData.append('StockName', newItem.StockName);
+        formData.append('Quantity', newItem.Quantity);
+        formData.append('CostPrice', newItem.CostPrice);
+        formData.append('SupplierID', newItem.SupplierID);
+        
+        if (newItem.Image) {
+          formData.append('Image', newItem.Image);
+        }
+
+        await axios.post('http://127.0.0.1:8000/api/stock/stocks/', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
         });
 
         await this.fetchStocks(); 
@@ -242,8 +286,8 @@ export default {
       this.selectedItem = stock;
       this.showEditForm = true;
     },
-  },
-  mounted() {
+
+  },  mounted() {
     this.fetchStocks();
     this.fetchSuppliers(); // Fetch suppliers on component creation
 
@@ -308,7 +352,6 @@ export default {
     border-bottom: 1px solid #eee;
   }
   .stock-table tbody{
-    font-family: 'Arial', sans-serif;
   font-size: 15px;
   }
 
@@ -322,26 +365,6 @@ export default {
   .search-container {
   position: relative;
   margin-right: 3px;
-}
-
-.search-icon {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #333;
-  pointer-events: none;
-}
-
-.search-bar {
-  padding: 8px 30px 8px 8px;
-  border: 1px solid #94949400;
-  border-radius: 10px;
-  width: 130px;
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
-  background-color: #D9D9D9;
 }
 
 .filter-btn {
@@ -599,4 +622,35 @@ export default {
 .confirm-btn:hover {
   background-color: #d84666;
 }
+.stock-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.stock-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.stock-image:hover {
+  transform: scale(1.1);
+}
+
+.stock-name {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+.stock-table td {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
 </style>

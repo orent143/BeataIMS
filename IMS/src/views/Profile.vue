@@ -143,7 +143,7 @@ export default {
 
 .modal-header h2{
   color: white;
-
+font-family: 'Arial', sans-serif;
 }
 
 .close-btn {

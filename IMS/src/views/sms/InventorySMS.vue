@@ -274,7 +274,6 @@ export default {
 .products-header {
   color: #333;
   font-size: 30px;
-  font-family: 'Arial', sans-serif;
   font-weight: 900;
 }
 
@@ -311,7 +310,6 @@ export default {
 }
 
 .stock-table tbody {
-  font-family: 'Arial', sans-serif;
   font-size: 15px;
 }
 
