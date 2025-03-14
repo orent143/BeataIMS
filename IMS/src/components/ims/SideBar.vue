@@ -196,8 +196,8 @@ export default {
   display: flex;
   justify-content: left;
   padding: 0;
-  margin-top: auto; /* Ensures the logout stays at the bottom */
-  margin-bottom: auto; /* Adds space from the bottom */
+  margin-top: auto; 
+  margin-bottom: auto; 
 }
 
 .sidebar-footer .sidebar-link {

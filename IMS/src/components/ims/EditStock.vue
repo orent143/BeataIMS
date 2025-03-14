@@ -71,7 +71,7 @@ export default {
       editedItem: {},
       suppliers: [],
       showConfirmModal: false,
-      imagePreview: null, // Add this
+      imagePreview: null, 
 
     };
   },
@@ -80,7 +80,7 @@ export default {
       handler(newValue) {
         if (newValue) {
           this.editedItem = { ...newValue };
-          this.imagePreview = newValue.Image; // Add this
+          this.imagePreview = newValue.Image; 
 
         }
       },
@@ -351,8 +351,8 @@ select {
 .image-upload {
   position: relative;
   width: 100%;
-  max-width: 210%; /* Adjust width as needed */
-  height: 120px; /* Increased height */
+  max-width: 210%; 
+  height: 120px; 
   display: flex;
   justify-content: center;
   align-items: center;

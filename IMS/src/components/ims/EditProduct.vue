@@ -69,7 +69,7 @@ export default {
   },
   data() {
     return {
-      product: { ...this.itemToEdit }, // Ensure reactivity
+      product: { ...this.itemToEdit }, 
       categories: [],
       showConfirmModal: false,
       selectedImage: null,
@@ -131,7 +131,7 @@ export default {
     );
 
     toast.success("Product updated successfully!");
-    this.$emit("update", this.product); // Fix: Emit the updated product data
+    this.$emit("update", this.product); 
     this.closeForm();
   } catch (error) {
     console.error("Error updating product:", error);
@@ -227,8 +227,8 @@ label {
 .image-upload {
   position: relative;
   width: 100%;
-  max-width: 210%; /* Adjust width as needed */
-  height: 120px; /* Increased height */
+  max-width: 210%; 
+  height: 120px; 
   display: flex;
   justify-content: center;
   align-items: center;
