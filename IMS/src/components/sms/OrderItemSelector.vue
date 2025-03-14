@@ -5,14 +5,15 @@
     <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
     <div v-if="menuItems.length > 0" class="items-grid">
       <MenuItemCard
-        v-for="menuItem in menuItems"
-        :key="menuItem.id"
-        :item="menuItem"
-        :quantity="getItemQuantity(menuItem)"
-        :selected="isItemSelected(menuItem)"
-        @add="addOrUpdateItem(menuItem)"
-        @update:quantity="updateQuantity(menuItem, $event)"
-      />
+  v-for="menuItem in menuItems"
+  :key="menuItem.id"
+  :item="menuItem"
+  :quantity="getItemQuantity(menuItem)"
+  :selected="isItemSelected(menuItem)"
+  @add="addOrUpdateItem(menuItem)"
+  @update:quantity="updateQuantity(menuItem, $event)"
+/>
+
     </div>
   </div>
 </template>

@@ -10,6 +10,28 @@
         <input v-model="newCategory.CategoryName" id="categoryName" type="text" placeholder="Category Name" required />
       </div>
       
+      <div class="form-group image-section">
+    <label for="categoryImage">Category Image:</label>
+    <div class="image-upload-container">
+      <label for="categoryImage" class="image-upload">
+        <input 
+          type="file" 
+          id="categoryImage" 
+          @change="handleImageChange" 
+          accept="image/*"
+          class="image-input"
+        />
+        <img 
+          v-if="imagePreview" 
+          :src="imagePreview" 
+          alt="Category Preview"
+          class="preview-image"
+        />
+        <span v-if="!imagePreview" class="upload-text">Upload New Image</span>
+      </label>
+    </div>
+  </div>
+
       <div class="form-actions">
         <button type="submit" class="add-category-btn">Add Category</button>
       </div>
@@ -41,8 +63,10 @@ export default {
   data() {
     return {
       newCategory: {
-       CategoryName: '' 
+       CategoryName: '',
+       Image: null
       },
+      imagePreview: null,
       showConfirmModal: false,
     };
   },
@@ -60,6 +84,14 @@ export default {
       this.showConfirmModal = false;
       this.submitForm();
     },
+    handleImageChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.newCategory.Image = file;
+        this.imagePreview = URL.createObjectURL(file);
+      }
+    },
+
     async submitForm() {
       const toast = useToast();
       if (!this.newCategory.CategoryName) {
@@ -68,19 +100,38 @@ export default {
       }
 
       try {
+        const formData = new FormData();
+formData.append('CategoryName', this.newCategory.CategoryName);
+if (this.newCategory.Image) {
+  formData.append('Image', this.newCategory.Image);
+}
+
+
         const response = await axios.post(
-          'http://127.0.0.1:8000/api/categories/categories/', 
-          new URLSearchParams({ CategoryName: this.newCategory.CategoryName }),
-          { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } } 
+          'http://127.0.0.1:8000/api/categories/categories/',
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }
         );
 
         toast.success('Category added successfully!');
-        this.$emit('add', response.data); 
+        this.$emit('add', response.data);
         this.closeForm();
       } catch (error) {
         toast.error('Error adding category.');
         console.error("Error adding category:", error.response?.data || error);
       }
+    },
+    closeForm() {
+      this.newCategory = {
+        CategoryName: '',
+        Image: null
+      };
+      this.imagePreview = null;
+      this.$emit('close');
     }
   }
 };
@@ -132,7 +183,13 @@ export default {
 .form-group {
   width: 100%;
 }
-
+.image-section {
+  display: flex;
+  flex-direction: column;
+  grid-column: span 2;
+  gap: 10px;
+  width: 100%;
+}
 label {
   font-weight: 600;
   font-size: 14px;
@@ -153,7 +210,91 @@ input {
   display: flex;
   justify-content: flex-end;
 }
+.image-upload-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 15px;
+}
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.upload-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+}
+.upload-text::before {
+  content: '+';
+  display: block;
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: #E54F70;
+}
+.image-input {
+  display: none;
+}
+.image-upload {
+  position: relative;
+  width: 100%;
+  max-width: 210%;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: #f9f9f9;
+}
+.image-upload:hover {
+  border-color: #E54F70;
+  background: #fff5f7;
+}
+.image-upload input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.upload-btn {
+  background-color: #f0f0f0;
+  color: #333;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
 
+.upload-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.upload-btn i {
+  font-size: 16px;
+}
+.form-container {
+  gap: 20px;
+}
+
+.form-group {
+  margin-bottom: 5px;
+}
 .add-category-btn {
   padding: 10px 20px;
   background-color: #E54F70;

@@ -186,19 +186,25 @@ export default {
   font-weight: 900;
 }
 
+.product-name {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
 .product-info {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
-
 
 .product-image {
   width: 50px;
   height: 50px;
   object-fit: cover;
-  border-radius: 5px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
 }
 
 .header-actions {
@@ -255,7 +261,11 @@ export default {
   color: #333;
   font-weight: bold;
 }
-
+.stock-table td {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
 .inventory-container {
   position: relative;
   flex-grow: 1;

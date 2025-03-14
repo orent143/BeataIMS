@@ -142,7 +142,7 @@ export default {
       isLowStockMode: false,
       selectedLowStockItems: [],
       showPopoutOptions: false,
-      suppliers: [], // Add this to store suppliers
+      suppliers: [], 
       toast: useToast(), 
     };
   },
@@ -163,7 +163,7 @@ export default {
       if (!imageUrl) {
         imageUrl = 'https://via.placeholder.com/50';
       } else if (!imageUrl.startsWith('http')) {
-        imageUrl = `http://127.0.0.1:8000${imageUrl}`;  // Ensure full URL
+        imageUrl = `http://127.0.0.1:8000${imageUrl}`;  
       }
       
       return {
@@ -173,7 +173,7 @@ export default {
     });
     
     this.filteredItems = [...this.stocks];
-    console.log("Fetched stocks:", this.stocks); // Debugging
+    console.log("Fetched stocks:", this.stocks); 
   } catch (error) {
     console.error("Error fetching stocks:", error);
     this.toast.error("Failed to fetch stocks");
@@ -214,7 +214,6 @@ export default {
     async addItem(newItem) {
       const toast = useToast();
       try {
-        // Create FormData for multipart/form-data
         const formData = new FormData();
         formData.append('StockName', newItem.StockName);
         formData.append('Quantity', newItem.Quantity);
@@ -289,7 +288,7 @@ export default {
 
   },  mounted() {
     this.fetchStocks();
-    this.fetchSuppliers(); // Fetch suppliers on component creation
+    this.fetchSuppliers(); 
 
   }
 };

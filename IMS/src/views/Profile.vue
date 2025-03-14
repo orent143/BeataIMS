@@ -137,8 +137,8 @@ export default {
   background: linear-gradient(to right, #e54f6f7e, #ed959821, rgba(0, 0, 0, 0.863)),
               url('@/assets/background.jpg') center/cover no-repeat;
   border-bottom: 1px solid #eee;
-  border-top-left-radius: 10px;  /* Adjust the value as per your design */
-  border-top-right-radius: 10px; /* Adjust the value as per your design */
+  border-top-left-radius: 10px;  
+  border-top-right-radius: 10px; 
 }
 
 .modal-header h2{

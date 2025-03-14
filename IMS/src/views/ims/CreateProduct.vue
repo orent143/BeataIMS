@@ -220,7 +220,7 @@ export default {
         formData.append("UnitPrice", this.product.UnitPrice);
         formData.append("Stocks", JSON.stringify(this.product.Stocks));
         if (this.product.Image) {
-          formData.append("Image", this.product.Image); // Add this line
+          formData.append("Image", this.product.Image); 
         }
         console.log("Submitting product:", this.product);
 
@@ -247,9 +247,9 @@ export default {
         Quantity: 1,
         UnitPrice: 0,
         Stocks: [],
-        Image: null, // Add this line
+        Image: null, 
       };
-      this.imagePreview = null; // Add this line
+      this.imagePreview = null; 
       this.toast.info("Form reset.");
     },
   },

@@ -98,7 +98,7 @@ export default {
 
 .logo {
   font-family: 'Inknut Antiqua', serif;
-  font-size: 30px; /* Increase the font size to make the logo text bigger */
+  font-size: 30px; 
     font-weight: bolder;
     color: white;
     text-shadow: 
@@ -110,7 +110,7 @@ export default {
       0px -1px 0 #940358,
       1px 0px 0 #940358,
       -1px 0px 0 #940358;
-    line-height: 1.2; /* Adjust line-height for better spacing */
+    line-height: 1.2; 
 
 }
 

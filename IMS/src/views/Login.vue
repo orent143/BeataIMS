@@ -21,7 +21,7 @@
 
 <script>
 import axios from "axios";
-import { useToast } from "vue-toastification"; // Import toast
+import { useToast } from "vue-toastification"; 
 
 export default {
   data() {
@@ -32,7 +32,7 @@ export default {
     };
   },
   setup() {
-    const toast = useToast(); // Initialize toast
+    const toast = useToast(); 
     return { toast };
   },
   methods: {
@@ -43,16 +43,13 @@ export default {
           password: this.password,
         });
 
-        // Store user data
         localStorage.setItem("user", JSON.stringify(response.data));
 
-        // Success toast
         this.toast.success("Login successful!", {
           position: "top-right",
           timeout: 3000,
         });
 
-        // Redirect based on user role
         const redirectPath = this.$route.query.redirect; 
         if (response.data.role === "admin") {
           this.$router.push("/dashboard");

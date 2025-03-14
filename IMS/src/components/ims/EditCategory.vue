@@ -9,6 +9,29 @@
         <label for="categoryName">Category Name:</label>
         <input v-model="editedCategory.CategoryName" id="categoryName" type="text" placeholder="Category Name" required />
       </div>
+
+      <div class="form-group image-section">
+        <label for="categoryImage">Category Image:</label>
+        <div class="image-upload-container">
+          <label for="categoryImage" class="image-upload">
+            <input 
+              type="file" 
+              id="categoryImage" 
+              @change="handleImageChange" 
+              accept="image/*"
+              class="image-input"
+            />
+            <img 
+              v-if="imagePreview || editedCategory.Image" 
+              :src="imagePreview || editedCategory.Image" 
+              alt="Category Preview"
+              class="preview-image"
+            />
+            <span v-if="!imagePreview && !editedCategory.Image" class="upload-text">Upload New Image</span>
+          </label>
+        </div>
+      </div>
+
       <div class="form-actions">
         <button type="submit" class="save-category-btn">Save Category</button>
       </div>
@@ -40,8 +63,9 @@ export default {
   data() {
     return {
       editedCategory: { ...this.category },
-      showConfirmModal: false
-    };
+      imagePreview: null,
+      newImage: null,
+      showConfirmModal: false    };
   },
   methods: {
     async confirmAndSubmit() {
@@ -50,31 +74,51 @@ export default {
     cancelSubmit() {
       this.showConfirmModal = false;
     },
-    confirmSubmit() {
-      this.showConfirmModal = false;
-      this.submitForm();
+    async confirmSubmit() {
+  this.showConfirmModal = false;
+  await this.submitForm();
+},
+    handleImageChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.newImage = file;
+        this.imagePreview = URL.createObjectURL(file);
+      }
     },
     async submitForm() {
       const toast = useToast();
       try {
-        await axios.put(`http://127.0.0.1:8000/api/categories/categories/${this.category.id}`,  
-          new URLSearchParams({
-            CategoryName: this.editedCategory.CategoryName
-          }),
+        const formData = new FormData();
+        formData.append('CategoryName', this.editedCategory.CategoryName);
+        if (this.newImage) {
+          formData.append('Image', this.newImage);
+        }
+
+        await axios.put(
+          `http://127.0.0.1:8000/api/categories/categories/${this.category.id}`,
+          formData,
           {
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
           }
         );
 
         toast.success('Category updated successfully!');
-        this.$emit("save", this.editedCategory); 
+        this.$emit("save", { 
+          ...this.editedCategory,
+          Image: this.imagePreview || this.editedCategory.Image 
+        });
         this.closeForm();
       } catch (error) {
         toast.error('Error updating category.');
-        console.error("Error updating category:", error.response?.data || error.message);
+        console.error("Error updating category:", error);
       }
     },
     closeForm() {
+      if (this.imagePreview) {
+        URL.revokeObjectURL(this.imagePreview);
+      }
       this.$emit("close");
     }
   }
@@ -246,5 +290,73 @@ input {
 
 .confirm-btn:hover {
   background-color: #d84666;
+}
+.image-section {
+  display: flex;
+  flex-direction: column;
+  grid-column: span 2;
+  gap: 10px;
+  width: 100%;
+}
+
+.image-upload-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.image-upload {
+  position: relative;
+  width: 100%;
+  max-width: 210%;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: #f9f9f9;
+}
+.image-upload:hover {
+  border-color: #E54F70;
+  background: #fff5f7;
+}
+
+.image-upload input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.upload-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+}
+
+.upload-text::before {
+  content: '+';
+  display: block;
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: #E54F70;
 }
 </style>

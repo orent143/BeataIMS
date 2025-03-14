@@ -79,7 +79,6 @@
       </div>
     </div>
 
-    <!-- Confirmation Modal -->
     <div class="modal-overlay" v-if="showConfirmModal">
       <div class="confirmation-modal">
         <div class="modal-content">
@@ -137,7 +136,7 @@ export default {
       inventorySummaries: [],
       showConfirmModal: false,
       selectedProductId: null,
-      categories: [], // Add this to store categories
+      categories: [], 
       toast: useToast(), 
     };
   },
@@ -229,7 +228,6 @@ export default {
       try {
         console.log("Updating product in parent:", updatedProduct);
 
-        // Refetch the product list to ensure it updates correctly
         await this.fetchProductItems();
         
         this.showEditForm = false;
@@ -261,7 +259,7 @@ export default {
 
   created() {
     this.fetchProductItems();
-    this.fetchCategories(); // Fetch categories on component creation
+    this.fetchCategories(); 
 
   },
 

@@ -30,7 +30,17 @@
           </thead>
           <tbody>
             <tr v-for="item in lowStockItems" :key="item.ReportID">
-              <td>{{ item.StockName }}</td>
+              <td>
+                <div class="stock-info">
+                  <img 
+                    :src="getImageUrl(item.Image)" 
+                    :alt="item.StockName"
+                    @error="handleImageError"
+                    class="stock-image"
+                  />
+                  <span class="stock-name">{{ item.StockName }}</span>
+                </div>
+              </td>
               <td>{{ item.Quantity }}</td>
               <td>₱{{ parseFloat(item.CostPrice).toFixed(2) }}</td>
               <td>{{ item.SupplierID }}</td>
@@ -47,7 +57,7 @@
       <div class="totals-container">
         <div class="totals-item">
           <span>Report Date: </span>
-          <span>{{formatDate (reportData.date) }}</span>
+          <span>{{ formatDate(reportData.date) }}</span>
         </div>
         <div class="totals-item">
           <span>Total Items: </span>
@@ -83,6 +93,8 @@ export default {
       lowStockItems: [],
       selectedDate: new Date().toISOString().split("T")[0], 
       currentDate: new Date().toISOString().split("T")[0], 
+      apiBaseUrl: "http://127.0.0.1:8000", // API Base URL
+      fallbackImage: "/default-placeholder.png", // Default Image
     };
   },
   methods: {
@@ -94,18 +106,30 @@ export default {
           return;
         }
 
-        const response = await axios.get(`http://127.0.0.1:8000/api/reports/low_stock_report?date=${this.selectedDate}`);
-        
+        const response = await axios.get(`http://127.0.0.1:8000/api/reports/low_stock_report?date=${this.selectedDate}`, {
+          params: { date: this.selectedDate }
+        });
+
         this.reportData = {
-          date: response.data.date,
-          total_items: response.data.total_items,
-          total_value: parseFloat(response.data.total_value),
+          date: response.data.date || "N/A",
+          total_items: response.data.total_items || 0,
+          total_value: parseFloat(response.data.total_value) || 0,
         };
-        this.lowStockItems = response.data.items;
+
+        this.lowStockItems = response.data.items.map(item => ({
+          ...item,
+          Image: item.Image ? `${this.apiBaseUrl}${item.Image}` : this.fallbackImage,
+        }));
       } catch (error) {
         console.error("Error fetching low stock report:", error);
         alert("Error fetching low stock report. Please try again.");
       }
+    },
+    getImageUrl(imagePath) {
+      return imagePath && imagePath.startsWith("http") ? imagePath : this.fallbackImage;
+    },
+    handleImageError(event) {
+      event.target.src = this.fallbackImage;
     },
     getStatus(quantity) {
       return quantity <= 0 ? "Out of Stock" : "Low Stock";
@@ -241,7 +265,26 @@ export default {
   color: #333;
   font-weight: bold;
 }
+.stock-name {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+.stock-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
 
+.stock-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
 .inventory-container {
   position: relative;
   flex-grow: 1;

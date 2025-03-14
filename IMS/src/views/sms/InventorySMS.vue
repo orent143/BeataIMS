@@ -1,6 +1,6 @@
 <template>
   <Header />
-  <SideBar />
+  <Sidebar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="products-header">Product List</h1>
@@ -106,14 +106,12 @@
 
 <script>
 import axios from 'axios';
-import SideBar from '@/components/ims/SideBar.vue';
-import AddProduct from '@/components/ims/AddProduct.vue';
-import EditProduct from '@/components/ims/EditProduct.vue';
+import Sidebar from '@/components/sms/Sidebar.vue';
 import Header from '@/components/Header.vue';
 import { useToast } from 'vue-toastification';
 
 export default {
-  components: { AddProduct, EditProduct, SideBar, Header },
+  components: { Sidebar, Header },
   data() {
     return {
       searchTerm: '',

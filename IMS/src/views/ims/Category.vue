@@ -19,7 +19,14 @@
     <div class="category-container">
       <div class="category-list">
         <div v-for="category in filteredCategories" :key="category.id" class="category-card">
-          <h3>{{ category.CategoryName }}</h3> 
+          <img 
+  :src="getCategoryImage(category)" 
+  :alt="category.CategoryName"
+  @error="handleImageError"
+  class="category-image"
+/>
+
+    <h3>{{ category.CategoryName }}</h3>
           <div class="category-actions">
             <button @click="setEditCategory(category)" class="action-btn edit-btn">
               <i class="pi pi-pencil"></i>
@@ -27,7 +34,7 @@
             <button @click="confirmDelete(category.id)" class="action-btn remove-btn">
               <i class="pi pi-trash"></i>
             </button>
-          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -78,6 +85,8 @@ export default {
       showConfirmModal: false,
       selectedCategoryId: null,
       toast: useToast(),
+      apiBaseUrl: 'http://127.0.0.1:8000',
+      fallbackImage: 'https://via.placeholder.com/100',
     };
   },
   computed: {
@@ -97,14 +106,35 @@ export default {
     toggleAddForm() {
       this.showAddForm = !this.showAddForm;
     },
-    async fetchCategories() {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/api/categories/');
-        this.categories = response.data;
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
+    getCategoryImage(category) {
+  if (!category.ImagePath) {
+    return this.fallbackImage;
+  }
+
+  if (category.ImagePath.startsWith('http')) {
+    return category.ImagePath;
+  }
+
+  return `${this.apiBaseUrl}${category.ImagePath}`;
+},
+
+    handleImageError(event) {
+      event.target.src = this.fallbackImage;
     },
+    async fetchCategories() {
+  try {
+    const response = await axios.get('http://127.0.0.1:8000/api/categories/');
+    console.log("Fetched Categories:", response.data); 
+    
+    this.categories = response.data.map(category => ({
+      ...category,
+      imageUrl: this.getCategoryImage(category)
+    }));
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    this.toast.error('Error fetching categories');
+  }
+},
     async addCategory(newCategory) {
       await this.fetchCategories(); 
       this.toggleAddForm();
@@ -112,13 +142,10 @@ export default {
     setEditCategory(category) {
       this.editingCategory = { ...category };
     },
-    async saveCategory(updatedCategory) {
-      const index = this.categories.findIndex(cat => cat.id === updatedCategory.id);
-      if (index !== -1) {
-        this.categories[index] = updatedCategory;
-      }
-      this.editingCategory = null; 
-    },
+    async saveCategory() {
+  await this.fetchCategories(); 
+  this.editingCategory = null;
+},
     confirmDelete(categoryId) {
       this.selectedCategoryId = categoryId;
       this.showConfirmModal = true;
@@ -140,7 +167,8 @@ export default {
         console.error("Error deleting category:", error.response?.data || error.message);
         this.toast.error('Error deleting category.');
       }
-    }
+    },
+    
   }
 };
 </script>
@@ -182,6 +210,12 @@ export default {
 
 .category-container::-webkit-scrollbar-track {
   background: transparent;
+}
+.category-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 .products-header {
   color: #333;
