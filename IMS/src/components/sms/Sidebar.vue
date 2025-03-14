@@ -35,13 +35,13 @@ export default {
     return {
       isCollapsed: false,
       links: [
-        { name: 'Dashboard', path: '/homesms', icon: 'pi-home' }, // pi-dashboard for "Dashboard"
-        { name: 'Orders', path: '/order', icon: 'pi pi-shopping-cart' }, // pi-shopping-cart for "Orders"
-        { name: 'Create Orders', path: '/createorder', icon: 'pi pi-plus-circle' }, // pi-plus-circle for "Create Orders"
-        { name: 'Sales', path: '/sales', icon: 'pi pi-dollar' }, // pi-dollar for "Sales"
-        { name: 'Inventory', path: '/inventorysms', icon: 'pi pi-box' }, // pi-box for "Inventory"
-        { name: 'Orders History', path: '/ordershistory', icon: 'pi pi-history' }, // pi-history for "Orders History"
-        { name: 'Reports', path: '/reportssms', icon: 'pi pi-file' } // pi-file for "Reports"
+        { name: 'Dashboard', path: '/homesms', icon: 'pi-home' }, 
+        { name: 'Orders', path: '/order', icon: 'pi pi-shopping-cart' }, 
+        { name: 'Create Orders', path: '/createorder', icon: 'pi pi-plus-circle' }, 
+        { name: 'Sales', path: '/sales', icon: 'pi pi-dollar' }, 
+        { name: 'Inventory', path: '/inventorysms', icon: 'pi pi-box' }, 
+        { name: 'Orders History', path: '/ordershistory', icon: 'pi pi-history' }, 
+        { name: 'Reports', path: '/reportssms', icon: 'pi pi-file' } 
       ]
     };
   },

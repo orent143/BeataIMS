@@ -1,17 +1,17 @@
 <template>
     <header class="dashboard-header">
-      <div class="header-content">
+      <div class="header-content">  
         <div class="header-left">
           <button class="sidebar-toggle" @click="toggleSidebar">☰</button>
           <div class="logo">
 
 
-            <span class="logo-text">Cafe Beata</span> <!-- Logo Text updated to Cafe Beata -->
+            <span class="logo-text">Cafe Beata</span> 
           </div>
         </div>
         <div class="header-right">
           <div class="search-bar">
-            <i class="pi pi-search search-icon"></i> <!-- Search Icon -->
+            <i class="pi pi-search search-icon"></i> 
             <input
               type="text"
               placeholder="Search"
@@ -55,7 +55,7 @@
     },
     data() {
       return {
-        localSearchQuery: this.searchQuery, // Local copy of the search query
+        localSearchQuery: this.searchQuery, 
         showDropdown: false,
         isProfileOpen: false
 
@@ -75,12 +75,12 @@
         this.$emit('toggleSidebar');
       },
       updateSearchQuery() {
-        this.$emit('update:searchQuery', this.localSearchQuery); // Emit event to update parent
+        this.$emit('update:searchQuery', this.localSearchQuery); 
       }
     },
     watch: {
       searchQuery(newQuery) {
-        this.localSearchQuery = newQuery; // Update local value if prop changes
+        this.localSearchQuery = newQuery; 
       }
     }
   };
@@ -99,59 +99,59 @@
   .header-content {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Ensure space between left and right sections */
+    justify-content: space-between; 
   }
   
   .header-left {
     display: flex;
-    align-items: center; /* Align toggle and logo vertically */
+    align-items: center; 
   }
   
   .sidebar-toggle {
-    color: rgba(0, 0, 0, 0.932); /* Text color */
-    background-color: transparent; /* Transparent background */
-    border: none; /* Remove border */
-    padding: 0px; /* Padding for the button */
-    cursor: pointer; /* Pointer cursor on hover */
-    font-size: 25px; /* Font size for the toggle icon */
+    color: rgba(0, 0, 0, 0.932); 
+    background-color: transparent; 
+    border: none; 
+    padding: 0px; 
+    cursor: pointer;
+    font-size: 25px; 
     font-weight: 900;
-    transition: background-color 0.3s; /* Smooth transition */
+    transition: background-color 0.3s; 
   }
   
   .sidebar-toggle:hover {
-    background-color: rgba(0, 0, 0, 0.1); /* Light background on hover */
+    background-color: rgba(0, 0, 0, 0.1); 
   }
   
   .logo {
     display: flex;
-    margin-left: 10px; /* Add some spacing from the toggle button */
+    margin-left: 10px; 
   }
   
   .header-right {
     display: flex;
-    align-items: center; /* Align search and profile vertically */
+    align-items: center; 
   }
   
   .search-bar {
-    position: relative; /* Position relative for the input */
-    display: flex; /* Align icon and input horizontally */
-    align-items: center; /* Center the icon and input */
+    position: relative; 
+    display: flex; 
+    align-items: center; 
   }
   
   .search-icon {
     position: absolute;
-    left: 10px; /* Position the search icon inside the input */
+    left: 10px; 
     top: 50%;
     transform: translateY(-50%);
-    color: #333; /* Ensure the color is visible */
-    pointer-events: none; /* Prevent interaction with the icon */
+    color: #333; 
+    pointer-events: none; 
   }
   
   .notification-icon {
     margin-left: 10px;
-    color: #333; /* Color for the notification icon */
-    cursor: pointer; /* Pointer cursor on hover */
-    font-size: 17px; /* Font size for the profile icon */
+    color: #333; 
+    cursor: pointer;
+    font-size: 17px; 
   }
   
   .profile {
@@ -161,10 +161,10 @@
   position: relative;
 }
   .profile-icon {
-    margin-right: 10px; /* Spacing between notification icon and profile icon */
-    color: #333; /* Color for the profile icon */
-    cursor: pointer; /* Pointer cursor on hover */
-    font-size: 17px; /* Font size for the profile icon */
+    margin-right: 10px; 
+    color: #333; 
+    cursor: pointer; 
+    font-size: 17px; 
   }
   
   .profile-dropdown {
@@ -203,35 +203,35 @@
 }
 
   .search-bar input {
-    padding: 8px 30px 8px 30px; /* Adjust padding */
-    border: 1px solid #94949400; /* Border for the input */
-    border-radius: 10px; /* Rounded corners */
-    width: 130px; /* Width of the input */
-    font-size: 14px; /* Font size */
-    font-weight: bold; /* Bold text */
-    color: #333; /* Text color */
-    background-color: #F5F5F5; /* Background color */
+    padding: 8px 30px 8px 30px; 
+    border: 1px solid #94949400;
+    border-radius: 10px; 
+    width: 130px; 
+    font-size: 14px; 
+    font-weight: bold; 
+    color: #333; 
+    background-color: #F5F5F5; 
   }
   
   .search-bar input:focus {
-    border-color: #007BF6; /* Change border color on focus */
-    outline: none; /* Remove default outline */
+    border-color: #007BF6; 
+    outline: none;
   }
   
   .profile {
     display: flex;
     align-items: center;
-    gap: 15px; /* Add spacing between search bar and profile */
+    gap: 15px;
   }
   
   .profile-pic {
     border-radius: 50%;
-    margin-left: 10px; /* Add spacing between notification icon and profile picture */
+    margin-left: 10px; 
   }
   
   .logo-text {
     font-family: 'Inknut Antiqua', serif;
-    font-size: 30px; /* Increase the font size to make the logo text bigger */
+    font-size: 30px; 
     font-weight: bolder;
     color: white;
     text-shadow: 
@@ -243,6 +243,6 @@
       0px -1px 0 #940358,
       1px 0px 0 #940358,
       -1px 0px 0 #940358;
-    line-height: 1.2; /* Adjust line-height for better spacing */
+    line-height: 1.2;   
   }
   </style>

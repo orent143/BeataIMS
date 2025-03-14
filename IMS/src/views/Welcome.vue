@@ -5,7 +5,13 @@
       <div class="nav-links">
         <a href="#about">About</a>
         <a href="#features">Features</a>
+        <a href="#features">Terms & Conditions</a>
         <a href="#contact">Contact</a>
+      </div>
+      <div class="admin-link">
+        <a @click="redirectToLogin('dashboard')" href="#" class="admin-btn">
+          <i class="fas fa-user-shield"></i> Admin
+        </a>
       </div>
     </nav>
 
@@ -20,11 +26,6 @@
 <button @click="redirectToLogin('homesms')" class="secondary-btn">
   <i class="fas fa-chart-line"></i> Sales Management
 </button>
-
-          <button @click="redirectToLogin('dashboard')" class="third-btn">
-            <i class="fas fa-chart-line"></i>
-            Admin
-          </button>
         </div>
       </div>
     </header>
@@ -91,10 +92,18 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-image: linear-gradient(to right, #E54F70, #ed9598);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  
 }
+
+.nav-links {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+}
+
 
 .logo {
   font-family: 'Inknut Antiqua', serif;
@@ -139,6 +148,10 @@ export default {
 
 .hero-content {
   max-width: 800px;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  backdrop-filter: blur(1px);
 }
 
 .hero h1 {
@@ -157,7 +170,7 @@ export default {
   justify-content: center;
 }
 
-.primary-btn, .secondary-btn, .third-btn {
+.primary-btn, .secondary-btn {
   padding: 1rem 2rem;
   border-radius: 8px;
   font-size: 1.1rem;
@@ -180,13 +193,33 @@ export default {
   background-color: #E54F70;
 }
 
-.primary-btn:hover, .secondary-btn:hover, .third-btn:hover {
+.primary-btn:hover, .secondary-btn:hover, .admin-link:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
-.third-btn{
-  color: white;
+.admin-link {
+  position: fixed;
+  top: 20px; 
+  cursor: pointer;
+  right: 20px;
+  z-index: 1001; 
   background-color: #E54F70;
+  padding: 10px 15px;
+  border-radius: 8px;
+
+}
+.admin-btn {
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.admin-btn:hover {
+  color: var(--secondary-color);
 }
 .features {
   padding: 5rem 5%;
@@ -234,11 +267,16 @@ export default {
 
 @media (max-width: 768px) {
   .nav-links {
+    position: static;
+    transform: none;
     display: none;
   }
   
   .hero h1 {
     font-size: 2.5rem;
+  }
+  .admin-link {
+    display: none;
   }
   
   .cta-buttons {

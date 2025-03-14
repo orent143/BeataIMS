@@ -256,7 +256,6 @@ import Sidebar from '@/components/sms/Sidebar.vue';
   padding: 15px;
   background-color: #f4f4f4;
   border-bottom: 10px;
-  font-family: 'Arial', sans-serif;
   font-size: 16px;
 }
 

@@ -8,7 +8,6 @@
 
       <div class="content-wrapper">
         <div class="main-content">
-          <!-- Menu Items -->
           <OrderItemSelector 
             :items="order.items"
             :menuItems="menuItems"
@@ -17,7 +16,6 @@
           />
         </div>
 
-        <!-- Customer Details and Order Summary -->
         <div class="order-details-section">
           <div class="customer-details">
             <h2>Customer Details</h2>
@@ -31,7 +29,6 @@
               <input v-model.number="order.tableNumber" type="number" required class="form-input" />
             </div>
 
-            <!-- Payment Method Selection -->
             <div class="form-group">
               <label>Payment Method</label>
               <select v-model="order.paymentMethod" class="form-input">
@@ -41,7 +38,6 @@
             </div>
           </div>
 
-          <!-- Order Summary -->
           <OrderSummary 
             :items="order.items"
             :paymentMethod="order.paymentMethod"
@@ -53,7 +49,7 @@
           </div>
         </div>
       </div>
-    </div> <!-- End of new container -->
+    </div> 
 </template>
 
 <script>
@@ -80,7 +76,7 @@ export default {
       status: 'pending',
       paymentMethod: 'CASH'
     },
-    menuItems: [], // 🔹 Add this to store menu items
+    menuItems: [], 
     loading: false,
     errorMessage: ''
   };
@@ -89,7 +85,7 @@ export default {
   methods: {
     updateOrderItems(updatedItems) {
       console.log("Updating order items:", updatedItems);
-      this.order.items = [...updatedItems]; // Ensure reactivity
+      this.order.items = [...updatedItems]; 
     },
 
     async submitOrder() {
@@ -125,7 +121,6 @@ export default {
       return;
     }
 
-    // 🛑 Check for stock availability before submitting
     for (const item of sanitizedItems) {
       const product = this.menuItems.find(menuItem => menuItem.id === item.id);
       if (product && item.quantity > product.stock) {
@@ -192,7 +187,7 @@ export default {
   flex-direction: column;
   flex-grow: 1;
   margin-left: 230px;
-  height: 100vh; /* Ensure full viewport height */
+  height: 100vh; 
 }
 
 .header-container {
@@ -214,15 +209,15 @@ h1 {
   display: grid;
   grid-template-columns: 1fr 400px;
   gap: 20px;
-  height: calc(100vh - 60px); /* Account for header height */
-  overflow-y: auto; /* Enable scrolling if content overflows */
+  height: calc(100vh - 60px); 
+  overflow-y: auto; 
 }
 
 .main-content {
   background-color: transparent;
-  flex-grow: 1; /* Allow the content to take the remaining space */
-  transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
-  overflow-y: auto; /* Enable scrolling if content overflows */
+  flex-grow: 1; 
+  transition: margin-left 0.3s ease; 
+  overflow-y: auto; 
 }
 
 .order-details-section {

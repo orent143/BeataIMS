@@ -47,9 +47,9 @@ export default {
   watch: {
     items: {
       handler() {
-        this.$forceUpdate(); // Ensure Vue re-renders when `items` changes
+        this.$forceUpdate(); 
       },
-      deep: true // Watch for changes within array objects
+      deep: true 
     }
   }
 };

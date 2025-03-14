@@ -52,24 +52,7 @@
             </div>
           </div>
         </div>
-  
-        <div class="charts-container">
-          <div class="chart-card">
-            <h3>Daily Sales</h3>
-            <div class="chart-placeholder">
-              <!-- Add Chart.js implementation here -->
-              <p class="placeholder-text">Sales Chart</p>
-            </div>
-          </div>
-  
-          <div class="chart-card">
-            <h3>Popular Items</h3>
-            <div class="chart-placeholder">
-              <!-- Add Chart.js implementation here -->
-              <p class="placeholder-text">Items Chart</p>
-            </div>
-          </div>
-        </div>
+
   
         <div class="table-container">
           <h3>Recent Orders</h3>
@@ -136,9 +119,33 @@ import Header from '@/components/Header.vue';
             total: '9.00',
             date: new Date(),
             status: 'pending'
+          },
+          {
+            id: 1003,
+            customerName: 'John Doe',
+            itemCount: 3,
+            total: '15.50',
+            date: new Date(),
+            status: 'completed'
+          },
+          {
+            id: 1004,
+            customerName: 'John Doe',
+            itemCount: 3,
+            total: '15.50',
+            date: new Date(),
+            status: 'completed'
+          },
+          {
+            id: 1005,
+            customerName: 'John Doe',
+            itemCount: 3,
+            total: '15.50',
+            date: new Date(),
+            status: 'completed'
           }
         ]
-      }
+        }
     },
     methods: {
       generateReport() {
@@ -196,7 +203,7 @@ import Header from '@/components/Header.vue';
   
   .generate-btn {
     padding: 8px 16px;
-    background-color: #FF32BA;
+    background-color: #E54F70;
     color: white;
     border: none;
     border-radius: 4px;

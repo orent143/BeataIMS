@@ -27,7 +27,7 @@ export default {
   components: { MenuItemCard },
   props: {
     items: Array,
-    menuItems: Array // ✅ Comes from parent `CreateOrder.vue`
+    menuItems: Array 
   },
   data() {
     return {
@@ -48,7 +48,6 @@ export default {
         
         console.log("Menu items received:", response.data);
         
-        // ✅ Emit to parent to update `menuItems`
         this.$emit('update:menuItems', response.data);
 
         if (!response.data.length) {
@@ -77,7 +76,7 @@ export default {
     updatedItems.push({ 
       id: menuItem.id, 
       name: menuItem.name, 
-      price: Number(menuItem.price),  // ✅ Ensure price is added as a number
+      price: Number(menuItem.price), 
       quantity: 1 
     });
   }

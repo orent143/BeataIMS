@@ -73,6 +73,7 @@
 import axios from 'axios';
 import sidebar from '@/components/admin/sidebar.vue';
 import Header from '@/components/Header.vue';
+import { useToast } from "vue-toastification";
 
 export default {
   name: 'UserManagement',
@@ -92,6 +93,7 @@ export default {
         profile_pic: null
       },
       showNotification: false,
+      toast: useToast(),  
     };
   },
 
@@ -152,11 +154,18 @@ export default {
         this.users.push(response.data);
         this.newUser = { username: '', password: '', role: '', profile_pic: null };
 
-        this.showNotification = true;
-        setTimeout(() => {
-          this.showNotification = false; 
-        }, 3000);
+        this.toast.success("User added successfully!", {
+          timeout: 3000,
+          position: "top-right",
+          closeOnClick: true,
+        });
+
       } catch (error) {
+        this.toast.error("Error creating user: " + error.message, {
+          timeout: 5000,
+          position: "top-right",
+          closeOnClick: true,
+        });
         console.error('There was an error creating the user:', error);
       }
     },
@@ -165,6 +174,8 @@ export default {
 </script>
 
   <style scoped>
+
+  
 .app-container {
   display: flex;
   flex-direction: column;
@@ -172,13 +183,12 @@ export default {
   margin-left: 230px; /* Make space for sidebar, adjust as needed */
   height: 100%; /* Full height of the page */
 }
-  .add-user-form {
-    margin-bottom: 20px;
-    padding: 15px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
+.add-user-form {
+  background-color: white;
+  border-radius: 10px;
+  padding: 15px;
+}
+
   
   .add-user-form form {
     display: flex;
@@ -206,22 +216,12 @@ export default {
     background-color: #1976d2;
   }
   
-  .notification {
-    padding: 10px;
-    background-color: #4caf50;
-    color: white;
-    border-radius: 5px;
-    margin-top: 10px;
-    text-align: center;
-  }
-  
-  .notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: auto;
-    z-index: 1000;
-  }
+  .user-management-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
   
   .table th,
   .table td {
@@ -264,34 +264,34 @@ export default {
     outline: none;
   }
   
-  .user-management-container {
-    padding: 20px;
-  }
-  
   .user-table {
-    position: relative;
-  flex-grow: 1;
-  height: 37dvw;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  border-collapse: collapse;
-
-  background-color: #ffffff;
-  border-radius: 25px;
+  flex: 1;
+  max-height: calc(100% - 200px); /* Adjust based on other elements */
   overflow-y: auto;
-  margin-left: 5px;
-  padding: 0;
-  }
-  
-  .user-table th,
-  .user-table td {
-    padding: 10px;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
+  background-color: white;
+  border-radius: 10px;
   padding: 10px;
-  border-bottom: 1px solid #eee;
 }
+
   
+.user-table thead {
+  position: sticky;
+  top: 0;
+  background-color: #f4f4f4;
+  z-index: 1;
+}
+
+.user-table tbody {
+  display: block;
+  overflow-y: auto;
+}
+
+.user-table thead tr,
+.user-table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
   th {
     background-color: #f4f4f4;
   padding: 13px;
@@ -335,7 +335,24 @@ export default {
   .modal-content button {
     background-color: #f44336;
   }
-  
+  .user-table::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.user-table::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.user-table::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.user-table::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
   @media (max-width: 768px) {
     .main-content {
       padding: 15px;

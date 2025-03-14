@@ -5,7 +5,6 @@
         <button class="close-btn" @click="closeForm">x</button>
       </div>
       <form @submit.prevent="submit" class="form-container">
-        <!-- First Row -->
         <div class="form-group">
           <label for="name">Item Name</label>
           <input id="name" v-model="name" placeholder="Item Name" required />
@@ -15,7 +14,6 @@
           <input id="quantity" v-model="quantity" type="number" placeholder="Quantity" required min="1" />
         </div>
   
-        <!-- Second Row -->
         <div class="form-group">
           <label for="unitPrice">Unit Price</label>
           <input id="unitPrice" v-model="unitPrice" type="number" placeholder="Unit Price" required min="0" step="0.01" />
@@ -33,8 +31,7 @@
           <label for="supplier">Supplier</label>
           <input id="supplier" v-model="supplier" placeholder="Supplier" required />
         </div>
-  
-        <!-- Third Row -->
+
         <div class="form-group">
           <label for="status">Status</label>
           <select id="status" v-model="status" required>
@@ -45,7 +42,6 @@
           </select>
         </div>
   
-        <!-- Form Actions -->
         <div class="form-actions">
           <button type="submit" class="add-item-btn">Add Product</button>
         </div>

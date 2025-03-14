@@ -374,13 +374,8 @@ export default {
   font-weight: 500;
 }
 
-.activity-status.completed {
-  background: #E8F5E9;
-  color: #4CAF50;
-}
-
 .activity-status.success {
-  background-color: #e3f2fd;
+  background-color: #E8F5E9;
   color: #43a047;
 }
 
