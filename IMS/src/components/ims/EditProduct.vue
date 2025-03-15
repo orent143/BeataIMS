@@ -28,6 +28,7 @@
           <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.CategoryName }}</option>
         </select>
       </div>
+
       <div class="form-group image-section">
       <label for="image">Product Image</label>
       <div class="image-upload-container">
@@ -107,37 +108,37 @@ export default {
       }
     },
     async updateProduct() {
-  const toast = useToast();
-  try {
-    if (!this.product.id) {
-      throw new Error("Product ID is missing!");
+    const toast = useToast();
+    try {
+      if (!this.product.id) {
+        throw new Error("Product ID is missing!");
+      }
+
+      let formData = new FormData();
+      formData.append("ProductName", this.product.ProductName);
+      formData.append("Quantity", this.product.Quantity);
+      formData.append("UnitPrice", this.product.UnitPrice);
+      formData.append("CategoryID", this.product.CategoryID);
+      formData.append("Status", this.product.Status);
+
+      if (this.selectedImage) {
+        formData.append("Image", this.selectedImage);
+      }
+
+      await axios.put(
+        `http://127.0.0.1:8000/api/inventory/inventoryproduct/${this.product.id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      toast.success("Product updated successfully!");
+      this.$emit("update", this.product);
+      this.closeForm();
+    } catch (error) {
+      console.error("Error updating product:", error);
+      toast.error("Failed to update product");
     }
-
-    let formData = new FormData();
-    formData.append("ProductName", this.product.ProductName);
-    formData.append("Quantity", this.product.Quantity);
-    formData.append("UnitPrice", this.product.UnitPrice);
-    formData.append("CategoryID", this.product.CategoryID);
-    formData.append("Status", this.product.Status);
-
-    if (this.selectedImage) {
-      formData.append("Image", this.selectedImage);
-    }
-
-    await axios.put(
-      `http://127.0.0.1:8000/api/inventory/inventoryproduct/${this.product.id}`,
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
-
-    toast.success("Product updated successfully!");
-    this.$emit("update", this.product); 
-    this.closeForm();
-  } catch (error) {
-    console.error("Error updating product:", error);
-    toast.error("Failed to update product");
   }
-}
 
   },
   created() {
@@ -404,4 +405,5 @@ select {
 .confirm-btn:hover {
   background-color: #d84666;
 }
+
 </style>

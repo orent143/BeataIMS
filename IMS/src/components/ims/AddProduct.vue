@@ -27,6 +27,14 @@
           </option>
         </select>
       </div>
+      <div class="form-group">
+    <label for="processType">Process Type:</label>
+    <select id="processType" v-model="processType" class="form-control" required>
+      <option value="" disabled>Select Process Type</option>
+      <option value="Ready-Made">Ready Made</option>
+      <option value="To Be Made">To Be Made</option>
+    </select>
+  </div>
       <div class="form-group image-section">
       <label for="image">Product Image</label>
       <div class="image-upload-container">
@@ -72,10 +80,12 @@ export default {
       unitPrice: 0,
       categoryId: null,
       categories: [],
+      processType: "",
       imageFile: null, 
       imagePreview: null, 
       showConfirmModal: false,
       toast: useToast(), 
+      
     };
   },
   async created() {
@@ -96,6 +106,7 @@ export default {
       this.quantity = 1;
       this.unitPrice = 0;
       this.categoryId = null;
+      this.processType = "";
     },
     async confirmAndSubmit() {
       this.showConfirmModal = true;
@@ -120,6 +131,7 @@ export default {
         formData.append("ProductName", this.name);
         formData.append("Quantity", this.quantity);
         formData.append("UnitPrice", this.unitPrice);
+        formData.append("ProcessType", this.processType);
         if (this.categoryId) {
           formData.append("CategoryID", this.categoryId);
         }
@@ -396,5 +408,18 @@ select {
   margin-bottom: 5px;
   color: #E54F70;
 }
+select.form-control {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 12px;
+  width: 85%;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+}
 
+select.form-control:focus {
+  border-color: #E54F70;
+  outline: none;
+}
 </style>

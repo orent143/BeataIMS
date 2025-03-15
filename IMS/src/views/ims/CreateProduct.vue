@@ -55,7 +55,7 @@
           </div>
 
           <div class="form-group">
-            <label>Stocks (Optional, Add Multiple)</label>
+            <label>Stocks Needed(Optional, Add Multiple)</label>
             <div v-for="(stockEntry, index) in product.Stocks" :key="index" class="stock-entry">
               <select v-model.number="stockEntry.StockID" class="form-input">
                 <option value="" disabled>Select Stock</option>

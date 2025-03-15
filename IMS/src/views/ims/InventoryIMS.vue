@@ -6,18 +6,23 @@
       <h1 class="products-header">Product List</h1>
       <div class="header-actions">
         <div class="filter-container">
-          <button class="filter-btn" @click="toggleFilterDropdown">
-            <i class="fas fa-filter"></i>
-          </button>
-          <div v-if="showFilterDropdown" class="dropdown">
-            <select v-model="selectedStatus" class="filter-select" @change="filterItems">
-              <option value="">All Statuses</option>
-              <option value="In Stock">In Stock</option>
-              <option value="Low Stock">Low Stock</option>
-              <option value="Out of Stock">Out of Stock</option>
-            </select>
+          <div class="filter-label">Filter by</div>
+  <button class="filter-btn" @click="toggleFilterDropdown">
+    {{ selectedProcessType || 'Process Type' }}
+    <i class="pi pi-angle-down"></i>
+  </button>
+  <div v-if="showFilterDropdown" class="dropdown">
+    <select v-model="selectedProcessType" class="filter-select" @change="filterItems">
+      <option value="">All Process Types</option>
+      <option value="Ready-Made">Ready Made</option>
+      <option value="To Be Made">To Be Made</option>
+    </select>
           </div>
         </div>
+        <button @click="toggleTransactionLog" class="transaction-log-btn">
+      <i class="pi pi-history"></i>
+      Transaction Log
+    </button>
         <button @click="toggleAddForm" class="add-product-btn">Add</button>
       </div>
     </div>
@@ -31,6 +36,7 @@
             <th>Quantity</th>
             <th>Unit Price</th>
             <th>Category</th>
+            <th>Process Type</th> <!-- Added Column -->
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -53,6 +59,8 @@
             <td>{{ product.Quantity }}</td>
             <td>₱{{ product.UnitPrice }}</td>
             <td>{{ getCategoryName(product.CategoryID) }}</td>
+            <td>{{ product.ProcessType }}</td> <!-- Display Process Type -->
+
             <td>
               <span :class="'status status-' + product.Status.toLowerCase().replace(/ /g, '-')">
                 {{ product.Status }}
@@ -106,6 +114,10 @@
       @close="toggleEditForm"
       @update="handleUpdateProduct"
     />
+    <transaction-log 
+    :isVisible="showTransactionLog"
+    @close="toggleTransactionLog"
+  />
   </div>
 </template>
 
@@ -115,15 +127,18 @@ import SideBar from '@/components/ims/SideBar.vue';
 import AddProduct from '@/components/ims/AddProduct.vue';
 import EditProduct from '@/components/ims/EditProduct.vue';
 import Header from '@/components/Header.vue';
+import TransactionLog from '@/components/ims/TransactionLog.vue';
+
 import { useToast } from 'vue-toastification';
 
 export default {
-  components: { AddProduct, EditProduct, SideBar, Header },
+  components: { AddProduct, EditProduct, SideBar, Header,     TransactionLog  },
   data() {
     return {
       searchTerm: '',
       selectedStatus: '',
       showFilterDropdown: false,
+      selectedProcessType: '',
       showAddForm: false,
       showEditForm: false,
       showPopoutOptions: false,
@@ -136,6 +151,7 @@ export default {
       inventorySummaries: [],
       showConfirmModal: false,
       selectedProductId: null,
+      showTransactionLog: false,
       categories: [], 
       toast: useToast(), 
     };
@@ -144,6 +160,9 @@ export default {
   methods: {
     toggleFilterDropdown() {
       this.showFilterDropdown = !this.showFilterDropdown;
+    },
+    toggleTransactionLog() {
+      this.showTransactionLog = !this.showTransactionLog;
     },
     toggleAddForm() {
       this.showAddForm = !this.showAddForm;
@@ -155,17 +174,18 @@ export default {
       this.showPopoutOptions = !this.showPopoutOptions;
     },
     filterItems() {
-      let filtered = this.productItems;
-      if (this.searchTerm) {
-        filtered = filtered.filter(item =>
-          item.ProductName.toLowerCase().includes(this.searchTerm.toLowerCase())
-        );
-      }
-      if (this.selectedStatus) {
-        filtered = filtered.filter(item => item.Status === this.selectedStatus);
-      }
-      this.filteredItems = filtered;
-    },
+  let filtered = this.productItems;
+  if (this.searchTerm) {
+    filtered = filtered.filter(item =>
+      item.ProductName.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
+  if (this.selectedProcessType) {
+    filtered = filtered.filter(item => item.ProcessType === this.selectedProcessType);
+  }
+  this.filteredItems = filtered;
+  this.showFilterDropdown = false; // Close dropdown after selecting
+},
     getStatusByQuantity(quantity) {
       if (quantity === 0) {
         return 'Out of Stock';
@@ -181,14 +201,20 @@ export default {
       this.showAddForm = false; 
     },
     async fetchProductItems() {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/api/inventory/');
-        this.productItems = response.data;
-        this.filterItems();
-      } catch (error) {
-        console.error('Error fetching product items:', error);
-      }
-    },
+  try {
+    let url = 'http://127.0.0.1:8000/api/inventory/inventoryproducts/all';
+    
+    if (this.selectedProcessType) {
+      url = `http://127.0.0.1:8000/api/inventory/inventoryproducts/filter?process_type=${this.selectedProcessType}`;
+    }
+
+    const response = await axios.get(url);
+    this.productItems = response.data;
+    this.filterItems();
+  } catch (error) {
+    console.error('Error fetching product items:', error);
+  }
+},
     confirmDelete(productId) {
       this.selectedProductId = productId;
       this.showConfirmModal = true;
@@ -265,7 +291,8 @@ export default {
 
   watch: {
     searchTerm: 'filterItems',
-    selectedStatus: 'filterItems',
+    selectedProcessType: 'filterItems',
+
     productItems: {
       deep: true,
       handler() {
@@ -368,42 +395,69 @@ export default {
   transition: transform 0.2s ease;
 }
 
-
 .filter-btn {
-  padding: 8px;
-  background-color: transparent;
-  border: none;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 19px;
+  font-size: 14px;
   color: #333;
-  transition: color 0.3s;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  min-width: 150px;
+  justify-content: space-between;
+}
+.filter-btn .pi-angle-down {
+  font-size: 17px;
+  margin-left: 4px;
 }
 
+.filter-btn:hover {
+  border-color: #E54F70;
+  color: #E54F70;
+}
 .filter-container {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+.filter-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
 .dropdown {
   position: absolute;
-  top: 35px;
+  top: 100%;
   left: 0;
+  margin-top: 4px;
   background-color: white;
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
   border-radius: 5px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 10px;
-  z-index: 10;
-  width: 8dvw;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  width: 100%;
+  z-index: 100;
 }
 
 .filter-select {
-  padding: 8px;
-  font-size: 14px;
-  border-radius: 5px;
   width: 100%;
-  margin-bottom: 10px;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  outline: none;
 }
 
+.filter-select option {
+  padding: 8px;
+}
 .add-product-btn {
   padding: 8px 12px;
   background-color: #E54F70;
@@ -616,5 +670,23 @@ export default {
   font-size: 14px;
   color: #333;
   font-weight: 500;
+}
+.transaction-log-btn {
+  padding: 8px 16px;
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.transaction-log-btn:hover {
+  border-color: #E54F70;
+  color: #E54F70;
 }
 </style>

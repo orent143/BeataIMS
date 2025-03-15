@@ -10,7 +10,7 @@
       <div class="report-card" @click="goToReport('summary')">
         <div class="report-card-header">
           <i class="fas fa-chart-line report-icon"></i>
-          <h3>Summary Report</h3>
+          <h3>Product Summary Report</h3>
         </div>
         <div class="report-card-body">
           <p>Overview of all inventory reports and metrics</p>
