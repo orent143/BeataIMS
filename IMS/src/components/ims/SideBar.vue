@@ -58,19 +58,29 @@ export default {
       links: [
         { name: 'Home', path: '/homeims', icon: 'pi-home' },
         {
-          name: 'Manage Inventory',
+          name: 'Product',
           path: '#',
           icon: 'pi-box',
           submenu: [
-            { name: 'Products', path: '/inventoryims', icon: 'pi-box' },
-            { name: 'Stock', path: '/stocks', icon: 'pi-box' }
+            { name: 'Create Product', path: '/create', icon: 'pi-plus-circle' },
+            { name: 'View Products', path: '/products', icon: 'pi-eye' }
           ],
           isOpen: false 
         },
-        { name: 'Create Product', path: '/create', icon: 'pi-plus-circle' },
+        {
+          name: 'Inventory',
+          path: '#',
+          icon: 'pi-warehouse',
+          submenu: [
+            { name: 'View Inventory', path: '/viewinventory', icon: 'pi-eye' },
+            { name: 'Stock-in', path: '/stocks', icon: 'pi-plus-circle' }
+          ],
+          isOpen: false 
+        },
         { name: 'Suppliers', path: '/suppliers', icon: 'pi-truck' },
         { name: 'Categories', path: '/category', icon: 'pi-list' },
         { name: 'Reports', path: '/reportsims', icon: 'pi-chart-line' }
+        
       ]
     };
   },

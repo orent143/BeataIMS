@@ -19,60 +19,52 @@
     </select>
           </div>
         </div>
-        <button @click="toggleTransactionLog" class="transaction-log-btn">
+        <button @click="toggleProductTransaction" class="transaction-log-btn">
       <i class="pi pi-history"></i>
       Transaction Log
     </button>
-        <button @click="toggleAddForm" class="add-product-btn">Add</button>
+        
       </div>
     </div>
 
     <div class="inventory-container">
       <table class="stock-table">
         <thead>
-          <tr>
-            <th v-if="isLowStockMode">Select</th>
-            <th>Product Name</th>
-            <th>Quantity</th>
-            <th>Unit Price</th>
-            <th>Category</th>
-            <th>Process Type</th> <!-- Added Column -->
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
+      <tr>
+        <th>Product ID</th>
+        <th>Product Name</th>
+        <th>Unit Price</th>
+        <th>Category</th>
+        <th>Process Type</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
         </thead>
         <tbody>
           <tr v-for="product in filteredItems" :key="product.id">
-            <td v-if="isLowStockMode">
-              <input
-                type="checkbox"
-                :value="product.id"
-                v-model="selectedLowStockItems"
-              />
-            </td>
+            <td>{{ product.ProductID }}</td>
             <td>
               <div class="product-info">
                 <img :src="product.Image || 'https://via.placeholder.com/50'" alt="Product Image" class="product-image" />
                 <span class="product-name">{{ product.ProductName }}</span>
               </div>
             </td>
-            <td>{{ product.Quantity }}</td>
             <td>₱{{ product.UnitPrice }}</td>
             <td>{{ getCategoryName(product.CategoryID) }}</td>
             <td>{{ product.ProcessType }}</td> <!-- Display Process Type -->
 
             <td>
-              <span :class="'status status-' + product.Status.toLowerCase().replace(/ /g, '-')">
-                {{ product.Status }}
-              </span>
+              <span :class="'status status-' + (product.Status ? product.Status.toLowerCase().replace(/ /g, '-') : 'unknown')">
+  {{ product.Status || 'Unknown' }}
+</span>
             </td>
             <td>
               <button class="action-btn edit" @click="editItem(product)">
                 <i class="pi pi-pencil"></i>
               </button>
-              <button class="action-btn delete" @click="confirmDelete(product.id)">
-                <i class="pi pi-trash"></i>
-              </button>
+              <button class="action-btn delete" @click="confirmDelete(product.ProductID)">
+  <i class="pi pi-trash"></i>
+</button>
             </td>
           </tr>
         </tbody>
@@ -81,7 +73,6 @@
       <div class="floating-btn-container">
         <button class="floating-btn" @click="togglePopoutOptions">+</button>
         <div v-if="showPopoutOptions" class="popout-options">
-          <button class="popout-option" @click="addLowStock">Add Low Stock</button>
           <button class="popout-option" @click="postInventorySummary">Add Summary</button>
         </div>
       </div>
@@ -114,9 +105,9 @@
       @close="toggleEditForm"
       @update="handleUpdateProduct"
     />
-    <transaction-log 
-    :isVisible="showTransactionLog"
-    @close="toggleTransactionLog"
+    <ProductTransaction
+    :isVisible="showProductTransaction"
+    @close="toggleProductTransaction"
   />
   </div>
 </template>
@@ -127,12 +118,11 @@ import SideBar from '@/components/ims/SideBar.vue';
 import AddProduct from '@/components/ims/AddProduct.vue';
 import EditProduct from '@/components/ims/EditProduct.vue';
 import Header from '@/components/Header.vue';
-import TransactionLog from '@/components/ims/TransactionLog.vue';
-
+import ProductTransaction from '@/components/ims/ProductTransaction.vue';
 import { useToast } from 'vue-toastification';
 
 export default {
-  components: { AddProduct, EditProduct, SideBar, Header,     TransactionLog  },
+  components: { AddProduct, EditProduct, SideBar, Header,     ProductTransaction  },
   data() {
     return {
       searchTerm: '',
@@ -151,7 +141,7 @@ export default {
       inventorySummaries: [],
       showConfirmModal: false,
       selectedProductId: null,
-      showTransactionLog: false,
+      showProductTransaction: false,
       categories: [], 
       toast: useToast(), 
     };
@@ -161,12 +151,10 @@ export default {
     toggleFilterDropdown() {
       this.showFilterDropdown = !this.showFilterDropdown;
     },
-    toggleTransactionLog() {
-      this.showTransactionLog = !this.showTransactionLog;
-    },
-    toggleAddForm() {
-      this.showAddForm = !this.showAddForm;
-    },
+    toggleProductTransaction() {
+    this.showProductTransaction = !this.showProductTransaction;
+  },
+
     toggleEditForm() {
       this.showEditForm = !this.showEditForm;
     },
@@ -186,39 +174,37 @@ export default {
   this.filteredItems = filtered;
   this.showFilterDropdown = false; // Close dropdown after selecting
 },
-    getStatusByQuantity(quantity) {
-      if (quantity === 0) {
-        return 'Out of Stock';
-      } else if (quantity <= 10) {
-        return 'Low Stock';
-      } else {
-        return 'In Stock';
-      }
-    },
     addItem(newProduct) {
       this.productItems.push(newProduct);
       this.filterItems();
       this.showAddForm = false; 
     },
     async fetchProductItems() {
-  try {
-    let url = 'http://127.0.0.1:8000/api/inventory/inventoryproducts/all';
-    
-    if (this.selectedProcessType) {
-      url = `http://127.0.0.1:8000/api/inventory/inventoryproducts/filter?process_type=${this.selectedProcessType}`;
-    }
+      try {
+        let url = 'http://127.0.0.1:8000/api/inventory/inventoryproducts/all';
 
-    const response = await axios.get(url);
-    this.productItems = response.data;
-    this.filterItems();
-  } catch (error) {
-    console.error('Error fetching product items:', error);
-  }
-},
-    confirmDelete(productId) {
-      this.selectedProductId = productId;
-      this.showConfirmModal = true;
+        if (this.selectedProcessType) {
+          url = `http://127.0.0.1:8000/api/inventory/inventoryproducts/filter?process_type=${this.selectedProcessType}`;
+        }
+
+        const response = await axios.get(url);
+
+        this.productItems = response.data.map(product => ({
+          ...product,
+          Status: product.Status || 'Unknown',
+          ProductID: product.ProductID || 'N/A'
+        }));
+
+        this.filterItems();
+      } catch (error) {
+        console.error('Error fetching product items:', error);
+      }
     },
+    confirmDelete(productID) {
+    console.log("Confirming delete for ProductID:", productID); // Debug log
+    this.selectedProductId = productID;
+    this.showConfirmModal = true;
+  },
     cancelSubmit() {
       this.showConfirmModal = false;
       this.selectedProductId = null;
@@ -228,16 +214,31 @@ export default {
       this.removeItem(this.selectedProductId);
     },
     async removeItem(productId) {
-      try {
-        await axios.delete(`http://127.0.0.1:8000/api/inventory/inventoryproduct/${productId}`);
-        this.productItems = this.productItems.filter(item => item.id !== productId);
+    try {
+      if (!productId) {
+        this.toast.error("Invalid product ID");
+        return;
+      }
+
+      console.log("Attempting to delete product with ID:", productId);
+      
+      const response = await axios.delete(`http://127.0.0.1:8000/api/inventory/inventoryproduct/${productId}`);
+      
+      if (response.status === 200) {
+        // Use the same ID field for filtering
+        this.productItems = this.productItems.filter(item => item.ProductID !== productId);
         this.filterItems();
         this.toast.success("Product deleted successfully!");
-      } catch (error) {
-        console.error('Error deleting product:', error);
-        this.toast.error("Failed to delete product.");
       }
-    },
+    } catch (error) {
+      console.error("Error deleting product:", error.response?.data || error);
+      const errorMessage = error.response?.data?.detail || "Failed to delete product";
+      this.toast.error(errorMessage);
+    } finally {
+      this.selectedProductId = null;
+      this.showConfirmModal = false;
+    }
+  },
     async fetchCategories() {
       try {
         const response = await axios.get('http://127.0.0.1:8000/api/categories/');
@@ -367,11 +368,11 @@ export default {
   color: #333;
   font-weight: bold;
 }
-
-.stock-table input[type="checkbox"] {
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
+.stock-table td:first-child {
+  font-family: monospace;
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
 }
 
 

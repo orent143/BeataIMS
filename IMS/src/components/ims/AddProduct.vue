@@ -85,7 +85,6 @@ export default {
       imagePreview: null, 
       showConfirmModal: false,
       toast: useToast(), 
-      
     };
   },
   async created() {

@@ -9,21 +9,25 @@
       <div class="content-wrapper">
         <div class="product-details">
           <h2>Product Details</h2>
+          
+          <div class="form-group">
+            <label>Product ID</label>
+            <input v-model="product.ProductID" type="text" required class="form-input" placeholder="Enter Product ID" />
+          </div>
+
           <div class="form-group">
             <label>Product Name</label>
-            <input v-model="product.ProductName" type="text" required class="form-input" />
+            <input v-model="product.ProductName" type="text" required class="form-input" placeholder="Enter Product Name" />
           </div>
-          <div class="form-group">
-            <label>Product Quantity</label>
-            <input v-model.number="product.Quantity" type="number" min="1" required class="form-input" />
-          </div>
+
           <div class="form-group">
             <label>Unit Price (₱)</label>
             <input v-model.number="product.UnitPrice" type="number" min="0" step="0.01" required class="form-input" />
           </div>
+
           <div class="form-group">
             <label>Category</label>
-            <select v-model="product.CategoryID" class="form-input">
+            <select v-model="product.CategoryID" class="form-input" required>
               <option value="" disabled>Select Category</option>
               <option v-for="category in categories" :key="category.id" :value="category.id">
                 {{ category.CategoryName }}
@@ -32,15 +36,23 @@
           </div>
 
           <div class="form-group">
+            <label>Process Type</label>
+            <select v-model="product.ProcessType" class="form-input" required>
+              <option value="Ready-Made">Ready Made</option>
+              <option value="To Be Made">To Be Made</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label>Product Image</label>
             <div class="image-upload-container">
               <div class="image-preview" v-if="imagePreview">
                 <img :src="imagePreview" alt="Preview" />
-                <button class="remove-image-btn" @click="removeImage">-</button>
+                <button type="button" class="remove-image-btn" @click="removeImage">Remove</button>
               </div>
               <div class="upload-area" v-else>
-                <input
-                  type="file"
+                <input 
+                  type="file" 
                   @change="handleImageUpload"
                   accept="image/*"
                   class="file-input"
@@ -53,56 +65,35 @@
               </div>
             </div>
           </div>
-
-          <div class="form-group">
-            <label>Stocks Needed(Optional, Add Multiple)</label>
-            <div v-for="(stockEntry, index) in product.Stocks" :key="index" class="stock-entry">
-              <select v-model.number="stockEntry.StockID" class="form-input">
-                <option value="" disabled>Select Stock</option>
-                <option v-for="stock in stocks" :key="stock.StockID" :value="stock.StockID">
-                  {{ stock.StockName }} (Available: {{ stock.Quantity }})
-                </option>
-              </select>
-              <input v-model.number="stockEntry.StockQuantity" type="number" min="1" class="form-input stock-quantity" placeholder="Stock Quantity" />
-              <button @click="removeStock(index)" class="remove-btn">Remove</button>
-            </div>
-            <button @click="addStock" class="add-btn">Add Another Stock</button>
-          </div>
         </div>
 
         <div class="summary-section">
           <h2>Product Summary</h2>
           <div class="summary-details">
+            <p><strong>Product ID:</strong> {{ product.ProductID || 'N/A' }}</p>
             <p><strong>Product Name:</strong> {{ product.ProductName || 'N/A' }}</p>
             <p><strong>Category:</strong> {{ selectedCategoryName }}</p>
-            <p><strong>Quantity:</strong> {{ product.Quantity }}</p>
             <p><strong>Unit Price:</strong> ₱{{ product.UnitPrice.toFixed(2) }}</p>
-            <p><strong>Stocks:</strong></p>
-            <ul>
-              <li v-for="(stock, index) in product.Stocks" :key="index">
-                {{ getStockName(stock.StockID) }} - {{ stock.StockQuantity }} units
-              </li>
-            </ul>
-            <hr />
-            <p><strong>Total Cost:</strong> ₱{{ totalCost.toFixed(2) }}</p>
+            <p><strong>Process Type:</strong> {{ product.ProcessType }}</p>
           </div>
 
           <div class="form-actions">
             <button type="button" @click="resetForm" class="reset-btn">Reset</button>
-            <button type="button" @click="confirmAndSubmit" class="submit-btn">Create Product</button>
+            <button type="button" @click="showConfirmModal = true" class="submit-btn">Create Product</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Confirmation Modal -->
   <div class="modal-overlay" v-if="showConfirmModal">
     <div class="confirmation-modal">
       <div class="modal-content">
-        <h3>Confirm Addition</h3>
-        <p>Are you sure you want to add this product?</p>
+        <h3>Confirm Creation</h3>
+        <p>Are you sure you want to create this product?</p>
         <div class="modal-actions">
-          <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
+          <button @click="showConfirmModal = false" class="cancel-btn">Cancel</button>
           <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
         </div>
       </div>
@@ -121,70 +112,35 @@ export default {
   data() {
     return {
       product: {
+        ProductID: "",
         ProductName: "",
         CategoryID: null,
-        Quantity: 1,
         UnitPrice: 0,
+        ProcessType: "Ready-Made",
         Stocks: [],
         Image: null,
+        
       },
       categories: [],
-      stocks: [],
-      loading: false,
-      errorMessage: "",
       showConfirmModal: false,
       toast: useToast(),
       imagePreview: null,
     };
   },
   computed: {
-    totalCost() {
-      return this.product.Quantity * this.product.UnitPrice;
-    },
     selectedCategoryName() {
       const category = this.categories.find(cat => cat.id === this.product.CategoryID);
       return category ? category.CategoryName : 'N/A';
-    },
-    getStockName() {
-      return (stockID) => {
-        const stock = this.stocks.find(s => s.StockID === stockID);
-        return stock ? stock.StockName : 'N/A';
-      };
     }
   },
-  mounted() {
-    this.fetchPrepopulateData();
-  },
   methods: {
-    async fetchPrepopulateData() {
-      this.loading = true;
-      this.errorMessage = "";
+    async fetchCategories() {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/products/products/prepopulate');
-        if (response.data.categories && response.data.stocks) {
-          this.categories = response.data.categories;
-          this.stocks = response.data.stocks;
-          console.log("Categories fetched:", this.categories);
-          console.log("Stocks fetched:", this.stocks);
-          this.toast.success("Categories and Stocks loaded successfully!");
-        } else {
-          throw new Error("Invalid response structure");
-        }
+        const response = await axios.get("http://127.0.0.1:8000/api/categories");
+        this.categories = response.data;
       } catch (error) {
-        console.error('Error fetching prepopulate data:', error.response?.data?.detail || error.message);
-        this.errorMessage = "Failed to fetch categories and stocks.";
-        this.toast.error("Failed to fetch categories and stocks.");
-      } finally {
-        this.loading = false;
+        this.toast.error("Failed to fetch categories.");
       }
-    },
-    addStock() {
-      this.product.Stocks.push({ StockID: null, StockQuantity: 1 });
-      this.toast.info("New stock entry added.");
-    },
-    removeStock(index) {
-      this.product.Stocks.splice(index, 1);
-      this.toast.warning("Stock entry removed.");
     },
     handleImageUpload(event) {
       const file = event.target.files[0];
@@ -193,68 +149,59 @@ export default {
         this.imagePreview = URL.createObjectURL(file);
       }
     },
-
     removeImage() {
       this.product.Image = null;
       this.imagePreview = null;
-      const input = document.getElementById('imageInput');
-      if (input) input.value = '';
     },
-    async confirmAndSubmit() {
-      this.showConfirmModal = true;
-    },
-    cancelSubmit() {
+    async confirmSubmit() {
       this.showConfirmModal = false;
-    },
-    confirmSubmit() {
-      this.showConfirmModal = false;
-      this.submitProduct();
-    },
-    async submitProduct() {
       this.loading = true;
+      
       try {
         const formData = new FormData();
+        formData.append("ProductID", this.product.ProductID);
         formData.append("ProductName", this.product.ProductName);
         formData.append("CategoryID", this.product.CategoryID);
-        formData.append("Quantity", this.product.Quantity);
         formData.append("UnitPrice", this.product.UnitPrice);
-        formData.append("Stocks", JSON.stringify(this.product.Stocks));
+        formData.append("ProcessType", this.product.ProcessType);
+
         if (this.product.Image) {
-          formData.append("Image", this.product.Image); 
+          formData.append("Image", this.product.Image);
         }
-        console.log("Submitting product:", this.product);
 
-        const response = await axios.post('http://127.0.0.1:8000/api/products/products/', formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const response = await axios.post(
+          'http://127.0.0.1:8000/api/inventory/inventoryproduct/',
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
 
-        this.toast.success("Product created successfully!");
-        console.log("Product created:", response.data);
+        this.toast.success(response.data.message || "Product created successfully!");
         this.resetForm();
       } catch (error) {
-        console.error("Error creating product:", error.response?.data?.detail || error.message);
         this.toast.error(error.response?.data?.detail || "Failed to create product.");
       } finally {
         this.loading = false;
       }
     },
-
-
     resetForm() {
       this.product = {
+        ProductID: "",
         ProductName: "",
         CategoryID: null,
-        Quantity: 1,
         UnitPrice: 0,
+        ProcessType: "Ready-Made",
         Stocks: [],
-        Image: null, 
+        Image: null,
       };
-      this.imagePreview = null; 
-      this.toast.info("Form reset.");
-    },
+      this.imagePreview = null;
+    }
   },
+  created() {
+    this.fetchCategories();
+  }
 };
 </script>
+
 
 <style scoped>
 .app-container {
@@ -407,9 +354,7 @@ button:focus {
   gap: 10px;
   margin-bottom: 10px;
 }
-.stock-quantity {
-  width: 80px;
-}
+
 .add-stock-btn, .remove-stock-btn {
   margin-top: 5px;
   padding: 5px;

@@ -2,7 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 //ims
 import HomeIMS from '@/views/ims/HomeIMS.vue';
-import InventoryIMS from '@/views/ims/InventoryIMS.vue';
+import Products from '@/views/ims/Products.vue';
+import ViewInventoryVue from '@/views/ims/ViewInventory.vue';
+import ViewDetailsVue from '@/views/ims/ViewDetails.vue';
 import Suppliers from '@/views/ims/Suppliers.vue';
 import ReportsIMS from '@/views/ims/ReportsIMS.vue';
 import Category from '@/views/ims/Category.vue';
@@ -35,7 +37,9 @@ const routes = [
   { path: '/login', component: Login }, // Add the login route
   { path: '/profile', component: Profile }, // Add the login route
   { path: '/homeims', component: HomeIMS },
-  { path: '/inventoryims', component: InventoryIMS },
+  { path: '/products', component: Products },
+  { path: '/viewinventory', component: ViewInventoryVue },
+  { path: '/viewdetails/:id', name: 'ViewDetailsVue', component: ViewDetailsVue },
   { path: '/stocks', component: StockVue },
   { path: '/create', component: CreateProductVue },
   { path: '/sales', component: Sales },
