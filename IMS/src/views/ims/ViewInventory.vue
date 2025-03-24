@@ -1,8 +1,9 @@
 <template>
-  <Header />
-  <SideBar />
-  <div class="app-container">
-    <div class="header-container">
+  <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
+
+<SideBar :isCollapsed="isSidebarCollapsed" />
+<div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
+  <div class="header-container">
       <h1 class="products-header">Inventory List</h1>
       <div class="header-actions">
         <div class="filter-container">
@@ -25,7 +26,7 @@
             <th>Product ID</th>
             <th>Product Name</th>
             <th>Quantity</th>
-            <th>Cost Price</th>
+            <th>Unit Price</th>
             <th>Status</th>
             <th class="details-header">Details</th>
           </tr>
@@ -86,6 +87,7 @@
     components: {  SideBar, Header,     TransactionLog  },
     data() {
   return {
+    isSidebarCollapsed: false,
     searchTerm: '',
     showFilterDropdown: false,
     selectedProcessType: 'Ready-Made', // Default to Ready-Made
@@ -106,6 +108,9 @@
 
   
     methods: {
+      handleSidebarToggle(collapsed) {
+      this.isSidebarCollapsed = collapsed;
+    },
       toggleFilterDropdown() {
         this.showFilterDropdown = !this.showFilterDropdown;
       },
@@ -210,14 +215,17 @@
   </script>
   
   <style scoped>
-  .app-container {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    margin-left: 230px;
-    height: 100%;
-  }
-  
+.app-container {
+  display: flex;
+  flex-direction: column;
+  margin-left: 230px;
+  transition: all 0.3s ease;
+}
+
+.app-container.sidebar-collapsed {
+  margin-left: 70px;
+  padding-left: 20px;
+}
   .header-container {
     display: flex;
     align-items: center;

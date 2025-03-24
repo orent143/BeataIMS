@@ -1,7 +1,8 @@
 <template>
-  <Header />
-  <SideBar />
-  <div class="app-container">
+  <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
+
+  <SideBar :isCollapsed="isSidebarCollapsed" />
+  <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
     <div class="main-container">
       <div class="header-container">
         <h1 class="header">Add Stock</h1>
@@ -198,6 +199,7 @@ export default {
   },
   data() {
     return {
+      isSidebarCollapsed: false,
     stockData: {
       StockID: '',
       StockName: '',
@@ -224,6 +226,9 @@ export default {
   };
   },
   methods: {
+    handleSidebarToggle(collapsed) {
+      this.isSidebarCollapsed = collapsed;
+    },
   async handleStockSelection() {
     if (!this.stockData.StockID) {
       this.resetForm();
@@ -452,11 +457,24 @@ export default {
 </script>
 
 <style scoped>
+.app-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  margin-left: 230px; /* Default margin when sidebar is expanded */
+  height: 100vh;
+  transition: margin-left 0.3s ease; /* Smooth transition for sidebar toggle */
+}
+
+.app-container.sidebar-collapsed {
+  margin-left: 70px; /* Adjust margin when sidebar is collapsed */
+}
+
 .main-container {
   flex-grow: 1;
-  margin-left: 230px;
   padding: 20px;
 }
+
 .header{
   color: #333;
   font-size: 30px;

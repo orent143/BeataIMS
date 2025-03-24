@@ -1,6 +1,6 @@
 <template>
   <Header />
-  <Sidebar />
+  <SideBar />
   <div class="app-container">
     <div class="header-container">
       <h1 class="sales-header">Order History</h1>
@@ -26,11 +26,11 @@
             <tr>
               <th>Order ID</th>
               <th>Customer</th>
-              <th>Table</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Time</th>
-              <th>Status</th>
+              <th>Total Items</th>
+              <th>Cash on hand</th>
+              <th>Total Amount</th>
+              <th>Change</th>
+              <th>Date</th>
             </tr>
           </thead>
           <tbody>
@@ -72,12 +72,12 @@
 
 <script>
 import axios from 'axios';
-import Sidebar from '@/components/sms/Sidebar.vue';
+import SideBar from '@/components/ims/SideBar.vue';
   import Header from '@/components/Header.vue';
 
   export default {
     components: {
-      Sidebar,
+      SideBar,
       Header
     },
   data() {

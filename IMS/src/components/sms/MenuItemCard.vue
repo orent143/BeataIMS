@@ -1,5 +1,5 @@
-<template>
-  <div class="menu-item-card">
+<template> 
+  <div class="menu-item-card" :class="{ 'to-be-made': isToBeMade }">
     <div class="item-image-container">
       <img 
         v-if="item.image" 
@@ -8,33 +8,41 @@
         class="menu-image" 
       />
     </div>
+    
     <div class="item-details">
       <h3>{{ item.name }}</h3>
       <p class="price">₱{{ formattedPrice }}</p>
-      <p class="stock" :class="{ 'low-stock': item.stock <= 5 }">
-        Stock: {{ item.stock }}
+      
+      <p class="stock" 
+         :class="{ 'low-stock': !isToBeMade && item.stock <= 5, 'to-be-made-tag': isToBeMade }">
+        {{ isToBeMade ? 'To Be Made (∞)' : `Stock: ${item.stock}` }}
       </p>
 
       <div class="item-controls">
-        <input 
-          type="number"
-          min="1"
-          :max="item.stock"
-          :value="quantity"
-          @input="$emit('update:quantity', Math.min(Math.max(1, Number($event.target.value)), item.stock))"
-          class="quantity-input"
-        />
-        <button 
-          class="add-btn"
-          @click="$emit('add', { ...item, price: Number(item.price) })"
-          :class="{ 'selected': selected }"
-          :disabled="item.stock <= 0"
-        >
-          {{ selected ? 'Update' : 'Add' }}
-        </button>
-      </div>
+      <input 
+        type="number"
+        min="1"
+        :max="isToBeMade ? null : item.stock"
+        :value="quantity"
+        @input="updateQuantity($event.target.value)"
+        class="quantity-input"
+        :disabled="shouldDisableInput"
+      />
+      
+      <button 
+        class="add-btn"
+        @click="emitAdd"
+        :class="{ 
+          'selected': selected,
+          'to-be-made-btn': isToBeMade 
+        }"
+        :disabled="shouldDisableButton"
+      >
+        {{ selected ? 'Update' : 'Add' }}
+      </button>
     </div>
   </div>
+</div>
 </template>
 
 <script>
@@ -46,12 +54,34 @@ export default {
     selected: Boolean
   },
   computed: {
+    isToBeMade() {
+      return this.item.processType === 'To Be Made';
+    },
     formattedPrice() {
       return `${Number(this.item.price || 0).toFixed(2)}`;
+    },
+    shouldDisableInput() {
+      return !this.isToBeMade && this.item.stock <= 0;
+    },
+    shouldDisableButton() {
+      return !this.isToBeMade && this.item.stock <= 0;
+    }
+  },
+  methods: {
+    updateQuantity(value) {
+      const quantity = Math.max(1, Number(value));
+      this.$emit('update:quantity', quantity);
+    },
+    emitAdd() {
+      this.$emit('add', { 
+        ...this.item, 
+        price: Number(this.item.price)
+      });
     }
   }
 };
 </script>
+
   
 <style scoped>
 .menu-item-card {
@@ -160,5 +190,26 @@ h3 {
 .menu-item-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.to-be-made .quantity-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(23, 162, 184, 0.2);
+}
+
+.to-be-made .add-btn {
+  background-color: #E54F70;
+  opacity: 1 !important;
+  cursor: pointer !important;
+}
+
+.to-be-made .add-btn:hover {
+  background-color: #138496;
+}
+
+.to-be-made .quantity-input:disabled {
+  opacity: 1;
+  background-color: #f8fdff;
+  cursor: text;
 }
 </style>

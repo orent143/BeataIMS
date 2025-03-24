@@ -1,7 +1,9 @@
 <template>
-  <Header />
-  <SideBar />
-  <div class="app-container">
+  <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
+
+  <SideBar :isCollapsed="isSidebarCollapsed" />
+  
+  <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
     <div class="main-container">
       <div class="header-container">
         <h1 class="header">Create Inventory Product</h1>
@@ -111,6 +113,7 @@ export default {
   components: { SideBar, Header },
   data() {
     return {
+      isSidebarCollapsed: false,
       product: {
         ProductID: "",
         ProductName: "",
@@ -119,7 +122,6 @@ export default {
         ProcessType: "Ready-Made",
         Stocks: [],
         Image: null,
-        
       },
       categories: [],
       showConfirmModal: false,
@@ -134,6 +136,9 @@ export default {
     }
   },
   methods: {
+    handleSidebarToggle(collapsed) {
+      this.isSidebarCollapsed = collapsed;
+    },
     async fetchCategories() {
       try {
         const response = await axios.get("http://127.0.0.1:8000/api/categories");
@@ -155,8 +160,6 @@ export default {
     },
     async confirmSubmit() {
       this.showConfirmModal = false;
-      this.loading = true;
-      
       try {
         const formData = new FormData();
         formData.append("ProductID", this.product.ProductID);
@@ -179,8 +182,6 @@ export default {
         this.resetForm();
       } catch (error) {
         this.toast.error(error.response?.data?.detail || "Failed to create product.");
-      } finally {
-        this.loading = false;
       }
     },
     resetForm() {
@@ -202,29 +203,45 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .app-container {
   display: flex;
-  height: 100%;
+  transition: all 0.3s ease;
+  height: 100vh;
+}
+
+.app-container.sidebar-collapsed .main-container {
+  margin-left: 70px; /* Adjust space when collapsed */
+}
+
+.app-container .main-container {
+  flex-grow: 1;
+  margin-left: 230px; /* Space when sidebar is expanded */
+  transition: margin-left 0.3s ease;
+  padding: 20px;
 }
 
 .main-container {
-  flex-grow: 1;
-  margin-left: 230px;
-  padding: 0px 20px;
+  width: calc(100% - 230px);
 }
+
+.sidebar-collapsed .main-container {
+  width: calc(100% - 70px);
+}
+
+/* Smooth transition for content wrapper */
+.content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 30px;
+  transition: all 0.3s ease;
+}
+
 .header{  
   color: #333;
   font-size: 30px;
   font-family: 'Arial', sans-serif;
   font-weight: 900;
-}
-
-.content-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 30px;
 }
 
 .product-details {

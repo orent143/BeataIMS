@@ -1,19 +1,22 @@
 <template>
-    <Header />
-    <SideBar />
-    <div class="app-container">
-      <div class="details-container">
-        <div class="header-section">
-          <button class="back-btn" @click="$router.go(-1)">
-            <i class="pi pi-arrow-left"></i> Back
-          </button>
-          <h1>Product Details</h1>
-        </div>
-  
-        <div v-if="loading" class="loading">Loading...</div>
-        <div v-else-if="error" class="error">{{ error }}</div>
-        <div v-else class="product-details">
-          <div class="product-header">
+  <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
+  <SideBar :isCollapsed="isSidebarCollapsed" />
+  <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
+    <div class="details-container">
+      <div class="header-section">
+        <button class="back-btn" @click="$router.go(-1)">
+          <i class="pi pi-arrow-left"></i> Back
+        </button>
+        <h1>Product Details</h1>
+      </div>
+
+      <div v-if="loading" class="loading">Loading...</div>
+      <div v-else-if="error" class="error">{{ error }}</div>
+      <div v-else class="content-layout">
+
+        <!-- Left Section - Product Details -->
+        <div class="main-content">
+          <div class="product-details">
             <img :src="product.Image || 'https://via.placeholder.com/150'" 
                  alt="Product Image" 
                  class="product-image" />
@@ -22,7 +25,7 @@
               <span class="product-id">ID: {{ product.ProductID }}</span>
             </div>
           </div>
-  
+
           <div class="details-grid">
             <div class="detail-item">
               <label>Process Type</label>
@@ -33,13 +36,13 @@
               <span>{{ product.Quantity }}</span>
             </div>
             <div class="detail-item">
-              <label>Unit Price</label>
-              <span>₱{{ product.UnitPrice }}</span>
+              <label>Cost Price</label>
+              <span>₱{{ product.CostPrice }}</span>
             </div>
             <div class="detail-item">
-    <label>Current Supplier</label>
-    <span class="supplier-name">{{ product.CurrentSupplier }}</span>
-  </div>
+              <label>Current Supplier</label>
+              <span class="supplier-name">{{ product.CurrentSupplier }}</span>
+            </div>
             <div class="detail-item">
               <label>Status</label>
               <span :class="'status status-' + product.Status?.toLowerCase().replace(/ /g, '-')">
@@ -47,56 +50,92 @@
               </span>
             </div>
           </div>
-  
-          <!-- Additional stock details -->
-          <div v-if="product.stockDetails && product.stockDetails.StockDetails.length" class="stock-details">
-  <h3 class="stock-details-header">Stock Details</h3>
-  <div class="stock-cards">
-    <div v-for="stock in product.stockDetails.StockDetails" 
-         :key="stock.id" 
-         class="stock-card">
-         <div class="stock-card-header">
-      <span class="supplier-tag">{{ stock.SupplierName }}</span>
-      <span class="timestamp">{{ formatTimestamp(stock.created_at) }}</span>
-    </div>
-      <div class="stock-card-item">
-        <span class="label">Batch Number</span>
-        <span class="value">{{ stock.batch_number || "N/A" }}</span>
-      </div>
-      <div class="stock-card-item">
-        <span class="label">Location</span>
-        <span class="value">{{ stock.stock_location }}</span>
-      </div>
+        </div>
 
-      <div class="stock-card-item">
-        <span class="label">Quantity</span>
-        <span class="value quantity">{{ stock.quantity }}</span>
-      </div>
-      <div class="stock-card-item">
-        <span class="label">Expiration Date</span>
-        <span class="value" :class="{ 'expiring': isExpiringSoon(stock.expiration_date) }">
-          {{ formatDate(stock.expiration_date) || "N/A" }}
-        </span>
-      </div>
-      <div class="stock-card-footer">
-      <div class="timestamp-info">
-        <div>
-          <span class="label">Created:</span>
-          <span class="value">{{ formatDateTime(stock.created_at) }}</span>
-        </div>
-        <div>
-          <span class="label">Updated:</span>
-          <span class="value">{{ formatDateTime(stock.updated_at) }}</span>
-        </div>
-      </div>
-    </div>
-    </div>
-  </div>
-</div>
-        </div>
-      </div>
-    </div>
-  </template>
+        <!-- Right Section - Stock Details -->
+        <div class="stock-details-sidebar" v-if="product.stockDetails && product.stockDetails.StockDetails.length">
+          <div class="stock-details-header-container">
+            <h3 class="stock-details-header">Stock Details</h3>
+            <div class="date-filter">
+              <div class="date-inputs">
+                <div class="date-input">
+                  <label>From:</label>
+                  <input 
+                    type="date" 
+                    v-model="dateFilter.from"
+                    :max="dateFilter.to || today"
+                  />
+                </div>
+                <div class="date-input">
+                  <label>To:</label>
+                  <input 
+                    type="date" 
+                    v-model="dateFilter.to"
+                    :min="dateFilter.from"
+                    :max="today"
+                  />
+                </div>
+              </div>
+              <button class="clear-filter" @click="clearDateFilter">
+                <i class="pi pi-times"></i> Clear
+              </button>
+            </div>
+          </div>
+
+          <!-- Stock Cards -->
+          <div class="stock-cards-container">
+            <div class="stock-cards">
+              <div v-for="stock in filteredStocks" 
+                   :key="stock.id" 
+                   class="stock-card">
+                <div class="stock-card-header">
+                  <span class="supplier-tag">{{ stock.SupplierName }}</span>
+                  <span class="timestamp">{{ formatTimestamp(stock.created_at) }}</span>
+                </div>
+                <div class="stock-card-item">
+                  <span class="label">Cost Price</span>
+                  <span class="value">₱{{ stock.CostPrice.toFixed(2) }}</span>
+                </div>
+                <div class="stock-card-item">
+                  <span class="label">Batch Number</span>
+                  <span class="value">{{ stock.batch_number || "N/A" }}</span>
+                </div>
+                <div class="stock-card-item">
+                  <span class="label">Location</span>
+                  <span class="value">{{ stock.stock_location }}</span>
+                </div>
+                <div class="stock-card-item">
+                  <span class="label">Quantity</span>
+                  <span class="value quantity">{{ stock.quantity }}</span>
+                </div>
+                <div class="stock-card-item">
+                  <span class="label">Expiration Date</span>
+                  <span class="value" :class="{ 'expiring': isExpiringSoon(stock.expiration_date) }">
+                    {{ formatDate(stock.expiration_date) || "N/A" }}
+                  </span>
+                </div>
+                <div class="stock-card-footer">
+                  <div class="timestamp-info">
+                    <div>
+                      <span class="label">Created:</span>
+                      <span class="value">{{ formatDateTime(stock.created_at) }}</span>
+                    </div>
+                    <div>
+                      <span class="label">Updated:</span>
+                      <span class="value">{{ formatDateTime(stock.updated_at) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div> <!-- End of stock-card -->
+            </div> <!-- End of stock-cards -->
+          </div> <!-- End of stock-cards-container -->
+        </div> <!-- End of stock-details-sidebar -->
+      </div> <!-- End of content-layout -->
+    </div> <!-- End of details-container -->
+  </div> <!-- End of app-container -->
+</template>
+
+
   
   <script>
   import axios from 'axios';
@@ -113,11 +152,45 @@
     },
     data() {
       return {
+        isSidebarCollapsed: false,
         product: null,
         loading: true,
-        error: null
+        error: null,
+        dateFilter: {
+        from: '',
+        to: ''
+      }
       }
     },
+    computed: {
+    today() {
+      return new Date().toISOString().split('T')[0];
+    },
+    filteredStocks() {
+      if (!this.product?.stockDetails?.StockDetails) return [];
+      
+      let stocks = this.product.stockDetails.StockDetails;
+      
+      if (this.dateFilter.from || this.dateFilter.to) {
+        stocks = stocks.filter(stock => {
+          const stockDate = new Date(stock.created_at).setHours(0, 0, 0, 0);
+          const fromDate = this.dateFilter.from ? new Date(this.dateFilter.from).setHours(0, 0, 0, 0) : null;
+          const toDate = this.dateFilter.to ? new Date(this.dateFilter.to).setHours(0, 0, 0, 0) : null;
+          
+          if (fromDate && toDate) {
+            return stockDate >= fromDate && stockDate <= toDate;
+          } else if (fromDate) {
+            return stockDate >= fromDate;
+          } else if (toDate) {
+            return stockDate <= toDate;
+          }
+          return true;
+        });
+      }
+      
+      return stocks;
+    }
+  },
     async created() {
       try {
         let productId = this.$route.params.id;
@@ -145,6 +218,15 @@
       }
     },
     methods: {
+      clearDateFilter() {
+      this.dateFilter = {
+        from: '',
+        to: ''
+      };
+    },
+      handleSidebarToggle(collapsed) {
+      this.isSidebarCollapsed = collapsed;
+    },
   getStatusByQuantity(quantity) {
     if (quantity === 0) return 'Out of Stock';
     if (quantity <= 10) return 'Low Stock';
@@ -202,11 +284,17 @@
   </script>
   
   <style scoped>
-  .app-container {
-    margin-left: 210px;
-    background: #f8f9fa;
-    min-height: 100vh;
-  }
+.app-container {
+  margin-left: 230px; /* Default margin when sidebar is expanded */
+  background: #f8f9fa;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease; /* Smooth transition for sidebar toggle */
+}
+
+.app-container.sidebar-collapsed {
+  margin-left: 70px; /* Adjust margin when sidebar is collapsed */
+}
+
   
   .details-container {
     background: white;
@@ -222,9 +310,8 @@
     display: flex;
     align-items: center;
     gap: 25px;
-    margin-bottom: 35px;
     border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 20px;
+    padding-bottom: 15px;
   }
   
   .header-section h1 {
@@ -255,6 +342,19 @@
     transform: translateX(-5px);
   }
   
+
+  .content-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px; /* Main content + stock details */
+  gap: 30px;
+  min-height: calc(100vh - 180px);
+}
+
+.main-content {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+}
   /* Product Header Styles */
   .product-header {
     display: flex;
@@ -304,15 +404,15 @@
   
   /* Details Grid Styles */
   .details-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 25px;
-    margin: 30px 0;
-    padding: 25px;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #eee;
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  margin: 30px 0;
+  padding: 25px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
   
   .detail-item {
     display: flex;
@@ -403,13 +503,47 @@
 
   /* Stock Details Styles */
   .stock-details {
+    
     margin-top: 40px;
     padding: 30px;
     background: white;
     border-radius: 15px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   }
-  
+  .stock-details-sidebar {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 20px;
+  height: calc(100vh - 140px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.stock-cards-container {
+  flex: 1;
+  overflow-y: auto;
+  margin-top: 10px;
+  padding-right: 10px;
+}
+
+.stock-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stock-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s;
+}
+
   .stock-card-header {
   display: flex;
   justify-content: space-between;
@@ -543,7 +677,63 @@
     background: #fff3e0;
     animation: pulse 2s infinite;
   }
-  
+  .date-filter {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+.date-inputs {
+  display: flex; /* Ensure date inputs are stacked vertically */
+  gap: 50px; 
+}
+
+.date-input {
+  display: block; /* Each date input takes full width */
+  margin-bottom: 15px;
+}
+
+.date-input label {
+  display: block; 
+  margin-bottom: 5px;
+}
+
+.date-input input {
+  width: 100%; 
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.date-input input:hover {
+  border-color: #E54F70;
+}
+.date-input input:focus {
+  outline: none;
+  border-color: #E54F70;
+  box-shadow: 0 0 0 2px rgba(229, 79, 112, 0.1);
+}
+
+.clear-filter {
+  background: white;
+  border: 1px solid #E54F70;
+  color: #E54F70;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  margin-left: auto;
+}
+
+.clear-filter:hover {
+  background: #E54F70;
+  color: white;
+}
   @keyframes pulse {
     0% { opacity: 1; }
     50% { opacity: 0.7; }
@@ -587,5 +777,27 @@
     .header-section h1 {
       font-size: 1.5rem;
     }
+    date-inputs {
+    flex-direction: column;
+    gap: 10px;
   }
+
+  .clear-filter {
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  }
+  @media (max-width: 1024px) {
+  .content-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .stock-details-sidebar {
+    position: relative;
+    top: 0;
+    height: 500px;
+    margin-top: 20px;
+  }
+}
   </style>

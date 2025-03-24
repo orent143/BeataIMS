@@ -5,15 +5,23 @@
     <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
     <div v-if="menuItems.length > 0" class="items-grid">
       <MenuItemCard
-  v-for="menuItem in menuItems"
-  :key="menuItem.id"
-  :item="menuItem"
-  :quantity="getItemQuantity(menuItem)"
-  :selected="isItemSelected(menuItem)"
-  @add="addOrUpdateItem(menuItem)"
-  @update:quantity="updateQuantity(menuItem, $event)"
-/>
-
+        v-for="menuItem in menuItems"
+        :key="menuItem.id"
+        :item="{
+          id: menuItem.id,
+          name: menuItem.name,
+          price: menuItem.price,
+          stock: menuItem.stock,
+          processType: menuItem.process_type,
+          image: menuItem.image,
+          category: menuItem.category,
+          status: menuItem.status
+        }"
+        :quantity="getItemQuantity(menuItem)"
+        :selected="isItemSelected(menuItem)"
+        @add="addOrUpdateItem(menuItem)"
+        @update:quantity="updateQuantity(menuItem, $event)"
+      />
     </div>
   </div>
 </template>
@@ -44,13 +52,20 @@ export default {
         this.loading = true;
         console.log("Fetching menu items...");
         
-        const response = await axios.get('http://127.0.0.1:8000/api/orders/menu_items');
+        const response = await axios.get('http://127.0.0.1:8000/api/orders/menu_items/all');
         
         console.log("Menu items received:", response.data);
-        
-        this.$emit('update:menuItems', response.data);
 
-        if (!response.data.length) {
+        // Map the menu items and enforce infinite stock for "To Be Made" products
+        const mappedMenuItems = response.data.map(item => ({
+          ...item,
+          stock: item.process_type === 'To Be Made' ? '∞' : item.stock,
+          status: item.process_type === 'To Be Made' ? 'Available' : item.status
+        }));
+
+        this.$emit('update:menuItems', mappedMenuItems);
+
+        if (!mappedMenuItems.length) {
           this.errorMessage = "No menu items found.";
         }
       } catch (error) {
@@ -67,22 +82,25 @@ export default {
       return this.items.some(item => item.id === menuItem.id);
     },
     addOrUpdateItem(menuItem) {
-  const updatedItems = [...this.items];
-  const existingItem = updatedItems.find(item => item.id === menuItem.id);
+      const updatedItems = [...this.items];
+      const existingItem = updatedItems.find(item => item.id === menuItem.id);
 
-  if (existingItem) {
-    existingItem.quantity = this.getItemQuantity(menuItem);
-  } else {
-    updatedItems.push({ 
-      id: menuItem.id, 
-      name: menuItem.name, 
-      price: Number(menuItem.price), 
-      quantity: 1 
-    });
-  }
+      if (existingItem) {
+        existingItem.quantity = this.getItemQuantity(menuItem);
+      } else {
+        updatedItems.push({ 
+          id: menuItem.id, 
+          name: menuItem.name, 
+          price: menuItem.price,
+          quantity: 1,
+          processType: menuItem.process_type,
+          status: menuItem.status,
+          category: menuItem.category
+        });
+      }
 
-  this.$emit('update:items', updatedItems);
-},
+      this.$emit('update:items', updatedItems);
+    },
     updateQuantity(menuItem, quantity) {
       const updatedItems = this.items.map(item =>
         item.id === menuItem.id ? { ...item, quantity } : item

@@ -1,9 +1,9 @@
 <template>
-  <Header />
+  <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
 
-  <SideBar />
+  <SideBar :isCollapsed="isSidebarCollapsed" />
 
-  <div class="app-container">
+  <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
     <div class="header-container">
       <h1 class="products-header">Dashboard</h1>
       <div class="header-actions">
@@ -21,9 +21,9 @@
             <i class="pi pi-chart-line"></i>
           </div>
           <div class="card-content">
-            <h3>Total Cost</h3>
+            <h3>Total Revenue</h3>
             <p class="amount">₱{{ animatedTotalCost.toFixed(2) }}</p>
-            <p class="subtitle">Overall Stock Cost</p>
+            <p class="subtitle">Overall Sales</p>
           </div>
         </div>
 
@@ -51,12 +51,12 @@
 
         <div class="card top-selling">
           <div class="card-icon">
-            <i class="pi pi-star-fill"></i>
+            <i class="pi pi-shopping-cart"></i>
           </div>
           <div class="card-content">
-            <h3>Top Selling</h3>
+            <h3>Total Orders</h3>
             <p class="product-name">{{ topSellingProduct }}</p>
-            <p class="subtitle">Most Popular Item</p>
+            <p class="subtitle">Orders</p>
           </div>
         </div>
       </div>
@@ -96,6 +96,7 @@ export default {
   name: 'Home',
   data() {
     return {
+      isSidebarCollapsed: false,
       currentDate: new Date().toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
@@ -113,6 +114,9 @@ export default {
     };
   },
   methods: {
+    handleSidebarToggle(collapsed) {
+      this.isSidebarCollapsed = collapsed;
+    },
     async fetchTotalCost() {
       try {
         const response = await axios.get("http://127.0.0.1:8000/api/stock/total_cost");
@@ -178,7 +182,6 @@ export default {
     this.fetchActivityLogs();
   }
 };
-
 </script>
 
 <style scoped>
@@ -188,6 +191,11 @@ export default {
   flex-grow: 1; 
   margin-left: 230px; 
   height: 100%; 
+  transition: margin-left 0.3s ease;
+}
+
+.app-container.sidebar-collapsed {
+  margin-left: 70px;
 }
 
 .header-container {

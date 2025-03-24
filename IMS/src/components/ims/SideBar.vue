@@ -1,111 +1,98 @@
 <template>
   <div :class="['sidebar', { 'collapsed': isCollapsed }]">
-    <ul v-if="!isCollapsed" class="sidebar-list">
+    <ul class="sidebar-list">
       <li v-for="(link, index) in links" :key="index">
+        <!-- Main menu items -->
         <router-link
-          v-if="link.submenu"
-          :to="link.path"
+          :to="link.submenu ? '#' : link.path"
           class="sidebar-link"
-          @click.prevent="toggleSubmenu(link)"  
+          :class="{ 'has-submenu': link.submenu }"
+          @click.prevent="link.submenu ? toggleSubmenu(link) : null"
         >
-          <i :class="['pi', link.icon]"></i> {{ link.name }}
-        </router-link>
-        <router-link
-          v-else
-          :to="link.path"
-          class="sidebar-link"
-          active-class="active-link"
-        >
-          <i :class="['pi', link.icon]"></i> {{ link.name }}
-        </router-link>
-
-        <ul v-if="link.submenu && link.isOpen" class="submenu">
-          <li v-for="(subLink, subIndex) in link.submenu" :key="subIndex">
-            <router-link
-              :to="subLink.path"
-              class="sidebar-link"
-              active-class="active-link"
-              @click.stop="stayOpen" 
-            >
-              <i :class="['pi', subLink.icon]"></i> {{ subLink.name }}
-            </router-link>
-          </li>
-        </ul>
-      </li>
-    </ul>
-
-    <ul v-else class="sidebar-list">
-      <li v-for="(link, index) in links" :key="index">
-        <router-link :to="link.path" class="sidebar-link" active-class="active-link">
           <i :class="['pi', link.icon]"></i>
+          <span v-if="!isCollapsed">{{ link.name }}</span>
         </router-link>
+
+        <!-- Submenu items -->
+        <transition name="submenu">
+          <ul v-if="!isCollapsed && link.submenu && link.isOpen" class="submenu">
+            <li v-for="(subLink, subIndex) in link.submenu" :key="subIndex">
+              <router-link
+                :to="subLink.path"
+                class="sidebar-link"
+                active-class="active-link"
+              >
+                <i :class="['pi', subLink.icon]"></i>
+                <span>{{ subLink.name }}</span>
+              </router-link>
+            </li>
+          </ul>
+        </transition>
       </li>
     </ul>
 
-    <div class="sidebar-footer">
-      <router-link to="/" class="sidebar-link" @click="logout">
-        <i class="pi pi-sign-out"></i> Logout
-      </router-link>
-    </div>
   </div>
 </template>
 
 <script>
 export default {
+  name: "SideBar",
+  props: {
+    isCollapsed: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
-      isCollapsed: false,
       links: [
-        { name: 'Home', path: '/homeims', icon: 'pi-home' },
+        { name: "Home", path: "/homeims", icon: "pi-home" },
         {
-          name: 'Product',
-          path: '#',
-          icon: 'pi-box',
+          name: "Product",
+          path: "#",
+          icon: "pi-box",
           submenu: [
-            { name: 'Create Product', path: '/create', icon: 'pi-plus-circle' },
-            { name: 'View Products', path: '/products', icon: 'pi-eye' }
+            { name: "Create Product", path: "/create", icon: "pi-plus-circle" },
+            { name: "View Products", path: "/products", icon: "pi-eye" },
+            { name: "View Sales Product", path: "/productsales", icon: "pi-eye" },
           ],
-          isOpen: false 
+          isOpen: false,
         },
         {
-          name: 'Inventory',
-          path: '#',
-          icon: 'pi-warehouse',
+          name: "Sales",
+          path: "#",
+          icon: "pi pi-dollar",
           submenu: [
-            { name: 'View Inventory', path: '/viewinventory', icon: 'pi-eye' },
-            { name: 'Stock-in', path: '/stocks', icon: 'pi-plus-circle' }
+            { name: "Create Orders", path: "/createorder", icon: "pi-plus-circle" },
+            { name: "Record Sales", path: "/record-sales", icon: "pi-pencil" },
+            { name: "View Sales", path: "/ordershistory", icon: "pi-eye" },
           ],
-          isOpen: false 
+          isOpen: false,
         },
-        { name: 'Suppliers', path: '/suppliers', icon: 'pi-truck' },
-        { name: 'Categories', path: '/category', icon: 'pi-list' },
-        { name: 'Reports', path: '/reportsims', icon: 'pi-chart-line' }
-        
-      ]
+        {
+          name: "Inventory",
+          path: "#",
+          icon: "pi-warehouse",
+          submenu: [
+            { name: "View Inventory", path: "/viewinventory", icon: "pi-eye" },
+            { name: "Stock-in", path: "/stocks", icon: "pi-plus-circle" },
+          ],
+          isOpen: false,
+        },
+        { name: "Suppliers", path: "/suppliers", icon: "pi-truck" },
+        { name: "Categories", path: "/category", icon: "pi-list" },
+        { name: "Reports", path: "/reportsims", icon: "pi-chart-line" },
+      ],
     };
-  },
-  mounted() {
-    this.checkActiveSubmenu();
   },
   methods: {
     toggleSubmenu(link) {
       if (link.submenu) {
-        link.isOpen = !link.isOpen; 
+        link.isOpen = !link.isOpen;
       }
     },
-    stayOpen() {
-    },
-    checkActiveSubmenu() {
-      this.links.forEach(link => {
-        if (link.submenu) {
-          link.isOpen = link.submenu.some(subLink => this.$route.path === subLink.path);
-        }
-      });
-    },
-    logout() {
-      console.log("Logging out...");
-    }
-  }
+
+  },
 };
 </script>
 
@@ -116,40 +103,17 @@ export default {
   justify-content: space-between;
   width: 180px;
   padding: 20px;
-  background-color:rgb(255, 255, 255);
+  background-color: rgb(255, 255, 255);
   height: 100vh;
   box-shadow: 0 8px 8px rgba(0, 0, 0, 0.1);
-
   position: fixed;
   transition: width 0.3s ease;
-
 }
 
-.sidebar-logo {
-  width: 42%;
-  height: auto;
-  margin: 0 auto;
-  display: block;
+.sidebar.collapsed {
+  width: 70px;
+  padding: 20px 5px;
 }
-
-.sidebar-title {
-  text-align: center;
-  margin-top: 5px;
-  margin-bottom: 30px;
-}
-
-.collapsed {
-  width: 50px;
-}
-
-.toggle-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 20px;
-  color: rgb(165, 165, 165);
-}
-
 
 .sidebar-list {
   list-style-type: none;
@@ -158,73 +122,92 @@ export default {
 }
 
 .sidebar-link {
-  color:rgba(14, 14, 14, 0.54);
+  color: rgba(14, 14, 14, 0.54);
   text-decoration: none;
   font-weight: 450;
   font-size: 15px;
   display: flex;
   align-items: center;
-  padding: 5px 10px;
-  margin: 15px 0;
-  transition: color 0.3s, border-color 0.3s;
+  padding: 10px 10px;
+  margin: 10px 0;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  gap: 10px; /* Add gap between icon and text */
+}
+
+.sidebar.collapsed .sidebar-link {
+  justify-content: center;
+  padding: 12px;
+}
+
+.sidebar.collapsed .sidebar-link span {
+  display: none;
 }
 
 .sidebar-link i {
-  margin-right: 20px;
   font-size: 18px;
-  vertical-align: middle;
+  min-width: 24px;
+  text-align: center;
 }
 
 .sidebar-link:hover {
   color: #000000;
-  border-color: #ed9598;
+  background-color: #f0f0f0;
 }
 
 .active-link {
   color: #000000;
   font-weight: bold;
-  background-color:#ed9598 !important;
+  background-color: #ed9598 !important;
   padding: 8px 5px !important;
   width: 100%;
   box-sizing: content-box;
-  border: 2px solidrgb(0, 0, 0);
   border-radius: 10px;
 }
 
 .submenu {
   list-style-type: none;
-  padding-left: 0;
-  margin-left: 20px;
-}
-
-.collapsed .sidebar-link {
-  justify-content: center;
+  padding-left: 20px;
+  margin: 10px 0;
 }
 
 .sidebar-footer {
-  width: 100%;
-  display: flex;
-  justify-content: left;
-  padding: 0;
-  margin-top: auto; 
-  margin-bottom: auto; 
+  margin-top: auto;
+  padding-top: 20px;
 }
 
 .sidebar-footer .sidebar-link {
-  color:rgba(14, 14, 14, 0.54);
-    font-size: 15px;
-  padding: 10px 20px;
-  border-radius: 25px;
-  display: flex;
-  align-items: left;
+  justify-content: center;
+}
+
+.sidebar-footer .sidebar-link span {
+  display: none;
 }
 
 .sidebar-footer .sidebar-link i {
-  margin-right: 18px;
+  font-size: 18px;
 }
 
-.sidebar-footer .sidebar-link:hover {
-  color: rgb(0, 0, 0);
+.sidebar.collapsed .sidebar-footer .sidebar-link {
+  justify-content: center;
 }
 
+@media (max-width: 768px) {
+  .sidebar {
+    width: 70px;
+    padding: 20px 5px;
+  }
+
+  .sidebar-link span {
+    display: none;
+  }
+
+  .sidebar-link {
+    justify-content: center;
+  }
+
+  .submenu {
+    display: none;
+  }
+}
 </style>

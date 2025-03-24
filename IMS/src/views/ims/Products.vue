@@ -1,7 +1,7 @@
 <template>
-  <Header />
-  <SideBar />
-  <div class="app-container">
+  <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle"/>
+  <SideBar :isCollapsed="isSidebarCollapsed"/>
+  <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
     <div class="header-container">
       <h1 class="products-header">Product List</h1>
       <div class="header-actions">
@@ -125,6 +125,7 @@ export default {
   components: { AddProduct, EditProduct, SideBar, Header,     ProductTransaction  },
   data() {
     return {
+      isSidebarCollapsed: false,
       searchTerm: '',
       selectedStatus: '',
       showFilterDropdown: false,
@@ -148,6 +149,9 @@ export default {
   },
 
   methods: {
+    handleSidebarToggle(collapse) {
+      this.isSidebarCollapsed = collapse;
+    },
     toggleFilterDropdown() {
       this.showFilterDropdown = !this.showFilterDropdown;
     },
@@ -308,9 +312,13 @@ export default {
 .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
   margin-left: 230px;
-  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.app-container.sidebar-collapsed {
+  margin-left: 70px;
+  padding-left: 20px;
 }
 
 .header-container {

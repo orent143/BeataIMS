@@ -1,7 +1,8 @@
 <template>
-  <Header />
-  <SideBar />
-  <div class="app-container">
+  <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
+
+  <SideBar :isCollapsed="isSidebarCollapsed" />
+  <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
     <div class="header-container">
       <h1 class="products-header">Reports</h1>
     </div>
@@ -47,6 +48,7 @@ export default {
   components: { SideBar, Header },
   data() {
     return {
+      isSidebarCollapsed: false,
       totalSummaryReports: 0,
       totalSummaryAmount: 0,
       totalLowStockReports: 0,
@@ -54,6 +56,9 @@ export default {
     };
   },
   methods: {
+    handleSidebarToggle(collapsed) {
+      this.isSidebarCollapsed = collapsed;
+    },
     async fetchReportData() {
       try {
         const response = await axios.get('http://127.0.0.1:8000/api/reports/inventory_report');
@@ -91,9 +96,12 @@ export default {
 .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
-  margin-left: 230px;
-  height: 100vh;
+  margin-left: 230px; /* Default margin when sidebar is expanded */
+  transition: margin-left 0.3s ease; /* Smooth transition for sidebar toggle */
+}
+
+.app-container.sidebar-collapsed {
+  margin-left: 70px; /* Adjust margin when sidebar is collapsed */
 }
 
 .header-container {
@@ -109,19 +117,6 @@ export default {
   font-size: 30px;
   font-family: 'Arial', sans-serif;
   font-weight: 900;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.main-content {
-  flex-grow: 1;
-  transition: margin-left 0.3s ease;
-  height: calc(100vh - 60px);
-  overflow-y: auto;
 }
 
 .report-cards {
@@ -186,30 +181,5 @@ export default {
 .report-stats span {
   font-weight: bold;
   color: #333;
-}
-
-.search-container {
-  position: relative;
-  margin-right: 3px;
-}
-
-.search-icon {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #333;
-  pointer-events: none;
-}
-
-.search-bar {
-  padding: 8px 30px 8px 8px;
-  border: 1px solid #94949400;
-  border-radius: 10px;
-  width: 130px;
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
-  background-color: #D9D9D9;
 }
 </style>

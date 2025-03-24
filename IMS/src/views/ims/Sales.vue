@@ -1,8 +1,7 @@
 <template>
-  <Header />
-  <Sidebar />
-
-  <div class="app-container">
+  <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle"/>
+  <SideBar :isCollapsed="isSidebarCollapsed"/>
+  <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
     <div class="header-container">
       <h1 class="sales-header">Sales Report</h1>
       <div class="header-actions">
@@ -66,14 +65,15 @@
 </template>
 
 <script>
-import Sidebar from '@/components/sms/Sidebar.vue';
+import SideBar from '@/components/ims/SideBar.vue';
 import Header from '@/components/Header.vue';
 import axios from 'axios';
 
 export default {
-  components: { Sidebar, Header },
+  components: { SideBar, Header },
   data() {
     return {
+      isSidebarCollapsed: false,
       salesData: [],
       showFilterDropdown: false,
       selectedStatus: '',
@@ -88,6 +88,9 @@ export default {
     },
   },
   methods: {
+    handleSidebarToggle(collapsed) {
+      this.isSidebarCollapsed = collapsed;
+    },
     async fetchSalesData() {
       try {
         const response = await axios.get('http://127.0.0.1:8000/api/sales/sales');
@@ -130,9 +133,13 @@ export default {
 .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow the container to take remaining space */
-  margin-left: 230px; /* Make space for sidebar, adjust as needed */
-  height: 100%; /* Full height of the page */
+  margin-left: 230px;
+  transition: all 0.3s ease;
+}
+
+.app-container.sidebar-collapsed {
+  margin-left: 70px;
+  padding-left: 20px;
 }
 
 .header-container {

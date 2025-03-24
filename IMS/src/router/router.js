@@ -6,20 +6,19 @@ import Products from '@/views/ims/Products.vue';
 import ViewInventoryVue from '@/views/ims/ViewInventory.vue';
 import ViewDetailsVue from '@/views/ims/ViewDetails.vue';
 import Suppliers from '@/views/ims/Suppliers.vue';
+import CreateOrder from '@/views/ims/CreateOrder.vue';
 import ReportsIMS from '@/views/ims/ReportsIMS.vue';
 import Category from '@/views/ims/Category.vue';
 import CreateProductVue from '@/views/ims/CreateProduct.vue';
+import ProductSales from '@/views/ims/Sales.vue';
 import StockVue from '@/views/ims/Stock.vue';
+import RecordSalesTransaction from '@/views/ims/RecordSalesTransaction.vue';
+import OrdersHistory from '@/views/ims/OrderHistory.vue';
 import SummaryReport from '@/views/ims/reports/SummaryReport.vue';
 import LowStockReport from '@/views/ims/reports/LowStockReport.vue';
 
 //sms
-import CreateOrder from '@/views/sms/CreateOrder.vue';
 import HomeSMS from '@/views/sms/HomeSMS.vue';
-import InventorySMS from '@/views/sms/InventorySMS.vue';
-import Order from '@/views/sms/Order.vue';
-import Sales from '@/views/sms/Sales.vue';
-import OrdersHistory from '@/views/sms/OrderHistory.vue';
 import ReportsSms from '@/views/sms/ReportsSMS.vue';
 import SalesReportSMS from '@/views/sms/reports/salesreport.vue';
 import HistoryReportSMS from '@/views/sms/reports/historyreport.vue';
@@ -42,16 +41,15 @@ const routes = [
   { path: '/viewdetails/:id', name: 'ViewDetailsVue', component: ViewDetailsVue },
   { path: '/stocks', component: StockVue },
   { path: '/create', component: CreateProductVue },
-  { path: '/sales', component: Sales },
+  { path: '/productsales', component: ProductSales },
+  { path: '/record-sales', component: RecordSalesTransaction },
   { path: '/suppliers', component: Suppliers },
   { path: '/category', component: Category },
   { path: '/reportsims', component: ReportsIMS },
   { path: '/reportsims/summary', component: SummaryReport },
   { path: '/reportsims/lowStock', component: LowStockReport },
   { path: '/homesms', component: HomeSMS },
-  { path: '/inventorysms', component: InventorySMS },
   { path: '/createorder', component: CreateOrder },
-  { path: '/order', component: Order },
   { path: '/ordershistory', component: OrdersHistory },
   { path: '/reportssms', component: ReportsSms },
   { path: '/reportssms/sales', component: SalesReportSMS },
