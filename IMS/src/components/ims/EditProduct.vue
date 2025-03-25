@@ -200,7 +200,6 @@ export default {
   
   created() {
     if (this.itemToEdit) {
-      // Map incoming data correctly
       this.product = {
         ProductID: this.itemToEdit.ProductID || this.itemToEdit.id, // Handle both ID formats
         ProductName: this.itemToEdit.ProductName,
