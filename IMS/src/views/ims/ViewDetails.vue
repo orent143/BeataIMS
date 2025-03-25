@@ -56,6 +56,28 @@
         <div class="stock-details-sidebar">
           <div class="stock-details-header-container">
             <h3 class="stock-details-header">Stock & Deducted Transactions</h3>
+
+            <div class="transaction-filters">
+    <button 
+      :class="['filter-btn', { active: transactionFilter === 'all' }]"
+      @click="transactionFilter = 'all'"
+    >
+      All
+    </button>
+    <button 
+      :class="['filter-btn', { active: transactionFilter === 'added' }]"
+      @click="transactionFilter = 'added'"
+    >
+      Added Stock
+    </button>
+    <button 
+      :class="['filter-btn', { active: transactionFilter === 'deducted' }]"
+      @click="transactionFilter = 'deducted'"
+    >
+      Deducted Stock
+    </button>
+  </div>
+
             <div class="date-filter">
               <div class="date-inputs">
                 <div class="date-input">
@@ -82,66 +104,74 @@
             </div>
           </div>
 
-          <!-- Display Stock and Deducted Transactions Together -->
           <div class="combined-transactions">
-            <div v-for="item in combinedTransactions" 
-                 :key="item.id || item.TransactionID" 
-                 class="transaction-card">
-              
-              <!-- Stock Details -->
-              <div v-if="item.stock_location" class="stock-card">
-                <div class="stock-card-header">
-                  <span class="supplier-tag">{{ item.SupplierName || 'N/A' }}</span>
-                  <span class="timestamp">{{ formatTimestamp(item.created_at) }}</span>
-                </div>
-                <div class="stock-card-item">
-                  <span class="label">Cost Price</span>
-                  <span class="value">₱{{ item.CostPrice?.toFixed(2) || '0.00' }}</span>
-                </div>
-                <div class="stock-card-item">
-                  <span class="label">Batch Number</span>
-                  <span class="value">{{ item.batch_number || "N/A" }}</span>
-                </div>
-                <div class="stock-card-item">
-                  <span class="label">Location</span>
-                  <span class="value">{{ item.stock_location || 'N/A' }}</span>
-                </div>
-                <div class="stock-card-item">
-                  <span class="label">Quantity</span>
-                  <span class="value quantity">{{ item.quantity }}</span>
-                </div>
-                <div class="stock-card-item">
-                  <span class="label">Expiration Date</span>
-                  <span class="value" :class="{ 'expiring': isExpiringSoon(item.expiration_date) }">
-                    {{ formatDate(item.expiration_date) || "N/A" }}
-                  </span>
-                </div>
-              </div>
+            <div v-if="combinedTransactions.length === 0" class="no-data">
+  No stock details available.
+</div>
+  <div v-for="item in filteredTransactions" 
+       :key="item.id || item.TransactionID" 
+       class="transaction-card">
+    
+    <!-- Stock Details -->
+    <div v-if="item.stock_location" class="stock-card">
+  <div class="stock-card-header">
+    <span :class="['transaction-type', item.TransactionType ? item.TransactionType.toLowerCase() : 'add']">
+    {{ item.TransactionType || 'Added' }}
+  </span>
+    <span class="timestamp">{{ formatTimestamp(item.created_at) }}</span>
+  </div>
+  <div class="stock-card-item">
+    <span class="label">Supplier</span>
+    <span class="supplier-tag">{{ item.SupplierName || 'N/A' }}</span>
+  </div>
+  <div class="stock-card-item">
+    <span class="label">Cost Price</span>
+    <span class="value">₱{{ item.CostPrice?.toFixed(2) || '0.00' }}</span>
+  </div>
+  <div class="stock-card-item">
+    <span class="label">Batch Number</span>
+    <span class="value">{{ item.batch_number || "N/A" }}</span>
+  </div>
+  <div class="stock-card-item">
+    <span class="label">Location</span>
+    <span class="value">{{ item.stock_location || 'N/A' }}</span>
+  </div>
+  <div class="stock-card-item">
+    <span class="label">Quantity</span>
+    <span class="value quantity">{{ item.quantity }}</span>
+  </div>
+  <div class="stock-card-item">
+    <span class="label">Expiration Date</span>
+    <span class="value" :class="{ 'expiring': isExpiringSoon(item.expiration_date) }">
+      {{ formatDate(item.expiration_date) || "N/A" }}
+    </span>
+  </div>
+</div>
 
-              <!-- Deducted Transactions -->
-              <div v-else class="deduct-card">
-                <div class="transaction-header">
-                  <span class="transaction-type">{{ item.TransactionType }}</span>
-                  <span class="transaction-date">{{ formatDateTime(item.TransactionDate) }}</span>
-                </div>
-                <div class="transaction-details">
-                  <div class="transaction-item">
-                    <span class="label">Product Name</span>
-                    <span class="value">{{ item.ProductName }}</span>
-                  </div>
-                  <div class="transaction-item">
-                    <span class="label">Quantity Deducted</span>
-                    <span class="value quantity-deducted">{{ item.QuantityDeducted }}</span>
-                  </div>
-                  <div class="transaction-item">
-                    <span class="label">Cost Price</span>
-                    <span class="value price">{{ item.CostPrice }}</span>
-                  </div>
-                </div>
-              </div>
+    <div v-else class="deduct-card">
+      <div class="transaction-header">
+        <span :class="['transaction-type', item.TransactionType ? item.TransactionType.toLowerCase() : 'deduct']">
+          {{ item.TransactionType === 'Deduct' ? 'Deducted' : item.TransactionType }}  </span>
+       <span class="transaction-date">{{ formatDateTime(item.TransactionDate) }}</span>
+      </div>
+      <div class="transaction-details">
+        <div class="transaction-item">
+          <span class="label">Product Name</span>
+          <span class="value">{{ item.ProductName }}</span>
+        </div>
+        <div class="transaction-item">
+          <span class="label">Quantity Deducted</span>
+          <span class="value quantity-deducted">{{ item.QuantityDeducted }}</span>
+        </div>
+        <div class="transaction-item">
+          <span class="label">Cost Price</span>
+          <span class="value price">{{ item.CostPrice }}</span>
+        </div>
+      </div>
+    </div>
 
-            </div>
-          </div>
+  </div>
+</div>
 
         </div>
       </div> 
@@ -170,38 +200,62 @@ export default {
         from: '',
         to: ''
       },
-      combinedTransactions: []
+      combinedTransactions: [],
+      transactionFilter: 'all',
     };
   },
   computed: {
     today() {
       return new Date().toISOString().split('T')[0];
+    },
+    filteredTransactions() {
+    let transactions = [...this.combinedTransactions];
+
+    if (this.transactionFilter === "added") {
+      transactions = transactions.filter(item => item.stock_location);
+    } else if (this.transactionFilter === "deducted") {
+      transactions = transactions.filter(item => !item.stock_location);
     }
+
+    if (this.dateFilter.from && this.dateFilter.to) {
+      const fromDate = new Date(this.dateFilter.from);
+      const toDate = new Date(this.dateFilter.to);
+      toDate.setHours(23, 59, 59);
+
+      transactions = transactions.filter(item => {
+        const itemDate = new Date(item.created_at || item.TransactionDate);
+        return itemDate >= fromDate && itemDate <= toDate;
+      });
+    }
+
+    return transactions;
+  }
   },
   async created() {
-    try {
-      let productId = this.$route.params.id;
-      productId = parseInt(productId, 10).toString();
+  try {
+    let productId = this.$route.params.id;
+    productId = parseInt(productId, 10).toString();
 
-      const productResponse = await axios.get(`http://127.0.0.1:8000/api/stock/stockin/${productId}`);
-      this.product = { ...productResponse.data };
+    const productResponse = await axios.get(`http://127.0.0.1:8000/api/stock/stockin/${productId}`);
+    this.product = { ...productResponse.data };
 
-      const stockResponse = await axios.get(`http://127.0.0.1:8000/api/stock/stockdetails/${productId}`);
-      
-      this.combinedTransactions = [
-        ...stockResponse.data.StockDetails, 
-        ...stockResponse.data.DeductedTransactions
-      ].sort((a, b) => new Date(b.created_at || b.TransactionDate) - new Date(a.created_at || a.TransactionDate));
+    const stockResponse = await axios.get(`http://127.0.0.1:8000/api/stock/stockdetails/${productId}`);
+    
+    this.combinedTransactions = [
+      ...stockResponse.data.StockDetails, 
+      ...stockResponse.data.DeductedTransactions
+    ].sort((a, b) => new Date(b.created_at || b.TransactionDate) - new Date(a.created_at || a.TransactionDate));
 
-    } catch (error) {
-      console.error("API Error:", error);
-      this.error = error.response?.data?.detail || 'Failed to load product details';
-      useToast().error(this.error);
-    } finally {
-      this.loading = false;
-    }
-  },
+  } catch (error) {
+    console.error("API Error:", error);
+    this.error = error.response?.data?.detail || 'Failed to load product details';
+    useToast().error(this.error);
+  } finally {
+    this.loading = false;
+  }
+},
   methods: {
+    
     getStatusByQuantity(quantity) {
       if (quantity <= 0) return 'Out of Stock';
       if (quantity <= 10) return 'Low Stock';
@@ -234,7 +288,7 @@ export default {
       const expDate = new Date(dateString);
       const today = new Date();
       return (expDate - today) / (1000 * 60 * 60 * 24) <= 30;
-    }
+    },
   }
 };
 </script>
@@ -242,14 +296,14 @@ export default {
   
   <style scoped>
 .app-container {
-  margin-left: 230px; /* Default margin when sidebar is expanded */
+  margin-left: 230px;
   background: #f8f9fa;
   min-height: 100vh;
-  transition: margin-left 0.3s ease; /* Smooth transition for sidebar toggle */
+  transition: margin-left 0.3s ease;
 }
 
 .app-container.sidebar-collapsed {
-  margin-left: 70px; /* Adjust margin when sidebar is collapsed */
+  margin-left: 70px; 
 }
 
   
@@ -671,7 +725,31 @@ export default {
   border-radius: 12px;
   margin-top: 15px;
 }
+.transaction-filters {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
 
+.filter-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #E54F70;
+  background: white;
+  color: #E54F70;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  background: #fff5f5;
+}
+
+.filter-btn.active {
+  background: #E54F70;
+  color: white;
+}
 .date-inputs {
   display: flex; /* Ensure date inputs are stacked vertically */
   gap: 50px; 
@@ -789,6 +867,29 @@ export default {
   }
 }
 /* Add to your existing <style> section */
+.transaction-type {
+  font-weight: bold;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: white;
+  display: inline-block;
+}
+
+.transaction-type.add {
+  background-color: #28a745 !important; /* Green for added stock */
+}
+
+.transaction-type.added {
+  background-color: #28a745 !important; /* Green for added stock */
+}
+.transaction-type.deduct {
+  background-color: #dc3545 !important; /* Red for deducted stock */
+}
+
+.transaction-type.deducted {
+  background-color: #dc3545 !important; /* Red for deducted stock */
+}
 .deducted-transactions {
   margin-top: 30px;
   padding-top: 20px;
