@@ -2,6 +2,7 @@
   <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
 
   <SideBar :isCollapsed="isSidebarCollapsed" />
+  
   <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
     <div class="header-container">
       <h1 class="header">Create Order</h1>
@@ -26,27 +27,58 @@
           </div>
 
           <div class="form-group">
-            <label>Table Number</label>
-            <input v-model.number="order.tableNumber" type="number" required class="form-input" />
+            <label>Payment Method</label>
+            <select v-model="order.paymentMethod" class="form-input" @change="handlePaymentMethodChange">
+              <option value="Cash">Cash</option>
+              <option value="Tally">Tally</option>
+            </select>
           </div>
 
-          <div class="form-group">
-            <label>Payment Method</label>
-            <select v-model="order.paymentMethod" class="form-input">
-              <option value="CASH">Cash</option>
-              <option value="TALLY">Tally</option>
-            </select>
+          <!-- Cash payment fields -->
+          <div v-if="order.paymentMethod === 'Cash'" class="form-group">
+            <label>Cash Amount</label>
+            <input 
+              v-model.number="order.cashOnHand" 
+              type="number" 
+              min="0" 
+              step="0.01" 
+              required 
+              class="form-input" 
+              @input="calculateChange"
+            />
+            <div v-if="order.change >= 0" class="change-amount">
+              Change: ₱{{ order.change.toFixed(2) }}
+            </div>
+          </div>
+
+          <!-- Tally payment fields -->
+          <div v-if="order.paymentMethod === 'Tally'" class="form-group">
+            <label>Employee ID</label>
+            <input 
+              v-model.number="order.employeeId" 
+              type="number" 
+              required 
+              class="form-input"
+            />
           </div>
         </div>
 
         <OrderSummary 
           :items="order.items"
           :paymentMethod="order.paymentMethod"
+          :totalAmount="totalAmount"
+          :cashOnHand="order.cashOnHand"
+          :change="order.change"
         />
 
         <div class="form-actions">
           <button type="button" @click="resetForm" class="reset-btn">Reset</button>
-          <button type="submit" @click.prevent="submitOrder" class="submit-btn" :disabled="loading">
+          <button 
+            type="submit" 
+            @click.prevent="submitOrder" 
+            class="submit-btn" 
+            :disabled="loading || !isValidOrder"
+          >
             {{ loading ? 'Submitting...' : 'Create Order' }}
           </button>
         </div>
@@ -75,61 +107,111 @@ export default {
       isSidebarCollapsed: false,
       order: {
         customerName: '',
-        tableNumber: null,
         items: [],
-        status: 'pending',
-        paymentMethod: 'CASH'
+        paymentMethod: 'Cash',
+        cashOnHand: null,
+        change: 0,
+        employeeId: null
       },
       menuItems: [],
       loading: false,
       errorMessage: ''
     };
   },
+
+  computed: {
+    totalAmount() {
+      return this.order.items.reduce((sum, item) => {
+        const product = this.menuItems.find(menuItem => menuItem.id === item.id);
+        return sum + (product ? product.price * item.quantity : 0);
+      }, 0);
+    },
+
+    isValidOrder() {
+      const hasValidItems = this.order.items.length > 0;
+      const hasCustomerName = !!this.order.customerName;
+
+      if (this.order.paymentMethod === 'Cash') {
+        return (
+          hasValidItems && 
+          hasCustomerName && 
+          this.order.cashOnHand !== null &&
+          this.order.cashOnHand >= this.totalAmount
+        );
+      }
+
+      if (this.order.paymentMethod === 'Tally') {
+        return hasValidItems && hasCustomerName && !!this.order.employeeId;
+      }
+
+      return false;
+    }
+  },
+
   methods: {
     handleSidebarToggle(collapsed) {
       this.isSidebarCollapsed = collapsed;
     },
+
+    handlePaymentMethodChange() {
+      if (this.order.paymentMethod === 'Cash') {
+        this.order.employeeId = null;
+      } else {
+        this.order.cashOnHand = null;
+        this.order.change = 0;
+      }
+    },
+
+    calculateChange() {
+      if (this.order.paymentMethod === 'Cash' && this.order.cashOnHand !== null) {
+        this.order.change = Math.max(0, this.order.cashOnHand - this.totalAmount);
+      }
+    },
+
     updateOrderItems(updatedItems) {
       this.order.items = [...updatedItems];
     },
 
     async submitOrder() {
-      if (!this.order.customerName || !this.order.tableNumber) {
-        alert('Please enter customer details.');
-        return;
-      }
-
-      if (this.order.items.length === 0) {
-        alert('Please add items to the order.');
+      if (!this.isValidOrder) {
+        alert('Please fill all required fields correctly.');
         return;
       }
 
       this.loading = true;
 
-      const sanitizedItems = this.order.items.map(item => ({
-        id: item.id ? Number(item.id) : null,
-        quantity: Number(item.quantity) || 0
-      })).filter(item => item.id && item.quantity > 0);
-
-      const totalAmount = sanitizedItems.reduce((sum, item) => {
-        const product = this.menuItems.find(menuItem => menuItem.id === item.id);
-        return sum + (product ? product.price * item.quantity : 0);
-      }, 0);
-
-      const orderPayload = {
-        customer_name: this.order.customerName,
-        table_number: Number(this.order.tableNumber),
-        items: sanitizedItems,
-        total_amount: parseFloat(totalAmount.toFixed(2))
-      };
-
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/orders/create_order', orderPayload);
-        alert('Order created successfully!');
+        const formattedItems = this.order.items.map(item => ({
+          id: Number(item.id),
+          quantity: Number(item.quantity)
+        }));
+
+        const orderPayload = {
+          customer_name: this.order.customerName,
+          items: formattedItems,
+          total_amount: this.totalAmount,
+          payment_method: this.order.paymentMethod,
+          ...(this.order.paymentMethod === 'Cash' && { cash_on_hand: this.order.cashOnHand }),
+          ...(this.order.paymentMethod === 'Tally' && { employee_id: this.order.employeeId })
+        };
+
+        console.log('Submitting order payload:', orderPayload);
+
+        const response = await axios.post(
+          'http://127.0.0.1:8000/api/orders/create_order',
+          orderPayload
+        );
+
+        console.log('Order response:', response.data);
+
         this.resetForm();
+        alert('Order created successfully!');
       } catch (error) {
-        console.error('Error creating order:', error);
-        alert('Failed to create order.');
+        console.error('Error details:', error.response?.data);
+        const errorMessage = error.response?.data?.detail 
+          || 'Failed to create order. Please check all fields and try again.';
+
+        alert(errorMessage);
       } finally {
         this.loading = false;
       }
@@ -138,15 +220,18 @@ export default {
     resetForm() {
       this.order = {
         customerName: '',
-        tableNumber: null,
         items: [],
-        status: 'pending',
-        paymentMethod: 'CASH'
+        paymentMethod: 'Cash',
+        cashOnHand: null,
+        change: 0,
+        employeeId: null
       };
     }
   }
 };
 </script>
+
+
 
 
 <style scoped>
@@ -260,5 +345,24 @@ h2 {
 
 button:hover {
   opacity: 0.9;
+}
+
+.change-amount {
+  margin-top: 8px;
+  padding: 8px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.form-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.submit-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 </style>

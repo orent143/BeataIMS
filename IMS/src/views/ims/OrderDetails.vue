@@ -1,0 +1,184 @@
+<template>
+<Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
+
+<SideBar :isCollapsed="isSidebarCollapsed" />
+
+<div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
+    <div class="order-details">
+        <div v-if="loading" class="loading">Loading...</div>
+        <div v-else-if="error" class="error">{{ error }}</div>
+        <div v-else class="order-container">
+            <!-- Order Summary Section -->
+            <div class="summary-section">
+                <h2>Order Summary</h2>
+                <div class="summary-details">
+                    <div class="detail-row">
+                        <span>Order ID:</span>
+                        <span>#{{ order.order_id }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Customer Name:</span>
+                        <span>{{ order.customer_name }}</span>
+                    </div>
+                    <div class="detail-row">
+    <span>Date:</span>
+    <span>{{ formatDate(order.OrderDate) }}</span> <!-- ✅ Use a date formatting method -->
+</div>
+                    <div class="detail-row">
+                        <span>Payment Method:</span>
+                        <span>{{ order.payment_method }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Total Items:</span>
+                        <span>{{ order.total_items }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Total Amount:</span>
+                        <span>₱{{ order.total_amount.toFixed(2) }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Cash:</span>
+                        <span>₱{{ order.cash_on_hand.toFixed(2) }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Change:</span>
+                        <span>₱{{ order.change.toFixed(2) }}</span>
+                    </div>
+                    <div class="detail-row">
+    <span>Employee ID:</span>
+    <span>{{ order.employee_id && order.employee_id !== 0 ? order.employee_id : 'N/A' }}</span>
+</div>
+                </div>
+            </div>
+
+            <!-- Order Items Section -->
+            <div class="items-section">
+                <h2>Order Items</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Name</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in order.items" :key="item.product_id">
+                            <td>{{ item.product_id }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>₱{{ item.price.toFixed(2) }}</td>
+                            <td>₱{{ (item.quantity * item.price).toFixed(2) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</template>
+
+<script>
+import axios from 'axios'
+import Header from '@/components/Header.vue'    
+import SideBar from '@/components/ims/SideBar.vue'
+
+export default {
+    components: {
+    SideBar,
+    Header,
+  },
+    name: 'OrderDetails',
+    data() {
+        return {
+            order: null,
+            loading: true,
+            error: null
+        }
+    },
+    async created() {
+    try {
+        const orderId = this.$route.params.orderId; // ✅ Use the correct route parameter name
+        const response = await axios.get(`http://127.0.0.1:8000/api/ordersummary/orders/history/${orderId}`);
+        this.order = response.data;
+        this.loading = false;
+    } catch (err) {
+        this.error = 'Error loading order details';
+        this.loading = false;
+        console.error('Error:', err);
+    }
+},
+    methods: {
+    formatDate(date) {
+        if (!date) return "N/A";
+        const options = { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" };
+        return new Date(date).toLocaleDateString("en-US", options);
+    }
+}
+}
+</script>
+
+<style scoped>
+.order-details {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.loading, .error {
+    text-align: center;
+    padding: 20px;
+}
+
+.error {
+    color: red;
+}
+
+.order-container {
+    display: grid;
+    gap: 20px;
+}
+
+.summary-section, .items-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.summary-details {
+    display: grid;
+    gap: 10px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+</style>

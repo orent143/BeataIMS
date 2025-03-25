@@ -91,12 +91,6 @@
       </div>
     </div>
 
-    <add-product
-      v-if="showAddForm"
-      :isVisible="showAddForm"
-      @close="toggleAddForm"
-      @add="addItem"
-    />
 
     <edit-product
       v-if="showEditForm"
@@ -115,14 +109,13 @@
 <script>
 import axios from 'axios';
 import SideBar from '@/components/ims/SideBar.vue';
-import AddProduct from '@/components/ims/AddProduct.vue';
 import EditProduct from '@/components/ims/EditProduct.vue';
 import Header from '@/components/Header.vue';
 import ProductTransaction from '@/components/ims/ProductTransaction.vue';
 import { useToast } from 'vue-toastification';
 
 export default {
-  components: { AddProduct, EditProduct, SideBar, Header,     ProductTransaction  },
+  components: { EditProduct, SideBar, Header,     ProductTransaction  },
   data() {
     return {
       isSidebarCollapsed: false,

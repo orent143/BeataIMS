@@ -157,12 +157,12 @@
         ({{ stockData.ProductType }})
       </span>
     </p>
-    <p><strong>Unit Price:</strong> ₱{{ stockData.UnitPrice || '0.00' }}</p>
+    <p><strong>Unit Price:</strong> {{ stockData.UnitPrice || '0.00' }}</p>
     <p>
       <strong>Current Supplier:</strong>
       <span class="supplier-name">{{ stockData.CurrentSupplier || 'N/A' }}</span>
     </p>
-    <p><strong>Cost Price:</strong> ₱{{ formatPrice(stockData.CostPrice) }}</p>
+    <p><strong>Cost Price:</strong> {{ formatPrice(stockData.CostPrice) }}</p>
     <p><strong>Total Quantity:</strong> {{ getTotalQuantity() }}</p>
     <p><strong>Total Locations:</strong> {{ stockData.Stocks.length }}</p>
     

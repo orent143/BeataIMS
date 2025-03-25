@@ -1,7 +1,8 @@
 <template>
-  <Header />
-  <SideBar />
-  <div class="app-container">
+  <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
+  <SideBar :isCollapsed="isSidebarCollapsed" />
+
+  <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
     <div class="header-container">
       <h1 class="sales-header">Order History</h1>
       <div class="header-actions">
@@ -10,52 +11,48 @@
             <i class="fas fa-filter"></i>
           </button>
           <div v-if="showFilterDropdown" class="dropdown">
-            <select v-model="selectedStatus" class="filter-select" @change="filterOrders">
+            <select v-model="selectedStatus" class="filter-select">
               <option value="">All Orders</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
+              <option value="Cash">Cash</option>
+              <option value="Tally">Tally</option>
             </select>
           </div>
         </div>
       </div>
     </div>
+
     <div class="sales-container">
-      <div class="sales-table-container">
-        <table class="sales-table">
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Total Items</th>
-              <th>Cash on hand</th>
-              <th>Total Amount</th>
-              <th>Change</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="order in filteredOrders" :key="order.order_id">
-              <td>#{{ order.order_id }}</td>
-              <td>{{ order.customer_name }}</td>
-              <td>{{ order.table_number }}</td>
-              <td>
-                <ul>
-                  <li v-for="(item, index) in order.items" :key="index">
-                    {{ item.quantity }}x {{ item.name }}
-                  </li>
-                </ul>
-              </td>
-              <td>₱{{ order.total_amount }}</td>
-              <td>{{ formatTime(order.order_date) }}</td>
-              <td>
-                <span :class="'status status-' + order.order_status.toLowerCase().replace(/ /g, '-')">
-                  {{ order.order_status }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <table class="sales-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Total Amount</th>
+          <th>Payment Method</th>
+          <th>Date</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="order in filteredOrders" :key="order.order_id">
+          <td class="order-id">{{ order.order_id }}</td>
+          <td>{{ order.customer_name }}</td>
+          <td>₱{{ formatPrice(order.total_amount) }}</td>
+          <td>
+            <span :class="['payment-badge', order.payment_method.toLowerCase()]">
+              {{ order.payment_method }}
+            </span>
+          </td>
+          <td>{{ formatDate(order.OrderDate) }}</td>
+          <td>
+            <button class="btn-details" @click="redirectToOrderDetails(order.order_id)">
+                  VIEW DETAILS
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
       <div class="totals-container">
         <div class="totals-item">
           <span>Total Orders:</span>
@@ -63,7 +60,7 @@
         </div>
         <div class="totals-item">
           <span>Total Sales:</span>
-          <span>₱{{ totalSales }}</span>
+          <span>₱{{ formatPrice(totalSales) }}</span>
         </div>
       </div>
     </div>
@@ -73,54 +70,97 @@
 <script>
 import axios from 'axios';
 import SideBar from '@/components/ims/SideBar.vue';
-  import Header from '@/components/Header.vue';
+import Header from '@/components/Header.vue';
 
-  export default {
-    components: {
-      SideBar,
-      Header
-    },
+export default {
+  components: {
+    SideBar,
+    Header
+  },
   data() {
     return {
+      isSidebarCollapsed: false,
       orders: [],
       selectedStatus: '',
       showFilterDropdown: false,
+      searchQuery: '',
+      loading: false
     };
   },
   computed: {
     filteredOrders() {
-      if (!this.selectedStatus) return this.orders;
-      return this.orders.filter(order => order.order_status === this.selectedStatus);
+      let filtered = [...this.orders];
+
+      if (this.selectedStatus) {
+        filtered = filtered.filter(order => 
+          order.payment_method === this.selectedStatus
+        );
+      }
+
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase();
+        filtered = filtered.filter(order =>
+          order.customer_name.toLowerCase().includes(query) ||
+          order.order_id.toString().includes(query)
+        );
+      }
+
+      return filtered;
     },
     totalSales() {
-      return this.filteredOrders.reduce((sum, order) => sum + order.total_amount, 0).toFixed(2);
-    },
+      return this.filteredOrders.reduce((sum, order) => 
+        sum + parseFloat(order.total_amount), 0
+      );
+    }
   },
   methods: {
+    handleSidebarToggle(collapsed) {
+      this.isSidebarCollapsed = collapsed;
+    },
+
     async fetchOrders() {
+      this.loading = true;
       try {
         const response = await axios.get('http://127.0.0.1:8000/api/ordersummary/orders/history');
         this.orders = response.data;
       } catch (error) {
         console.error('Error fetching orders:', error);
+      } finally {
+        this.loading = false;
       }
     },
-    formatTime(datetime) {
-      return new Date(datetime).toLocaleString();
+
+    formatPrice(value) {
+      return Number(value).toFixed(2);
     },
+
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      return new Date(dateString).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    },
+
     toggleFilterDropdown() {
       this.showFilterDropdown = !this.showFilterDropdown;
     },
-    filterOrders() {
-      // No need for extra logic; computed property handles filtering
-    },
+
+    redirectToOrderDetails(orderId) {
+    this.$router.push({
+      path: `/vieworderdetails/${orderId}`
+    });
+  }
   },
+
   mounted() {
     this.fetchOrders();
-  },
+  }
 };
 </script>
-
 
 <style scoped>
 .app-container {
@@ -188,30 +228,21 @@ import SideBar from '@/components/ims/SideBar.vue';
 .sales-table th {
   background-color: #f4f4f4;
 }
-
-.search-container {
-  position: relative;
-  margin-right: 3px;
+.payment-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
-.search-icon {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #333;
-  pointer-events: none;
+.payment-badge.cash {
+  background-color: #E8F5E9;
+  color: #2E7D32;
 }
 
-.search-bar {
-  padding: 8px 30px 8px 8px;
-  border: 1px solid #94949400;
-  border-radius: 10px;
-  width: 130px;
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
-  background-color: #D9D9D9;
+.payment-badge.tally {
+  background-color: #E3F2FD;
+  color: #1565C0;
 }
 
 .filter-btn {
@@ -340,5 +371,35 @@ input[type="checkbox"] {
 
 .add-to-reports-btn:hover {
   background-color: #218838;
+}
+.order-id {
+  font-family: monospace;
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+.btn-details {
+  background-color: transparent;
+  color: #4CAF50;
+  border: 1.5px solid #4CAF50;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.btn-details:hover {
+  background-color: #4CAF50;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn i {
+  font-size: 14px;
 }
 </style>

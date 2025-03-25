@@ -1,44 +1,75 @@
-<template>
+<template> 
   <div class="popout-form" v-if="isVisible">
     <div class="form-header">
       <h2>Edit Product</h2>
       <button class="close-btn" @click="closeForm">x</button>
     </div>
 
-
     <form @submit.prevent="confirmAndSubmit" class="form-container">
       <div class="form-group">
         <label for="name">Item Name</label>
-        <input id="name" v-model="product.ProductName" placeholder="Item Name" required />
-      </div>
-      <div class="form-group">
-        <label for="quantity">Quantity</label>
-        <input id="quantity" v-model="product.Quantity" type="number" placeholder="Quantity" required min="1" @input="updateStatus" />
+        <input 
+          id="name" 
+          v-model="product.ProductName" 
+          placeholder="Item Name" 
+          required 
+        />
       </div>
 
       <div class="form-group">
         <label for="unitPrice">Unit Price</label>
-        <input id="unitPrice" v-model="product.UnitPrice" type="number" placeholder="Unit Price" required min="0" step="0.01" />
+        <input 
+          id="unitPrice" 
+          v-model="product.UnitPrice" 
+          type="number" 
+          placeholder="Unit Price" 
+          required 
+          min="0" 
+          step="0.01" 
+        />
       </div>
-      
+
       <div class="form-group">
         <label for="category">Category</label>
-        <select id="category" v-model="product.CategoryID" required>
+        <select 
+          id="category" 
+          v-model="product.CategoryID" 
+          required
+        >
           <option value="" disabled>Select Category</option>
-          <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.CategoryName }}</option>
+          <option 
+            v-for="category in categories" 
+            :key="category.id" 
+            :value="category.id"
+          >
+            {{ category.CategoryName }}
+          </option>
         </select>
       </div>
 
       <div class="form-group image-section">
-      <label for="image">Product Image</label>
-      <div class="image-upload-container">
-      <label for="image" class="image-upload">
-        <input type="file" id="image" @change="handleFileUpload" />
-        <img v-if="imagePreview" :src="imagePreview" class="preview-image" />
-        <span v-if="!imagePreview" class="upload-text">Upload New Image</span>
-      </label>
-    </div>
-  </div>
+        <label for="image">Product Image</label>
+        <div class="image-upload-container">
+          <label for="image" class="image-upload">
+            <input 
+              type="file" 
+              id="image" 
+              @change="handleFileUpload" 
+              accept="image/*"
+            />
+            <img 
+              v-if="imagePreview" 
+              :src="imagePreview" 
+              class="preview-image" 
+              alt="Product preview"
+            />
+            <span v-if="!imagePreview" class="upload-text">
+              Upload New Image
+            </span>
+          </label>
+        </div>
+      </div>
+
       <div class="form-actions">
         <button type="submit" class="add-item-btn">Update Product</button>
       </div>
@@ -64,17 +95,25 @@ import axios from 'axios';
 import { useToast } from 'vue-toastification';
 
 export default {
+  emits: ['close', 'update'],
+
   props: {
     isVisible: Boolean,
     itemToEdit: Object
   },
   data() {
     return {
-      product: { ...this.itemToEdit }, 
+      product: {
+        ProductID: null,  // Changed from id to ProductID
+        ProductName: '',
+        UnitPrice: 0,
+        CategoryID: '',
+        Image: ''
+      },
       categories: [],
       showConfirmModal: false,
       selectedImage: null,
-      imagePreview: this.itemToEdit?.Image || null
+      imagePreview: null
     };
   },
   methods: {
@@ -98,66 +137,113 @@ export default {
         this.imagePreview = URL.createObjectURL(file);
       }
     },
-    updateStatus() {
-      if (this.product.Quantity === 0) {
-        this.product.Status = 'Out of Stock';
-      } else if (this.product.Quantity <= 10) {
-        this.product.Status = 'Low Stock';
-      } else {
-        this.product.Status = 'In Stock';
-      }
-    },
     async updateProduct() {
-    const toast = useToast();
-    try {
-      if (!this.product.id) {
-        throw new Error("Product ID is missing!");
+      const toast = useToast();
+      try {
+        if (!this.product.ProductID) {
+          console.error("Product ID is missing!");
+          toast.error("Product ID is missing!");
+          return; 
+        }
+
+        const formData = new FormData();
+        
+        // Ensure all form values are properly converted to their expected types
+        if (this.product.ProductName) {
+          formData.append("ProductName", this.product.ProductName);
+        }
+        
+        if (this.product.UnitPrice) {
+          formData.append("UnitPrice", parseFloat(this.product.UnitPrice));
+        }
+        
+        if (this.product.CategoryID) {
+          formData.append("CategoryID", parseInt(this.product.CategoryID));
+        }
+
+        if (this.selectedImage) {
+          formData.append("Image", this.selectedImage);
+        }
+
+        // Update API endpoint to match FastAPI route
+        const response = await axios.put(
+          `http://127.0.0.1:8000/api/inventory/inventoryproduct/${this.product.ProductID}`,
+          formData,
+          {
+            headers: { 
+              "Content-Type": "multipart/form-data"
+            }
+          }
+        );
+        if (response.data.message) {
+          toast.success(response.data.message);
+          
+          // Update image preview if new image was returned
+          if (response.data.Image) {
+            this.product.Image = response.data.Image;
+            this.imagePreview = `http://127.0.0.1:8000${response.data.Image}`;
+          }
+
+          this.$emit("update", this.product);
+          this.closeForm();
+        }
+      } catch (error) {
+        console.error("Error updating product:", error);
+        if (error.response?.status === 404) {
+          toast.error("Product not found");
+        } else {
+          toast.error(error.response?.data?.detail || "Failed to update product");
+        }
       }
-
-      let formData = new FormData();
-      formData.append("ProductName", this.product.ProductName);
-      formData.append("Quantity", this.product.Quantity);
-      formData.append("UnitPrice", this.product.UnitPrice);
-      formData.append("CategoryID", this.product.CategoryID);
-      formData.append("Status", this.product.Status);
-
-      if (this.selectedImage) {
-        formData.append("Image", this.selectedImage);
-      }
-
-      await axios.put(
-        `http://127.0.0.1:8000/api/inventory/inventoryproduct/${this.product.id}`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-
-      toast.success("Product updated successfully!");
-      this.$emit("update", this.product);
-      this.closeForm();
-    } catch (error) {
-      console.error("Error updating product:", error);
-      toast.error("Failed to update product");
     }
-  }
-
   },
+  
   created() {
-    axios.get('http://127.0.0.1:8000/api/categories').then(response => {
-      this.categories = response.data;
-    });
+    if (this.itemToEdit) {
+      // Map incoming data correctly
+      this.product = {
+        ProductID: this.itemToEdit.ProductID || this.itemToEdit.id, // Handle both ID formats
+        ProductName: this.itemToEdit.ProductName,
+        UnitPrice: this.itemToEdit.UnitPrice,
+        CategoryID: this.itemToEdit.CategoryID,
+        Image: this.itemToEdit.Image
+      };
+      
+      this.imagePreview = this.product.Image 
+        ? `http://127.0.0.1:8000${this.product.Image}`
+        : null;
+    }
+
+    axios.get('http://127.0.0.1:8000/api/categories')
+      .then(response => {
+        this.categories = response.data;
+      })
+      .catch(error => {
+        console.error("Error fetching categories:", error);
+      });
   },
   watch: {
     itemToEdit: {
       deep: true,
       handler(newValue) {
-        this.product = { ...newValue };
-        this.imagePreview = newValue?.Image || null;
+        if (newValue) {
+          this.product = {
+            ProductID: newValue.ProductID || newValue.id, // Handle both ID formats
+            ProductName: newValue.ProductName,
+            UnitPrice: newValue.UnitPrice,
+            CategoryID: newValue.CategoryID,
+            Image: newValue.Image
+          };
+          
+          this.imagePreview = newValue?.Image 
+            ? `http://127.0.0.1:8000${newValue.Image}`
+            : null;
+        }
       }
     }
   }
 };
 </script>
-
 
 
 <style scoped>

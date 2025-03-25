@@ -16,6 +16,7 @@ import RecordSalesTransaction from '@/views/ims/RecordSalesTransaction.vue';
 import OrdersHistory from '@/views/ims/OrderHistory.vue';
 import SummaryReport from '@/views/ims/reports/SummaryReport.vue';
 import LowStockReport from '@/views/ims/reports/LowStockReport.vue';
+import OrderDetailsVue from '@/views/ims/OrderDetails.vue';
 
 //sms
 import HomeSMS from '@/views/sms/HomeSMS.vue';
@@ -27,14 +28,14 @@ import HistoryReportSMS from '@/views/sms/reports/historyreport.vue';
 import Dashboard from '@/views/admin/Dashboard.vue';
 import Users from '@/views/admin/Users.vue';
 
-import Welcome from '@/views/Welcome.vue'; // Import the Welcome page
-import Login from '@/views/Login.vue'; // Import the Login page
-import Profile from '@/views/Profile.vue'; // Import the Profile page
+import Welcome from '@/views/Welcome.vue'; 
+import Login from '@/views/Login.vue'; 
+import Profile from '@/views/Profile.vue';
 
 const routes = [
-  { path: '/', component: Welcome }, // Set the root path to the Welcome page
-  { path: '/login', component: Login }, // Add the login route
-  { path: '/profile', component: Profile }, // Add the login route
+  { path: '/', component: Welcome }, 
+  { path: '/login', component: Login }, 
+  { path: '/profile', component: Profile }, 
   { path: '/homeims', component: HomeIMS },
   { path: '/products', component: Products },
   { path: '/viewinventory', component: ViewInventoryVue },
@@ -44,6 +45,7 @@ const routes = [
   { path: '/productsales', component: ProductSales },
   { path: '/record-sales', component: RecordSalesTransaction },
   { path: '/suppliers', component: Suppliers },
+  { path: '/vieworderdetails/:orderId', name: 'ViewOrderDetails', component: OrderDetailsVue },
   { path: '/category', component: Category },
   { path: '/reportsims', component: ReportsIMS },
   { path: '/reportsims/summary', component: SummaryReport },

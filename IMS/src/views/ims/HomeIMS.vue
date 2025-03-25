@@ -61,7 +61,7 @@
         </div>
       </div>
 
-      <!-- Recent Activity -->
+    <div class="hero-container">
       <div class="recent-activity">
         <h2>Recent Activity</h2>
         <div class="activity-list">
@@ -79,6 +79,38 @@
           </div>
         </div>
       </div>
+
+      <div class="recent-activity">
+  <h2>Recent Orders</h2>
+  <div class="table-container">
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Total</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="order in recentOrders" :key="order.id">
+          <td class="order-id">{{ order.id }}</td>
+          <td>{{ order.customerName }}</td>
+          <td>₱{{ order.total }}</td>
+          <td>{{ formatDate(order.date) }}</td>
+          <td>
+            <span :class="['payment-badge', order.status.toLowerCase()]">
+              {{ order.status }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
     </div>
   </div>
 </template>
@@ -149,6 +181,39 @@ export default {
         console.error("Error fetching activity logs:", error);
       }
     },
+        
+    async fetchRecentOrders() {
+    try {
+      const response = await axios.get("http://127.0.0.1:8000/api/ordersummary/orders/history");
+      // Take only the 5 most recent orders
+      this.recentOrders = response.data
+        .sort((a, b) => new Date(b.OrderDate) - new Date(a.OrderDate))
+        .slice(0, 5)
+        .map(order => ({
+          id: order.order_id,
+          customerName: order.customer_name,
+          itemCount: order.total_items || 1,
+          total: this.formatPrice(order.total_amount),
+          date: new Date(order.OrderDate),
+          status: order.payment_method
+        }));
+    } catch (error) {
+      console.error('Error fetching recent orders:', error);
+    }
+  },
+
+  formatPrice(value) {
+    return Number(value).toFixed(2);
+  },
+
+  formatDate(date) {
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  },
     animateValue(property, targetValue) {
       let start = this[property];
       let increment = (targetValue - start) / 50;
@@ -180,6 +245,7 @@ export default {
     this.fetchTotalProducts();
     this.fetchTotalLowStocks();
     this.fetchActivityLogs();
+    this.fetchRecentOrders();
   }
 };
 </script>
@@ -300,7 +366,61 @@ export default {
   font-size: 12px;
   color: #888;
 }
+.hero-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.table-container {
+  flex: 1;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.orders-table th,
+.orders-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+.orders-table th {
+  background: white;
+  padding: 13px;
+    color: #333;
+    font-weight: bold;
+}
+.payment-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
 
+.payment-badge.cash {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+}
+
+.payment-badge.tally {
+  background-color: #FFF3E0;
+  color: #F57C00;
+}
+.order-id {
+  font-family: monospace;
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+.orders-table tr:hover {
+  background-color: #f8f9fa;
+}
 .recent-activity {
   background: white;
   border-radius: 15px;
