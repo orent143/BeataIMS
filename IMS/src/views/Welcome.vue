@@ -23,9 +23,6 @@
           <button @click="redirectToLogin('homeims')" class="primary-btn">
   <i class="fas fa-boxes"></i> Inventory Management
 </button>
-<button @click="redirectToLogin('homesms')" class="secondary-btn">
-  <i class="fas fa-chart-line"></i> Sales Management
-</button>
         </div>
       </div>
     </header>

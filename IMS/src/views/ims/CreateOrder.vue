@@ -1,6 +1,5 @@
 <template>
   <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
-
   <SideBar :isCollapsed="isSidebarCollapsed" />
   
   <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
@@ -15,6 +14,8 @@
           :menuItems="menuItems"
           @update:items="updateOrderItems"
           @update:menuItems="menuItems = $event"
+          @increaseQuantity="increaseItemQuantity"
+          @decreaseQuantity="decreaseItemQuantity"
         />
       </div>
 
@@ -28,38 +29,10 @@
 
           <div class="form-group">
             <label>Payment Method</label>
-            <select v-model="order.paymentMethod" class="form-input" @change="handlePaymentMethodChange">
+            <select v-model="order.paymentMethod" class="form-input">
               <option value="Cash">Cash</option>
               <option value="Tally">Tally</option>
             </select>
-          </div>
-
-          <!-- Cash payment fields -->
-          <div v-if="order.paymentMethod === 'Cash'" class="form-group">
-            <label>Cash Amount</label>
-            <input 
-              v-model.number="order.cashOnHand" 
-              type="number" 
-              min="0" 
-              step="0.01" 
-              required 
-              class="form-input" 
-              @input="calculateChange"
-            />
-            <div v-if="order.change >= 0" class="change-amount">
-              Change: ₱{{ order.change.toFixed(2) }}
-            </div>
-          </div>
-
-          <!-- Tally payment fields -->
-          <div v-if="order.paymentMethod === 'Tally'" class="form-group">
-            <label>Employee ID</label>
-            <input 
-              v-model.number="order.employeeId" 
-              type="number" 
-              required 
-              class="form-input"
-            />
           </div>
         </div>
 
@@ -67,20 +40,33 @@
           :items="order.items"
           :paymentMethod="order.paymentMethod"
           :totalAmount="totalAmount"
-          :cashOnHand="order.cashOnHand"
-          :change="order.change"
+          @update-items="updateOrderItems"
         />
 
         <div class="form-actions">
           <button type="button" @click="resetForm" class="reset-btn">Reset</button>
           <button 
-            type="submit" 
-            @click.prevent="submitOrder" 
+            type="button" 
+            @click="showConfirmationModal" 
             class="submit-btn" 
             :disabled="loading || !isValidOrder"
           >
             {{ loading ? 'Submitting...' : 'Create Order' }}
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" v-if="showConfirmModal">
+      <div class="confirmation-modal">
+        <div class="modal-content">
+          <h3>Confirm Order Creation</h3>
+          <p>Are you sure you want to create this order?</p>
+          <div class="modal-actions">
+            <button @click="confirmSubmit" class="confirm-btn">Yes</button>
+            <button @click="cancelSubmit" class="cancel-btn">No</button>
+          </div>
         </div>
       </div>
     </div>
@@ -93,6 +79,7 @@ import OrderItemSelector from '@/components/sms/OrderItemSelector.vue';
 import OrderSummary from '@/components/sms/OrderSummary.vue';
 import SideBar from '@/components/ims/SideBar.vue';
 import Header from '@/components/Header.vue';
+import { useToast } from 'vue-toastification';  // Import toast
 
 export default {
   name: 'CreateOrder',
@@ -102,23 +89,24 @@ export default {
     SideBar,
     Header
   },
+  setup() {
+    const toast = useToast();  // Initialize toast
+    return { toast };
+  },
   data() {
     return {
       isSidebarCollapsed: false,
       order: {
         customerName: '',
         items: [],
-        paymentMethod: 'Cash',
-        cashOnHand: null,
-        change: 0,
-        employeeId: null
+        paymentMethod: 'Cash'
       },
       menuItems: [],
+      showConfirmModal: false,
       loading: false,
-      errorMessage: ''
+      errorMessage: '',
     };
   },
-
   computed: {
     totalAmount() {
       return this.order.items.reduce((sum, item) => {
@@ -126,64 +114,52 @@ export default {
         return sum + (product ? product.price * item.quantity : 0);
       }, 0);
     },
-
     isValidOrder() {
-      const hasValidItems = this.order.items.length > 0;
-      const hasCustomerName = !!this.order.customerName;
-
-      if (this.order.paymentMethod === 'Cash') {
-        return (
-          hasValidItems && 
-          hasCustomerName && 
-          this.order.cashOnHand !== null &&
-          this.order.cashOnHand >= this.totalAmount
-        );
-      }
-
-      if (this.order.paymentMethod === 'Tally') {
-        return hasValidItems && hasCustomerName && !!this.order.employeeId;
-      }
-
-      return false;
+      return this.order.items.length > 0 && !!this.order.customerName;
     }
   },
-
   methods: {
     handleSidebarToggle(collapsed) {
       this.isSidebarCollapsed = collapsed;
-    },
-
-    handlePaymentMethodChange() {
-      if (this.order.paymentMethod === 'Cash') {
-        this.order.employeeId = null;
-      } else {
-        this.order.cashOnHand = null;
-        this.order.change = 0;
-      }
-    },
-
-    calculateChange() {
-      if (this.order.paymentMethod === 'Cash' && this.order.cashOnHand !== null) {
-        this.order.change = Math.max(0, this.order.cashOnHand - this.totalAmount);
-      }
     },
 
     updateOrderItems(updatedItems) {
       this.order.items = [...updatedItems];
     },
 
-    async submitOrder() {
+    increaseItemQuantity(item) {
+      const updatedItem = this.order.items.find(i => i.id === item.id);
+      if (updatedItem) {
+        updatedItem.quantity += 1;
+      }
+      this.updateOrderItems(this.order.items);
+    },
+
+    decreaseItemQuantity(item) {
+      const updatedItem = this.order.items.find(i => i.id === item.id);
+      if (updatedItem && updatedItem.quantity > 1) {
+        updatedItem.quantity -= 1;
+      }
+      this.updateOrderItems(this.order.items);
+    },
+
+    showConfirmationModal() {
+      this.showConfirmModal = true;
+    },
+
+    async confirmSubmit() {
       if (!this.isValidOrder) {
-        alert('Please fill all required fields correctly.');
+        this.toast.error('Please fill all required fields correctly.');
         return;
       }
 
       this.loading = true;
+      this.showConfirmModal = false;  // Hide modal when confirmed
 
       try {
         const formattedItems = this.order.items.map(item => ({
           id: Number(item.id),
-          quantity: Number(item.quantity)
+          quantity: Number(item.quantity),
         }));
 
         const orderPayload = {
@@ -191,48 +167,40 @@ export default {
           items: formattedItems,
           total_amount: this.totalAmount,
           payment_method: this.order.paymentMethod,
-          ...(this.order.paymentMethod === 'Cash' && { cash_on_hand: this.order.cashOnHand }),
-          ...(this.order.paymentMethod === 'Tally' && { employee_id: this.order.employeeId })
         };
-
-        console.log('Submitting order payload:', orderPayload);
 
         const response = await axios.post(
           'http://127.0.0.1:8000/api/orders/create_order',
           orderPayload
         );
 
-        console.log('Order response:', response.data);
+        const successMessage = `Order created successfully! Order ID: ${response.data.history_id}`;
+        this.toast.success(successMessage);  // ✅ Show success toast after submission
 
-        this.resetForm();
-        alert('Order created successfully!');
+        this.resetForm();  // ✅ Reset the form after submission
       } catch (error) {
-        console.error('Error details:', error.response?.data);
-        const errorMessage = error.response?.data?.detail 
-          || 'Failed to create order. Please check all fields and try again.';
-
-        alert(errorMessage);
+        const errorMessage = error.response?.data?.detail || 'Failed to create order. Please try again.';
+        this.toast.error(errorMessage);  // ✅ Show error toast if submission fails
       } finally {
         this.loading = false;
       }
+    },
+
+    cancelSubmit() {
+      this.showConfirmModal = false;
     },
 
     resetForm() {
       this.order = {
         customerName: '',
         items: [],
-        paymentMethod: 'Cash',
-        cashOnHand: null,
-        change: 0,
-        employeeId: null
+        paymentMethod: 'Cash'
       };
+      this.toast.info('Form reset successfully');  // ✅ Toast after form reset
     }
   }
 };
 </script>
-
-
-
 
 <style scoped>
 .app-container {
@@ -364,5 +332,72 @@ button:hover {
 .submit-btn:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.confirmation-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+}
+.modal-content {
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.modal-content p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancel-btn, .confirm-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background-color: #f3f3f3;
+  color: #666;
+}
+
+.confirm-btn {
+  background-color: #E54F70;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #e7e7e7;
+}
+
+.confirm-btn:hover {
+  background-color: #d84666;
 }
 </style>

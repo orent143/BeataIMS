@@ -1,4 +1,4 @@
-<template>
+<template> 
   <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
 
   <SideBar :isCollapsed="isSidebarCollapsed" />
@@ -39,10 +39,16 @@
 
           <div class="form-group">
             <label>Process Type</label>
-            <select v-model="product.ProcessType" class="form-input" required>
+            <select v-model="product.ProcessType" class="form-input" required @change="handleProcessTypeChange">
               <option value="Ready-Made">Ready Made</option>
               <option value="To Be Made">To Be Made</option>
             </select>
+          </div>
+
+          <!-- Threshold Field (only for Ready-Made) -->
+          <div class="form-group" v-if="product.ProcessType === 'Ready-Made'">
+            <label>Threshold</label>
+            <input v-model.number="product.Threshold" type="number" min="0" step="1" required class="form-input" placeholder="Enter Threshold" />
           </div>
 
           <div class="form-group">
@@ -77,6 +83,7 @@
             <p><strong>Category:</strong> {{ selectedCategoryName }}</p>
             <p><strong>Unit Price:</strong> ₱{{ product.UnitPrice.toFixed(2) }}</p>
             <p><strong>Process Type:</strong> {{ product.ProcessType }}</p>
+            <p v-if="product.ProcessType === 'Ready-Made'"><strong>Threshold:</strong> {{ product.Threshold }}</p>
           </div>
 
           <div class="form-actions">
@@ -103,6 +110,11 @@
   </div>
 </template>
 
+---
+
+### ✅ **Updated Script Logic**
+
+```javascript
 <script>
 import axios from 'axios';
 import SideBar from '@/components/ims/SideBar.vue';
@@ -120,7 +132,7 @@ export default {
         CategoryID: null,
         UnitPrice: 0,
         ProcessType: "Ready-Made",
-        Stocks: [],
+        Threshold: null,   // ✅ New threshold field
         Image: null,
       },
       categories: [],
@@ -147,6 +159,12 @@ export default {
         this.toast.error("Failed to fetch categories.");
       }
     },
+    handleProcessTypeChange() {
+      // Reset threshold if switching to 'To Be Made'
+      if (this.product.ProcessType === "To Be Made") {
+        this.product.Threshold = null;
+      }
+    },
     handleImageUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -167,6 +185,10 @@ export default {
         formData.append("CategoryID", this.product.CategoryID);
         formData.append("UnitPrice", this.product.UnitPrice);
         formData.append("ProcessType", this.product.ProcessType);
+
+        if (this.product.ProcessType === "Ready-Made") {
+          formData.append("Threshold", this.product.Threshold);
+        }
 
         if (this.product.Image) {
           formData.append("Image", this.product.Image);
@@ -191,7 +213,7 @@ export default {
         CategoryID: null,
         UnitPrice: 0,
         ProcessType: "Ready-Made",
-        Stocks: [],
+        Threshold: null,
         Image: null,
       };
       this.imagePreview = null;
@@ -202,6 +224,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 .app-container {

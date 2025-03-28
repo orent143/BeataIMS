@@ -1,7 +1,7 @@
 <template>
   <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
-
   <SideBar :isCollapsed="isSidebarCollapsed" />
+  
   <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
     <div class="main-container">
       <div class="header-container">
@@ -14,42 +14,28 @@
             <div class="form-section">
               <h2 class="section-title">Stock Details</h2>
               <div class="form-group">
-  <label>Stock ID</label>
-  <div class="stock-id-input">
-  <input 
-    list="product-list"
-    v-model.trim="stockData.StockID" 
-    type="text"
-    required
-    class="form-input"
-    placeholder="Enter Stock ID or select from list"
-    @change="handleStockSelection"
-  />
-  <datalist id="product-list">
-    <option 
-      v-for="product in inventoryProducts" 
-      :key="product.ProductID" 
-      :value="product.ProductID"
-      :data-name="product.ProductName"
-    >
-      {{ product.ProductName }} ({{ product.ProcessType }})
-    </option>
-  </datalist>
-</div>
-
-</div>
-
-              <div class="form-group">
-                <label>Cost Price (₱)</label>
-                <input 
-                  v-model.number="stockData.CostPrice"
-                  type="number" 
-                  min="0.01" 
-                  step="0.01" 
-                  required 
-                  class="form-input"
-                  @input="validateCostPrice"
-                />
+                <label>Stock ID</label>
+                <div class="stock-id-input">
+                  <input 
+                    list="product-list"
+                    v-model.trim="stockData.StockID" 
+                    type="text"
+                    required
+                    class="form-input"
+                    placeholder="Enter Stock ID or select from list"
+                    @change="handleStockSelection"
+                  />
+                  <datalist id="product-list">
+                    <option 
+                      v-for="product in inventoryProducts" 
+                      :key="product.ProductID" 
+                      :value="product.ProductID"
+                      :data-name="product.ProductName"
+                    >
+                      {{ product.ProductName }} ({{ product.ProcessType }})
+                    </option>
+                  </datalist>
+                </div>
               </div>
 
               <div class="form-group">
@@ -77,16 +63,6 @@
             <div class="form-section">
               <h2 class="section-title">Stock Information</h2>
               <div v-for="(stock, index) in stockData.Stocks" :key="index" class="stock-entry">
-                <div class="form-group">
-                  <label>Stock Location</label>
-                  <input 
-                    v-model.trim="stock.stock_location" 
-                    type="text" 
-                    required 
-                    class="form-input" 
-                  />
-                </div>
-
                 <div class="form-group">
                   <label>Batch Number (Optional)</label>
                   <input 
@@ -143,48 +119,60 @@
           </form>
         </div>
 
-        <div class="summary-section">
-  <h2 class="section-title">Stock Summary</h2>
- <div class="summary-details" :class="{ 
-  loading: isLoading,
-  'has-data': hasValidStockData 
-}">
-    <p><strong>Stock ID:</strong> {{ stockData.StockID || 'N/A' }}</p>
-    <p>
-      <strong>Product Name:</strong> 
-      <span>{{ stockData.StockName || 'N/A' }}</span>
-      <span v-if="stockData.ProductType" class="process-type">
-        ({{ stockData.ProductType }})
-      </span>
-    </p>
-    <p><strong>Unit Price:</strong> {{ stockData.UnitPrice || '0.00' }}</p>
-    <p>
-      <strong>Current Supplier:</strong>
-      <span class="supplier-name">{{ stockData.CurrentSupplier || 'N/A' }}</span>
-    </p>
-    <p><strong>Cost Price:</strong> {{ formatPrice(stockData.CostPrice) }}</p>
-    <p><strong>Total Quantity:</strong> {{ getTotalQuantity() }}</p>
-    <p><strong>Total Locations:</strong> {{ stockData.Stocks.length }}</p>
-    
-    <div v-if="hasStockDetails" class="existing-stocks">
-      <h3>Existing Stock Details</h3>
-      <div class="stock-list">
-        <div v-for="(stock, index) in stockData.Stocks" :key="index" class="stock-item">
-          <div class="stock-location">{{ stock.stock_location }}</div>
-          <div class="stock-info">
-            <span>Qty: {{ stock.quantity }}</span>
-            <span>Batch: {{ stock.batch_number || 'N/A' }}</span>
-            <span>Expires: {{ formatDate(stock.expiration_date) || 'N/A' }}</span>
+        <!-- Confirmation Modal -->
+        <div class="modal-overlay" v-if="showConfirmModal">
+          <div class="confirmation-modal">
+            <div class="modal-content">
+              <h3>Confirm Submission</h3>
+              <p>Are you sure you want to submit this stock entry?</p>
+              <div class="modal-actions">
+                <button @click="confirmSubmit" class="confirm-btn">Yes</button>
+                <button @click="cancelSubmit" class="cancel-btn">No</button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-      </div>
-    </div>
-  </div>
+
+        <div class="summary-section">
+          <h2 class="section-title">Stock Summary</h2>
+          <div class="summary-details" :class="{ loading: isLoadingStock, 'has-data': stockData.StockID }">
+            <p><strong>Stock ID:</strong> {{ stockData.StockID || 'N/A' }}</p>
+            <p>
+              <strong>Product Name:</strong> 
+              <span>{{ stockData.StockName || 'N/A' }}</span>
+              <span v-if="stockData.ProductType" class="process-type">
+                ({{ stockData.ProductType }})
+              </span>
+            </p>
+            <p><strong>Unit Price:</strong> {{ stockData.UnitPrice || '0.00' }}</p>
+            <p>
+              <strong>Current Supplier:</strong>
+              <span class="supplier-name">{{ stockData.CurrentSupplier || 'N/A' }}</span>
+            </p>
+            <p><strong>Total Quantity:</strong> {{ getTotalQuantity() }}</p>
+            <p><strong>Total Locations:</strong> {{ stockData.Stocks.length }}</p>
+            
+            <div v-if="stockData.Stocks.length" class="existing-stocks">
+              <h3>Existing Stock Details</h3>
+              <div class="stock-list">
+                <div v-for="(stock, index) in stockData.Stocks" :key="index" class="stock-item">
+                  <div class="stock-info">
+                    <span>Qty: {{ stock.quantity }}</span>
+                    <span>Batch: {{ stock.batch_number || 'N/A' }}</span>
+                    <span>Expires: {{ formatDate(stock.expiration_date) || 'N/A' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- Closing main-container -->
+    </div> <!-- Closing app-container -->
+  </div> <!-- Closing app-container -->
+
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -200,105 +188,80 @@ export default {
   data() {
     return {
       isSidebarCollapsed: false,
-    stockData: {
-      StockID: '',
-      StockName: '',
-      ProductType: '',
-      UnitPrice: '',
-      CurrentSupplier: '',
-      Image: '',
-      CostPrice: '',
-      Stocks: [
-        {
-          stock_location: '',
-          batch_number: '',
-          quantity: 1,
-          expiration_date: '',
-        }
-      ]
-    },
-    selectedSupplier: null,
-    inventoryProducts: [],
-    suppliers: [],
-    isSubmitting: false,
-    isLoadingStock: false,
-    toast: useToast(),
-  };
+      stockData: {
+        StockID: '',
+        StockName: '',
+        ProductType: '',
+        UnitPrice: '',
+        CurrentSupplier: '',
+        Image: '',
+        Stocks: [
+          {
+            batch_number: '',
+            quantity: 1,
+            expiration_date: '',
+          }
+        ]
+      },
+      selectedSupplier: null,
+      inventoryProducts: [],
+      suppliers: [],
+      isSubmitting: false,
+      isLoadingStock: false,
+      showConfirmModal: false,
+      toast: useToast(),
+    };
   },
   methods: {
     handleSidebarToggle(collapsed) {
       this.isSidebarCollapsed = collapsed;
     },
-  async handleStockSelection() {
-    if (!this.stockData.StockID) {
+
+    async handleStockSelection() {
+  if (!this.stockData.StockID) {
+    this.resetForm();
+    return;
+  }
+
+  this.isLoadingStock = true;
+  try {
+    // Fetch stock details from FastAPI
+    const response = await axios.get(`http://127.0.0.1:8000/api/stock/stockdetails/${this.stockData.StockID}`);
+    
+    console.log('API Response:', response.data); // Debug log
+    
+    const productDetails = response.data;
+
+    if (productDetails) {
+      const updatedStockData = {
+        StockID: productDetails.ProductID,
+        StockName: productDetails.ProductName,
+        ProductType: productDetails.ProcessType,
+        UnitPrice: productDetails.UnitPrice,  // Ensure to set UnitPrice if available
+        CurrentSupplier: productDetails.CurrentSupplier,
+        Image: productDetails.Image,
+        Stocks: productDetails.StockDetails.map(stock => ({
+          batch_number: stock.batch_number,
+          quantity: stock.quantity,
+          expiration_date: stock.expiration_date
+        }))
+      };
+
+      // Update state with product details and stock information
+      this.stockData = updatedStockData;
+      this.selectedSupplier = this.suppliers.find(s => s.suppliername === productDetails.CurrentSupplier)?.id || null;
+    } else {
+      this.toast.error('No product details found');
       this.resetForm();
-      return;
     }
-
-    this.isLoadingStock = true;
-    try {
-      // Fetch product details
-      const response = await axios.get(`http://127.0.0.1:8000/api/stock/stockdetails/${this.stockData.StockID}`);
-      const product = response.data;
-
-      if (product) {
-        // Create a new stockData object with all the details
-        const updatedStockData = {
-          StockID: product.ProductID,
-          StockName: product.ProductName,
-          ProductType: product.ProcessType,
-          UnitPrice: product.UnitPrice,
-          CurrentSupplier: product.CurrentSupplier,
-          Image: product.Image,
-          CostPrice: '',
-          Stocks: []
-        };
-
-        // Add existing stock details if available
-        if (product.StockDetails && product.StockDetails.length > 0) {
-          updatedStockData.Stocks = product.StockDetails.map(detail => ({
-            stock_location: detail.stock_location,
-            batch_number: detail.batch_number,
-            quantity: detail.quantity,
-            expiration_date: detail.expiration_date,
-            cost_price: detail.cost_price
-          }));
-          
-          // Set the cost price from the most recent stock detail
-          updatedStockData.CostPrice = product.StockDetails[0].cost_price;
-        } else {
-          // Reset to default single stock entry if no existing details
-          updatedStockData.Stocks = [{
-            stock_location: '',
-            batch_number: '',
-            quantity: 1,
-            expiration_date: ''
-          }];
-        }
-
-        // Update the state with all details at once
-        await this.$nextTick();
-        this.stockData = updatedStockData;
-
-        // Handle supplier selection
-        const supplier = this.suppliers.find(s => s.suppliername === product.CurrentSupplier);
-        if (supplier) {
-          this.selectedSupplier = supplier.id;
-        } else {
-          this.selectedSupplier = null;
-        }
-
-        console.log('Updated stock data:', this.stockData); // Debug log
-      }
-    } catch (error) {
-      console.error('Error fetching product details:', error);
-      this.toast.error('Failed to fetch product details');
-      this.resetForm();
-    } finally {
-      this.isLoadingStock = false;
-    }
-  },
-
+  } catch (error) {
+    console.error('Error fetching product details:', error);
+    this.toast.error('Failed to fetch product details');
+    this.resetForm();
+  } finally {
+    this.isLoadingStock = false;
+  }
+},
     getCurrentDate() {
       const today = new Date();
       return today.toISOString().split("T")[0];
@@ -312,15 +275,17 @@ export default {
         minimumFractionDigits: 2
       }).format(value);
     },
+
     formatDate(dateString) {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  },
+      if (!dateString) return null;
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    },
+
     getSupplierName() {
       if (!this.selectedSupplier) return "Not selected";
       const supplier = this.suppliers.find(s => s.id === this.selectedSupplier);
@@ -333,14 +298,6 @@ export default {
       }, 0);
     },
 
-    validateCostPrice(event) {
-      const value = parseFloat(event.target.value);
-      if (value < 0) {
-        this.stockData.CostPrice = 0;
-        this.toast.warning('Cost price cannot be negative');
-      }
-    },
-
     validateQuantity(event, index) {
       const value = parseInt(event.target.value);
       if (value < 1) {
@@ -348,31 +305,53 @@ export default {
         this.toast.warning('Quantity must be at least 1');
       }
     },
+    submitForm() {
+      // Trigger the confirmation modal before submission
+      this.showConfirmationModal();
+    },
 
-    async submitForm() {
-      if (!this.validateForm()) return;
+    showConfirmationModal() {
+      this.showConfirmModal = true;
+    },
 
+    async confirmSubmit() {
+      this.showConfirmModal = false;
       this.isSubmitting = true;
+
       try {
-        const requestBody = this.prepareRequestBody();
+        const requestBody = {
+          ProductID: this.stockData.StockID,
+          Stocks: this.stockData.Stocks.map(stock => ({
+            batch_number: stock.batch_number || null,
+            quantity: stock.quantity,
+            expiration_date: stock.expiration_date || null,
+            SupplierID: this.selectedSupplier
+          }))
+        };
+
         const response = await axios.post('http://127.0.0.1:8000/api/stock/stockin/', requestBody);
         this.toast.success(response.data.message || 'Stock added successfully');
         this.resetForm();
       } catch (error) {
-        console.error('Error submitting form:', error);
-        this.toast.error(error.response?.data?.detail || 'Failed to add stock');
+        console.error('Error submitting stock:', error);
+        this.toast.error('Failed to add stock');
       } finally {
         this.isSubmitting = false;
       }
     },
 
+    cancelSubmit() {
+      this.showConfirmModal = false;
+    },
+
+
     validateForm() {
-      if (!this.stockData.StockID || !this.selectedSupplier || !this.stockData.CostPrice) {
+      if (!this.stockData.StockID || !this.selectedSupplier) {
         this.toast.error('Please fill all required fields');
         return false;
       }
-      if (this.stockData.Stocks.some(stock => !stock.stock_location)) {
-        this.toast.error('Stock location is required for all entries');
+      if (this.stockData.Stocks.some(stock => !stock.batch_number)) {
+        this.toast.error('Batch number is required for all entries');
         return false;
       }
       return true;
@@ -382,11 +361,9 @@ export default {
       return {
         ProductID: this.stockData.StockID,
         Stocks: this.stockData.Stocks.map(stock => ({
-          stock_location: stock.stock_location,
           batch_number: stock.batch_number || null,
           quantity: stock.quantity,
           expiration_date: stock.expiration_date || null,
-          cost_price: this.stockData.CostPrice,
           SupplierID: this.selectedSupplier
         }))
       };
@@ -397,15 +374,13 @@ export default {
         StockID: '',
         StockName: '',
         ProductType: '',
-        CostPrice: '',
-        Stocks: [{ stock_location: '', batch_number: '', quantity: 1, expiration_date: '' }]
+        Stocks: [{ batch_number: '', quantity: 1, expiration_date: '' }]
       };
       this.selectedSupplier = null;
     },
 
     addStock() {
       this.stockData.Stocks.push({
-        stock_location: '',
         batch_number: '',
         quantity: 1,
         expiration_date: ''
@@ -441,20 +416,21 @@ export default {
     this.fetchProductsAndSuppliers();
   },
   computed: {
-  hasStockDetails() {
-    return this.stockData.Stocks && this.stockData.Stocks.length > 0;
-  },
-  isLoading() {
-    return this.isLoadingStock || this.isSubmitting;
-  },
-  hasValidStockData() {
-    return this.stockData.StockID && 
-           this.stockData.StockName && 
-           this.stockData.Stocks.length > 0;
+    hasStockDetails() {
+      return this.stockData.Stocks && this.stockData.Stocks.length > 0;
+    },
+    isLoading() {
+      return this.isLoadingStock || this.isSubmitting;
+    },
+    hasValidStockData() {
+      return this.stockData.StockID && 
+             this.stockData.StockName && 
+             this.stockData.Stocks.length > 0;
+    }
   }
-}
 };
 </script>
+
 
 <style scoped>
 .app-container {
@@ -734,5 +710,73 @@ select.form-input:focus {
   .main-container {
     margin-left: 0;
   }
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.confirmation-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+.modal-content {
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.modal-content p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancel-btn, .confirm-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background-color: #f3f3f3;
+  color: #666;
+}
+
+.confirm-btn {
+  background-color: #E54F70;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #e7e7e7;
+}
+
+.confirm-btn:hover {
+  background-color: #d84666;
 }
 </style>

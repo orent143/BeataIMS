@@ -12,17 +12,12 @@ import Category from '@/views/ims/Category.vue';
 import CreateProductVue from '@/views/ims/CreateProduct.vue';
 import ProductSales from '@/views/ims/Sales.vue';
 import StockVue from '@/views/ims/Stock.vue';
-import RecordSalesTransaction from '@/views/ims/RecordSalesTransaction.vue';
 import OrdersHistory from '@/views/ims/OrderHistory.vue';
 import SummaryReport from '@/views/ims/reports/SummaryReport.vue';
 import LowStockReport from '@/views/ims/reports/LowStockReport.vue';
 import OrderDetailsVue from '@/views/ims/OrderDetails.vue';
 
-//sms
-import HomeSMS from '@/views/sms/HomeSMS.vue';
-import ReportsSms from '@/views/sms/ReportsSMS.vue';
-import SalesReportSMS from '@/views/sms/reports/salesreport.vue';
-import HistoryReportSMS from '@/views/sms/reports/historyreport.vue';
+
 
 //admin
 import Dashboard from '@/views/admin/Dashboard.vue';
@@ -43,19 +38,14 @@ const routes = [
   { path: '/stocks', component: StockVue },
   { path: '/create', component: CreateProductVue },
   { path: '/productsales', component: ProductSales },
-  { path: '/record-sales', component: RecordSalesTransaction },
   { path: '/suppliers', component: Suppliers },
-  { path: '/vieworderdetails/:orderId', name: 'ViewOrderDetails', component: OrderDetailsVue },
+  { path: '/vieworderdetails/:id', name: 'ViewOrderDetails', component: OrderDetailsVue },
   { path: '/category', component: Category },
   { path: '/reportsims', component: ReportsIMS },
   { path: '/reportsims/summary', component: SummaryReport },
   { path: '/reportsims/lowStock', component: LowStockReport },
-  { path: '/homesms', component: HomeSMS },
   { path: '/createorder', component: CreateOrder },
   { path: '/ordershistory', component: OrdersHistory },
-  { path: '/reportssms', component: ReportsSms },
-  { path: '/reportssms/sales', component: SalesReportSMS },
-  { path: '/reportssms/history', component: HistoryReportSMS },
   { path: '/dashboard', component: Dashboard },
   { path: '/users', component: Users }
 ];

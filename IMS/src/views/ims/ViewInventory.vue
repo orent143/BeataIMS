@@ -1,9 +1,8 @@
 <template>
   <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
-
-<SideBar :isCollapsed="isSidebarCollapsed" />
-<div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
-  <div class="header-container">
+  <SideBar :isCollapsed="isSidebarCollapsed" />
+  <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
+    <div class="header-container">
       <h1 class="products-header">Inventory List</h1>
       <div class="header-actions">
         <div class="filter-container">
@@ -27,7 +26,6 @@
             <th>Product Name</th>
             <th>Quantity</th>
             <th>Unit Price</th>
-            <th>Status</th>
             <th class="details-header">Details</th>
           </tr>
         </thead>
@@ -36,17 +34,15 @@
             <td class="product-id">{{ product.ProductID ? product.ProductID : 'N/A' }}</td>
             <td>
               <div class="product-info">
-                <img :src="product.Image || 'https://via.placeholder.com/50'" alt="Product Image" class="product-image" />
                 <span class="product-name">{{ product.ProductName }}</span>
               </div>
             </td>
-            <td>{{ product.Quantity }}</td>
-            <td>₱{{ product.UnitPrice }}</td>
             <td>
-              <span :class="'status status-' + (product.Status ? product.Status.toLowerCase().replace(/ /g, '-') : 'unknown')">
-                {{ product.Status || 'Unknown' }}
-              </span>
+              <div class="quantity-indicator" :class="getQuantityClass(product.Quantity, product.Threshold)">
+                {{ product.Quantity }}
+              </div>
             </td>
+            <td>₱{{ product.UnitPrice }}</td>
             <td>
               <div class="details-container">
                 <span class="details-text">{{ product.Details }}</span>
@@ -75,144 +71,145 @@
   </div>
 </template>
 
-  <script>
-  import axios from 'axios';
-  import SideBar from '@/components/ims/SideBar.vue';
-  import Header from '@/components/Header.vue';
-  import TransactionLog from '@/components/ims/TransactionLog.vue';
-  
-  import { useToast } from 'vue-toastification';
-  
-  export default {
-    components: {  SideBar, Header,     TransactionLog  },
-    data() {
-  return {
-    isSidebarCollapsed: false,
-    searchTerm: '',
-    showFilterDropdown: false,
-    selectedProcessType: 'Ready-Made', // Default to Ready-Made
-    showPopoutOptions: false,
-    selectedItem: null,
-    productItems: [],
-    filteredItems: [],
-    selectedLowStockItems: [],
-    isLowStockMode: false,
-    currentDate: new Date().toISOString().split('T')[0],
-    inventorySummaries: [],
-    selectedProductId: null,
-    showTransactionLog: false,
-    categories: [], 
-    toast: useToast(), 
-  };
-},
+<script>
+import axios from 'axios';
+import SideBar from '@/components/ims/SideBar.vue';
+import Header from '@/components/Header.vue';
+import TransactionLog from '@/components/ims/TransactionLog.vue';
+import { useToast } from 'vue-toastification';
 
-  
-    methods: {
-      handleSidebarToggle(collapsed) {
+export default {
+  components: { SideBar, Header, TransactionLog },
+  data() {
+    return {
+      isSidebarCollapsed: false,
+      searchTerm: '',
+      showFilterDropdown: false,
+      selectedProcessType: 'Ready-Made', // Default to Ready-Made
+      showPopoutOptions: false,
+      selectedItem: null,
+      productItems: [],
+      filteredItems: [],
+      selectedLowStockItems: [],
+      isLowStockMode: false,
+      currentDate: new Date().toISOString().split('T')[0],
+      inventorySummaries: [],
+      selectedProductId: null,
+      showTransactionLog: false,
+      categories: [],
+      toast: useToast(),
+    };
+  },
+
+  methods: {
+    handleSidebarToggle(collapsed) {
       this.isSidebarCollapsed = collapsed;
     },
-      toggleFilterDropdown() {
-        this.showFilterDropdown = !this.showFilterDropdown;
-      },
-      toggleTransactionLog() {
-    this.showTransactionLog = !this.showTransactionLog;
+    toggleFilterDropdown() {
+      this.showFilterDropdown = !this.showFilterDropdown;
+    },
+    toggleTransactionLog() {
+      this.showTransactionLog = !this.showTransactionLog;
+    },
+    viewDetails(product) {
+      if (!product || !product.ProductID) {
+        this.toast.error('Invalid product details');
+        return;
+      }
+      this.$router.push({
+        name: 'ViewDetailsVue',
+        params: { id: product.ProductID }
+      });
+    },
+
+    togglePopoutOptions() {
+      this.showPopoutOptions = !this.showPopoutOptions;
+    },
+    filterItems() {
+      let filtered = this.productItems;
+
+      if (this.searchTerm) {
+        filtered = filtered.filter(item =>
+          item.ProductName.toLowerCase().includes(this.searchTerm.toLowerCase())
+        );
+      }
+
+      // Ensure filtering is applied only to "Ready-Made" products
+      filtered = filtered.filter(item => item.ProcessType === "Ready-Made");
+
+      this.filteredItems = filtered;
+      this.showFilterDropdown = false;
+    },
+
+    // Updated getQuantityClass to consider threshold
+    getQuantityClass(quantity, threshold) {
+      if (quantity <= 0) {
+        return 'out-of-stock'; // No stock left
+      } else if (quantity <= threshold) {
+        return 'low-stock'; // Low stock based on threshold
+      } else {
+        return 'in-stock'; // In stock
+      }
+    },
+
+    // Fetch products and map threshold data
+    async fetchProductItems() {
+      try {
+        let url = 'http://127.0.0.1:8000/api/inventory/inventoryproducts/filter?process_type=Ready-Made';
+        const response = await axios.get(url);
+
+        this.productItems = response.data.map(item => {
+          return {
+            ...item,
+            ProductID: item.id ? String(item.id).padStart(4) : 'N/A',
+            Status: this.getQuantityClass(item.Quantity, item.Threshold) // Use updated getQuantityClass
+          };
+        });
+
+        this.filterItems();
+      } catch (error) {
+        console.error('Error fetching product items:', error);
+      }
+    },
+    async postInventorySummary() {
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/api/inventory/inventorysummary');
+
+        let savedReports = JSON.parse(localStorage.getItem("inventorySummaries")) || [];
+        savedReports.push(response.data);
+
+        localStorage.setItem("inventorySummaries", JSON.stringify(savedReports));
+
+        this.toast.success("Inventory summary posted successfully!");
+      } catch (error) {
+        console.error("Error posting inventory summary:", error);
+        this.toast.error("Failed to post inventory summary.");
+      }
+    },
   },
-      viewDetails(product) {
-  if (!product || !product.ProductID) {
-    this.toast.error('Invalid product details');
-    return;
-  }
-  this.$router.push({
-    name: 'ViewDetailsVue',
-    params: { id: product.ProductID }
-  });
-},
 
-      togglePopoutOptions() {
-        this.showPopoutOptions = !this.showPopoutOptions;
-      },
-      filterItems() {
-  let filtered = this.productItems;
+  created() {
+    const productId = this.$route.params.id;
+    console.log("Product ID:", productId);
+    this.fetchProductItems();
+  },
+  mounted() {
+    this.fetchProductItems();
+  },
+  watch: {
+    searchTerm: 'filterItems',
+    selectedProcessType: 'filterItems',
 
-  if (this.searchTerm) {
-    filtered = filtered.filter(item =>
-      item.ProductName.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
-  }
-
-  // Ensure filtering is applied only to "Ready-Made" products
-  filtered = filtered.filter(item => item.ProcessType === "Ready-Made");
-
-  this.filteredItems = filtered;
-  this.showFilterDropdown = false;
-},
-      getStatusByQuantity(quantity) {
-        if (quantity === 0) {
-          return 'Out of Stock';
-        } else if (quantity <= 10) {
-          return 'Low Stock';
-        } else {
-          return 'In Stock';
-        }
-      },
-
-  
-      async fetchProductItems() {
-  try {
-    let url = 'http://127.0.0.1:8000/api/inventory/inventoryproducts/filter?process_type=Ready-Made';
-    const response = await axios.get(url);
-    
-    this.productItems = response.data.map(item => {
-      return {
-        ...item,
-        ProductID: item.id ? String(item.id).padStart(4, '0') : 'N/A',
-        Status: this.getStatusByQuantity(item.Quantity)
-      };
-    });
-
-    this.filterItems();
-  } catch (error) {
-    console.error('Error fetching product items:', error);
-  }
-},
-
-      async postInventorySummary() {
-        try {
-          const response = await axios.post('http://127.0.0.1:8000/api/inventory/inventorysummary');
-          
-          let savedReports = JSON.parse(localStorage.getItem("inventorySummaries")) || [];
-          savedReports.push(response.data);
-  
-          localStorage.setItem("inventorySummaries", JSON.stringify(savedReports));
-  
-          this.toast.success("Inventory summary posted successfully!");
-        } catch (error) {
-          console.error("Error posting inventory summary:", error);
-          this.toast.error("Failed to post inventory summary.");
-        }
-      },
-    },
-  
-    created() {
-      const productId = this.$route.params.id;
-      console.log("Product ID:", productId);
-      this.fetchProductItems();
-  
-    },
-  
-    watch: {
-      searchTerm: 'filterItems',
-      selectedProcessType: 'filterItems',
-  
-      productItems: {
-        deep: true,
-        handler() {
-          localStorage.setItem('productItems', JSON.stringify(this.productItems));
-        }
+    productItems: {
+      deep: true,
+      handler() {
+        localStorage.setItem('productItems', JSON.stringify(this.productItems));
       }
     }
-  };
-  </script>
+  }
+};
+</script>
+
   
   <style scoped>
 .app-container {
@@ -249,17 +246,19 @@
   
   .inventory-container {
     position: relative;
-    flex-grow: 1;
-    height: 37dvw;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: #ffffff;
-    border-radius: 15px;
-    overflow-y: auto;
-    margin-left: 5px;
-    padding: 0;
-  }
+  flex-grow: 1;
+  height: 37dvw;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+
+  background-color: #ffffff;
+  border-radius: 15px;
+  overflow-y: auto;
+  margin-left: 5px;
+  padding: 0;
+}
   
   .stock-table {
+    padding: 10px;
     width: 100%;
     border-collapse: collapse;
   }
@@ -267,8 +266,10 @@
   .stock-table th,
   .stock-table td {
     padding: 10px;
-    text-align: center;
-    border-bottom: 1px solid #eee;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
   }
   
   .stock-table tbody {
@@ -277,37 +278,25 @@
   
   .stock-table th {
     background-color: #f4f4f4;
-    padding: 13px;
+    padding: 15px;
     color: #333;
     font-weight: bold;
   }
   
   .product-id {
   font-family: monospace;
-  font-size: 14px;
   color: #666;
   font-weight: 500;
 }
   
-  .product-name {
-    font-size: 14px;
-    color: #333;
-    font-weight: 500;
-  }
+
   .product-info {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
   }
-  .product-image {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
-  }
+  
   
   .filter-btn {
     padding: 8px 12px;
@@ -338,9 +327,6 @@
     font-weight: 500;
   }
 
-
-
-  
   .action-btn {
     padding: 8px;
     background-color: transparent;
@@ -431,27 +417,27 @@
     background-color: #004080;
   }
   
-  .status {
+  .quantity-indicator {
     padding: 4px 8px;
-    border-radius: 15px;
-    font-size: 12px;
-    display: inline-block;
-  }
-  
-  .status-in-stock {
-    background: #E8F5E9;
-    color: #4CAF50;
-  }
-  
-  .status-low-stock {
-    background: #FFF3E0;
-    color: #FF9800;
-  }
-  
-  .status-out-of-stock {
-    background: #F8D7DA;
-    color: #721c24;
-  }
+  border-radius: 15px;
+  font-size: 14px;
+  display: inline-block;
+}
+
+.out-of-stock {
+  background: #F8D7DA;
+  color: #721c24;
+}
+
+.low-stock {
+  background: #FFF3E0;
+  color: #FF9800;
+}
+
+.in-stock {
+  background: #E8F5E9;
+  color: #4CAF50;
+}
   
   .modal-overlay {
     position: fixed;

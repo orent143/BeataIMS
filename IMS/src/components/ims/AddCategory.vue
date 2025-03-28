@@ -1,51 +1,58 @@
 <template>
-  <div class="popout-form" v-if="isVisible">
-    <div class="form-header">
-      <h2>Add Category</h2>
-      <button @click="closeForm" class="close-btn">x</button>
-    </div>
-    <form @submit.prevent="confirmAndSubmit" class="form-container">
-      <div class="form-group">
-        <label for="categoryName">Category Name:</label>
-        <input v-model="newCategory.CategoryName" id="categoryName" type="text" placeholder="Category Name" required />
-      </div>
-      
-      <div class="form-group image-section">
-    <label for="categoryImage">Category Image:</label>
-    <div class="image-upload-container">
-      <label for="categoryImage" class="image-upload">
-        <input 
-          type="file" 
-          id="categoryImage" 
-          @change="handleImageChange" 
-          accept="image/*"
-          class="image-input"
-        />
-        <img 
-          v-if="imagePreview" 
-          :src="imagePreview" 
-          alt="Category Preview"
-          class="preview-image"
-        />
-        <span v-if="!imagePreview" class="upload-text">Upload New Image</span>
-      </label>
-    </div>
-  </div>
+  <div>
+    <!-- Overlay for the popout form -->
+    <div class="form-overlay" v-if="isVisible"></div>
 
-      <div class="form-actions">
-        <button type="submit" class="add-category-btn">Add Category</button>
+    <!-- Pop-out form -->
+    <div class="popout-form" v-if="isVisible">
+      <div class="form-header">
+        <h2>Add Category</h2>
+        <button @click="closeForm" class="close-btn">x</button>
       </div>
-    </form>
-  </div>
+      <form @submit.prevent="confirmAndSubmit" class="form-container">
+        <div class="form-group">
+          <label for="categoryName">Category Name:</label>
+          <input v-model="newCategory.CategoryName" id="categoryName" type="text" placeholder="Category Name" required />
+        </div>
+        
+        <div class="form-group image-section">
+          <label for="categoryImage">Category Image:</label>
+          <div class="image-upload-container">
+            <label for="categoryImage" class="image-upload">
+              <input 
+                type="file" 
+                id="categoryImage" 
+                @change="handleImageChange" 
+                accept="image/*"
+                class="image-input"
+              />
+              <img 
+                v-if="imagePreview" 
+                :src="imagePreview" 
+                alt="Category Preview"
+                class="preview-image"
+              />
+              <span v-if="!imagePreview" class="upload-text">Upload New Image</span>
+            </label>
+          </div>
+        </div>
 
-  <div class="modal-overlay" v-if="showConfirmModal">
-    <div class="confirmation-modal">
-      <div class="modal-content">
-        <h3>Confirm Addition</h3>
-        <p>Are you sure you want to add this category?</p>
-        <div class="modal-actions">
-          <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
-          <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
+        <div class="form-actions">
+          <button type="submit" class="add-category-btn">Add Category</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Confirmation modal -->
+    <div class="modal-overlay" v-if="showConfirmModal">
+      <div class="confirmation-modal">
+        <div class="modal-content">
+          <h3>Confirm Addition</h3>
+          <p>Are you sure you want to add this category?</p>
+          <div class="modal-actions">
+            <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
+            <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
+          </div>
         </div>
       </div>
     </div>
@@ -138,6 +145,18 @@ if (this.newCategory.Image) {
 </script>
 
 <style scoped>
+/* Overlay for the popout form */
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* Popout form styling */
 .popout-form {
   background-color: #ffffff;
   padding: 20px;

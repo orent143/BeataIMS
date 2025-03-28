@@ -7,15 +7,16 @@
       <div class="header-actions">
         <div class="filter-container">
           <button class="filter-btn" @click="toggleFilterDropdown">
-            <i class="fas fa-filter"></i>
+            <i class="pi pi-calendar-times"></i> Filter by Date
           </button>
           <div v-if="showFilterDropdown" class="dropdown">
-            <select v-model="selectedStatus" class="filter-select">
-              <option value="">All Statuses</option>
-              <option value="Completed">Completed</option>
-              <option value="Pending">Pending</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
+            <!-- Date Picker for filtering sales data -->
+            <input 
+              type="date" 
+              v-model="selectedDate" 
+              class="filter-select" 
+              @change="fetchSalesData"
+            />
           </div>
         </div>
       </div>
@@ -60,7 +61,6 @@
         <p>Loading sales data...</p>
       </div>
     </div>
-    
   </div>
 </template>
 
@@ -76,7 +76,7 @@ export default {
       isSidebarCollapsed: false,
       salesData: [],
       showFilterDropdown: false,
-      selectedStatus: '',
+      selectedDate: '', // Date filter
     };
   },
   computed: {
@@ -93,31 +93,32 @@ export default {
     },
     async fetchSalesData() {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/sales/sales');
+        const params = this.selectedDate ? { filter_date: this.selectedDate } : {}; // Include date filter if selected
+        const response = await axios.get('http://127.0.0.1:8000/api/sales/sales', { params });
         this.salesData = response.data;
       } catch (error) {
         console.error("Error fetching sales data:", error);
       }
     },
     async updateSales(productId, quantitySold, remitted) {
-  try {
-    const response = await axios.post('http://127.0.0.1:8000/api/sales/update', {
-      product_id: productId,
-      quantity_sold: quantitySold,
-      remitted: remitted
-    });
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/api/sales/update', {
+          product_id: productId,
+          quantity_sold: quantitySold,
+          remitted: remitted
+        });
 
-    console.log(response.data.message);
-  } catch (error) {
-    console.error("Error updating sales:", error.response.data.detail);
-  }
-},
+        console.log(response.data.message);
+      } catch (error) {
+        console.error("Error updating sales:", error.response.data.detail);
+      }
+    },
     toggleFilterDropdown() {
       this.showFilterDropdown = !this.showFilterDropdown;
     }
   },
   mounted() {
-    this.fetchSalesData();
+    this.fetchSalesData(); // Initial fetch on page load
   }
 };
 </script>
@@ -128,7 +129,6 @@ export default {
   text-align: center;
   margin-top: 20px;
 }
-
 
 .app-container {
   display: flex;
@@ -163,13 +163,11 @@ export default {
   gap: 10px;
 }
 
-
 .sales-container {
   position: relative;
   flex-grow: 1;
   height: 37dvw;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-
   background-color: #ffffff;
   border-radius: 25px;
   overflow-y: auto;
@@ -221,22 +219,33 @@ export default {
 }
 
 .filter-btn {
-  padding: 8px;
-  background-color: transparent;
-  border: none;
+  padding: 10px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 19px;
+  font-size: 16px;
   color: #333;
   transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+.filter-btn i {
+  font-size: 18px;
+}
+.filter-btn:hover {
+  border-color: #E54F70;
+  color: #E54F70;
+}
 .filter-container {
   position: relative;
 }
 
 .dropdown {
   position: absolute;
-  top: 35px;
+  top: 45px;
   left: 0;
   background-color: white;
   border: 1px solid #ccc;
@@ -244,14 +253,12 @@ export default {
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   padding: 10px;
   z-index: 10;
-  width: 8dvw;
 }
 
 .filter-select {
   padding: 8px;
   font-size: 14px;
   border-radius: 5px;
-  width: 100%;
   margin-bottom: 10px;
 }
 
@@ -273,7 +280,6 @@ export default {
   align-items: center; /* Center vertically */
   width: 45%; /* Adjust width as needed */
   margin-right: 15px; /* Add margin between items */
-
 }
 
 .totals-item span {
@@ -283,27 +289,28 @@ export default {
 
 .add-to-reports-btn {
   width: 35px;
-    height: 35px;
-    background-color: #4CAF50;
-    color: #0000009d;
-    border: none;
-    border-radius: 50%;
-    font-size: 19px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center; /* Center vertically */
+  height: 35px;
+  background-color: #4CAF50;
+  color: #0000009d;
+  border: none;
+  border-radius: 50%;
+  font-size: 19px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center; /* Center vertically */
   justify-content: center; /* Center horizontally */
   position: fixed; /* Fixed position */
   bottom: 20px; /* Distance from the bottom */
   right: 20px; /* Distance from the right */
-  z-index: 10; 
+  z-index: 10;
 }
 
 .add-to-reports-btn:hover {
   background-color: #218838; /* Darker green on hover */
 }
+
 .selected {
   background-color: #e3f2fd;
 }
@@ -314,30 +321,7 @@ tr {
 
 input[type="checkbox"] {
   cursor: pointer;
-  width: 16px;
+  width: 100%;
   height: 16px;
-}
-/* General Status Styles */
-.status {
-  padding: 4px 8px;
-  border-radius: 15px;
-  font-size: 12px;
-  display: inline-block; /* Ensure it behaves like a block element */
-}
-
-/* Specific Status Styles */
-.status-completed {
-  background: #E8F5E9; /* Light green */
-  color: #4CAF50; /* Dark green */
-}
-
-.status-pending {
-  background: #FFF3E0; /* Light yellow */
-  color: #FF9800; /* Dark yellow */
-}
-
-.status-cancelled {
-  background: #F8D7DA; /* Light red */
-  color: #721c24; /* Dark red */
 }
 </style>

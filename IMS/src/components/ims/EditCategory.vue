@@ -1,51 +1,58 @@
 <template>
-  <div class="popout-form" v-if="category">
-    <div class="form-header">
-      <h2>Edit Category</h2>
-      <button @click="closeForm" class="close-btn">x</button>
-    </div>
-    <form @submit.prevent="confirmAndSubmit" class="form-container">
-      <div class="form-group">
-        <label for="categoryName">Category Name:</label>
-        <input v-model="editedCategory.CategoryName" id="categoryName" type="text" placeholder="Category Name" required />
-      </div>
+  <div>
+    <!-- Overlay for the Edit Category form -->
+    <div class="form-overlay" v-if="category"></div>
 
-      <div class="form-group image-section">
-        <label for="categoryImage">Category Image:</label>
-        <div class="image-upload-container">
-          <label for="categoryImage" class="image-upload">
-            <input 
-              type="file" 
-              id="categoryImage" 
-              @change="handleImageChange" 
-              accept="image/*"
-              class="image-input"
-            />
-            <img 
-              v-if="imagePreview || editedCategory.Image" 
-              :src="imagePreview || editedCategory.Image" 
-              alt="Category Preview"
-              class="preview-image"
-            />
-            <span v-if="!imagePreview && !editedCategory.Image" class="upload-text">Upload New Image</span>
-          </label>
+    <!-- Pop-out form for editing Category -->
+    <div class="popout-form" v-if="category">
+      <div class="form-header">
+        <h2>Edit Category</h2>
+        <button @click="closeForm" class="close-btn">x</button>
+      </div>
+      <form @submit.prevent="confirmAndSubmit" class="form-container">
+        <div class="form-group">
+          <label for="categoryName">Category Name:</label>
+          <input v-model="editedCategory.CategoryName" id="categoryName" type="text" placeholder="Category Name" required />
         </div>
-      </div>
 
-      <div class="form-actions">
-        <button type="submit" class="save-category-btn">Save Category</button>
-      </div>
-    </form>
-  </div>
+        <div class="form-group image-section">
+          <label for="categoryImage">Category Image:</label>
+          <div class="image-upload-container">
+            <label for="categoryImage" class="image-upload">
+              <input 
+                type="file" 
+                id="categoryImage" 
+                @change="handleImageChange" 
+                accept="image/*"
+                class="image-input"
+              />
+              <img 
+                v-if="imagePreview || editedCategory.Image" 
+                :src="imagePreview || editedCategory.Image" 
+                alt="Category Preview"
+                class="preview-image"
+              />
+              <span v-if="!imagePreview && !editedCategory.Image" class="upload-text">Upload New Image</span>
+            </label>
+          </div>
+        </div>
 
-  <div class="modal-overlay" v-if="showConfirmModal">
-    <div class="confirmation-modal">
-      <div class="modal-content">
-        <h3>Confirm Addition</h3>
-        <p>Are you sure you want to edit this category?</p>
-        <div class="modal-actions">
-          <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
-          <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
+        <div class="form-actions">
+          <button type="submit" class="save-category-btn">Save Category</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Confirmation Modal for Category edit -->
+    <div class="modal-overlay" v-if="showConfirmModal">
+      <div class="confirmation-modal">
+        <div class="modal-content">
+          <h3>Confirm Edit</h3>
+          <p>Are you sure you want to edit this category?</p>
+          <div class="modal-actions">
+            <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
+            <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
+          </div>
         </div>
       </div>
     </div>
@@ -126,17 +133,30 @@ export default {
 </script>
 
 <style scoped>
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;  /* Larger z-index to ensure it overlays other content */
+  display: block; /* Ensure it's visible */
+}
+
+/* Popout form styling */
 .popout-form {
   background-color: #ffffff;
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.459);
-  position: absolute;
+  position: fixed; 
   right: 50%;
   top: 50%;
   transform: translate(50%, -50%);
   width: 400px;
   max-width: 100%;
+  z-index: 1000; 
 }
 
 .form-header {

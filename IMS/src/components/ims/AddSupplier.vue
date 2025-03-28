@@ -1,44 +1,52 @@
 <template>
-  <div class="popout-form" v-if="isVisible">
-    <div class="form-header">
-      <h2>Add Supplier</h2>
-      <button @click="closeForm" class="close-btn">x</button>
+  <div>
+    <!-- Overlay for the Add Supplier form -->
+    <div class="form-overlay" v-if="isVisible"></div>
+
+    <!-- Pop-out form for adding Supplier -->
+    <div class="popout-form" v-if="isVisible">
+      <div class="form-header">
+        <h2>Add Supplier</h2>
+        <button @click="closeForm" class="close-btn">x</button>
+      </div>
+      <form @submit.prevent="confirmAndSubmit" class="form-container">
+        <div class="form-group">
+          <label for="suppliername">Name:</label>
+          <input v-model="newSupplier.suppliername" id="suppliername" type="text" placeholder="Supplier Name" required />
+        </div>
+
+        <div class="form-group">
+          <label for="contactinfo">Contacts:</label>
+          <input v-model="newSupplier.contactinfo" id="contactinfo" type="text" placeholder="Contacts" required />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input v-model="newSupplier.email" id="email" type="email" placeholder="Email" required />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="add-item-btn">Add Supplier</button>
+        </div>
+      </form>
     </div>
-    <form @submit.prevent="confirmAndSubmit" class="form-container">
-      <div class="form-group">
-        <label for="suppliername">Name:</label>
-        <input v-model="newSupplier.suppliername" id="suppliername" type="text" placeholder="Supplier Name" required />
-      </div>
 
-      <div class="form-group">
-        <label for="contactinfo">Contacts:</label>
-        <input v-model="newSupplier.contactinfo" id="contactinfo" type="text" placeholder="Contacts" required />
-      </div>
-
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input v-model="newSupplier.email" id="email" type="email" placeholder="Email" required />
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="add-item-btn">Add Supplier</button>
-      </div>
-    </form>
-  </div>
-
-  <div class="modal-overlay" v-if="showConfirmModal">
-    <div class="confirmation-modal">
-      <div class="modal-content">
-        <h3>Confirm Addition</h3>
-        <p>Are you sure you want to add this supplier?</p>
-        <div class="modal-actions">
-          <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
-          <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
+    <!-- Confirmation Modal for Supplier addition -->
+    <div class="modal-overlay" v-if="showConfirmModal">
+      <div class="confirmation-modal">
+        <div class="modal-content">
+          <h3>Confirm Addition</h3>
+          <p>Are you sure you want to add this supplier?</p>
+          <div class="modal-actions">
+            <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
+            <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -55,7 +63,9 @@ export default {
         contactinfo: '',
         email: ''
       },
-      showConfirmModal: false
+      showConfirmModal: false,
+      isFormVisible: false,
+
     };
   },
   methods: {
@@ -102,18 +112,32 @@ export default {
 </script>
 
 <style scoped>
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;  /* Larger z-index to ensure it overlays other content */
+  display: block; /* Ensure it's visible */
+}
+
+/* Popout form styling */
 .popout-form {
   background-color: #ffffff;
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.459);
-  position: absolute;
+  position: fixed; 
   right: 50%;
   top: 50%;
   transform: translate(50%, -50%);
-  width: 400px; 
+  width: 400px;
   max-width: 100%;
+  z-index: 1000; 
 }
+
 
 .form-header {
   display: flex;

@@ -1,41 +1,49 @@
 <template>
-  <div class="popout-form" v-if="isVisible">
-    <div class="form-header">
-      <h2>Edit Supplier</h2>
-      <button @click="closeForm" class="close-btn">x</button>
-    </div>
-    <form @submit.prevent="confirmAndSubmit" class="form-container">
-      <div class="form-group">
-        <label for="suppliername">Name:</label>
-        <input v-model="editedSupplier.suppliername" id="suppliername" type="text" required />
-      </div>
-      <div class="form-group">
-        <label for="contactinfo">Contacts:</label>
-        <input v-model="editedSupplier.contactinfo" id="contactinfo" type="text" required />
-      </div>
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input v-model="editedSupplier.email" id="email" type="email" required />
-      </div>
-      <div class="form-actions">
-        <button type="submit" class="update-btn">Update Supplier</button>
-      </div>
-    </form>
-  </div>
+  <div>
+    <!-- Overlay for the Edit Supplier form -->
+    <div class="form-overlay" v-if="isVisible"></div>
 
-  <div class="modal-overlay" v-if="showConfirmModal">
-    <div class="confirmation-modal">
-      <div class="modal-content">
-        <h3>Confirm Addition</h3>
-        <p>Are you sure you want to edit this supplier?</p>
-        <div class="modal-actions">
-          <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
-          <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
+    <!-- Edit Supplier Form -->
+    <div class="popout-form" v-if="isVisible">
+      <div class="form-header">
+        <h2>Edit Supplier</h2>
+        <button @click="closeForm" class="close-btn">x</button>
+      </div>
+      <form @submit.prevent="confirmAndSubmit" class="form-container">
+        <div class="form-group">
+          <label for="suppliername">Name:</label>
+          <input v-model="editedSupplier.suppliername" id="suppliername" type="text" required />
+        </div>
+        <div class="form-group">
+          <label for="contactinfo">Contacts:</label>
+          <input v-model="editedSupplier.contactinfo" id="contactinfo" type="text" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input v-model="editedSupplier.email" id="email" type="email" required />
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="update-btn">Update Supplier</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" v-if="showConfirmModal">
+      <div class="confirmation-modal">
+        <div class="modal-content">
+          <h3>Confirm Update</h3>
+          <p>Are you sure you want to edit this supplier?</p>
+          <div class="modal-actions">
+            <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
+            <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -94,17 +102,28 @@ export default {
 </script>
 
 <style scoped>
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+  z-index: 999; /* Ensures it's on top of other content */
+}
+
+/* Popout form styling */
 .popout-form {
   background-color: #ffffff;
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.459);
-  position: absolute;
-  right: 50%;
+  position: fixed;
   top: 50%;
-  transform: translate(50%, -50%);
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 400px;
-  max-width: 100%;
+  z-index: 1000; /* Ensures it is above the overlay */
 }
 
 .form-header {

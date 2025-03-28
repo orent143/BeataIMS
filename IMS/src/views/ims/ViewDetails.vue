@@ -14,169 +14,148 @@
       <div v-else-if="error" class="error">{{ error }}</div>
       <div v-else class="content-layout">
 
-        <!-- Left Section - Product Details -->
         <div class="main-content">
-          <div class="product-details">
-            <img :src="product.Image || 'https://via.placeholder.com/150'" 
-                 alt="Product Image" 
-                 class="product-image" />
-            <div class="product-title">
-              <h2>{{ product.ProductName }}</h2>
-              <span class="product-id">ID: {{ product.ProductID }}</span>
+          <div class="product-details-container">
+            <!-- Product Details -->
+            <div class="product-details">
+              <img :src="product.Image || 'https://via.placeholder.com/150'" 
+                   alt="Product Image" 
+                   class="product-image" />
+              <div class="product-title">
+                <h2>{{ product.ProductName }}</h2>
+                <span class="product-id">ID: {{ product.ProductID }}</span>
+              </div>
             </div>
-          </div>
 
-          <div class="details-grid">
-            <div class="detail-item">
-              <label>Process Type</label>
-              <span>{{ product.ProcessType || 'N/A' }}</span>
+            <div class="details-grid">
+              <div class="detail-item">
+                <label>Process Type</label>
+                <span>{{ product.ProcessType || 'N/A' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Quantity</label>
+                <span>{{ product.Quantity }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Current Supplier</label>
+                <span class="supplier-name">{{ product.CurrentSupplier || 'N/A' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Status</label>
+                <span :class="'status status-' + product.Status?.toLowerCase().replace(/ /g, '-')">
+                  {{ product.Status }}
+                </span>
+              </div>
             </div>
-            <div class="detail-item">
-              <label>Quantity</label>
-              <span>{{ product.Quantity }}</span>
-            </div>
-            <div class="detail-item">
-              <label>Cost Price</label>
-              <span>₱{{ product.CostPrice?.toFixed(2) || '0.00' }}</span>
-            </div>
-            <div class="detail-item">
-              <label>Current Supplier</label>
-              <span class="supplier-name">{{ product.CurrentSupplier || 'N/A' }}</span>
-            </div>
-            <div class="detail-item">
-  <label>Status</label>
-  <span :class="'status status-' + product.Status?.toLowerCase().replace(/ /g, '-')">
-    {{ product.Status }}
-  </span>
-</div>
           </div>
         </div>
 
-        <!-- Right Section - Stock & Deduction Details -->
         <div class="stock-details-sidebar">
           <div class="stock-details-header-container">
-            <h3 class="stock-details-header">Stock & Deducted Transactions</h3>
-
-            <div class="transaction-filters">
-    <button 
-      :class="['filter-btn', { active: transactionFilter === 'all' }]"
-      @click="transactionFilter = 'all'"
-    >
-      All
-    </button>
-    <button 
-      :class="['filter-btn', { active: transactionFilter === 'added' }]"
-      @click="transactionFilter = 'added'"
-    >
-      Added Stock
-    </button>
-    <button 
-      :class="['filter-btn', { active: transactionFilter === 'deducted' }]"
-      @click="transactionFilter = 'deducted'"
-    >
-      Deducted Stock
-    </button>
-  </div>
-
-            <div class="date-filter">
-              <div class="date-inputs">
-                <div class="date-input">
-                  <label>From:</label>
-                  <input 
-                    type="date" 
-                    v-model="dateFilter.from"
-                    :max="dateFilter.to || today"
-                  />
-                </div>
-                <div class="date-input">
-                  <label>To:</label>
-                  <input 
-                    type="date" 
-                    v-model="dateFilter.to"
-                    :min="dateFilter.from"
-                    :max="today"
-                  />
-                </div>
+            <div class="stock-right">
+              <h3 class="stock-details-header">Stock & Deducted Transactions</h3>
+              <div class="transaction-filters">
+                <button 
+                  :class="['filter-btn', { active: transactionFilter === 'added' }]"
+                  @click="transactionFilter = 'added'">
+                  Added Stock
+                </button>
+                <button 
+                  :class="['filter-btn', { active: transactionFilter === 'deducted' }]"
+                  @click="transactionFilter = 'deducted'">
+                  Deducted Stock
+                </button>
               </div>
-              <button class="clear-filter" @click="clearDateFilter">
-                <i class="pi pi-times"></i> Clear
-              </button>
+            </div>
+            <div class="stock-left">
+              <div class="date-filter">
+                <div class="date-inputs">
+                  <div class="date-input">
+                    <label>From:</label>
+                    <input 
+                      type="date" 
+                      v-model="dateFilter.from"
+                      :max="dateFilter.to || today" />
+                  </div>
+                  <div class="date-input">
+                    <label>To:</label>
+                    <input 
+                      type="date" 
+                      v-model="dateFilter.to"
+                      :min="dateFilter.from"
+                      :max="today" />
+                  </div>
+                </div>
+                <button class="clear-filter" @click="clearDateFilter">
+                  <i class="pi pi-times"></i> Clear
+                </button>
+              </div>
             </div>
           </div>
 
-          <div class="combined-transactions">
-            <div v-if="combinedTransactions.length === 0" class="no-data">
-  No stock details available.
-</div>
-  <div v-for="item in filteredTransactions" 
-       :key="item.id || item.TransactionID" 
-       class="transaction-card">
-    
-    <!-- Stock Details -->
-    <div v-if="item.stock_location" class="stock-card">
-  <div class="stock-card-header">
-    <span :class="['transaction-type', item.TransactionType ? item.TransactionType.toLowerCase() : 'add']">
-    {{ item.TransactionType || 'Added' }}
-  </span>
-    <span class="timestamp">{{ formatTimestamp(item.created_at) }}</span>
-  </div>
-  <div class="stock-card-item">
-    <span class="label">Supplier</span>
-    <span class="supplier-tag">{{ item.SupplierName || 'N/A' }}</span>
-  </div>
-  <div class="stock-card-item">
-    <span class="label">Cost Price</span>
-    <span class="value">₱{{ item.CostPrice?.toFixed(2) || '0.00' }}</span>
-  </div>
-  <div class="stock-card-item">
-    <span class="label">Batch Number</span>
-    <span class="value">{{ item.batch_number || "N/A" }}</span>
-  </div>
-  <div class="stock-card-item">
-    <span class="label">Location</span>
-    <span class="value">{{ item.stock_location || 'N/A' }}</span>
-  </div>
-  <div class="stock-card-item">
-    <span class="label">Quantity</span>
-    <span class="value quantity">{{ item.quantity }}</span>
-  </div>
-  <div class="stock-card-item">
-    <span class="label">Expiration Date</span>
-    <span class="value" :class="{ 'expiring': isExpiringSoon(item.expiration_date) }">
-      {{ formatDate(item.expiration_date) || "N/A" }}
-    </span>
-  </div>
-</div>
+          <div class="combined-container" v-if="transactionFilter === 'added'">
+            <div class="combined-transactions">
+              <table v-if="filteredTransactions.length > 0">
+                <thead>
+                  <tr>
+                    <th>Batch Number</th>
+                    <th>Quantity</th>
+                    <th>Expiration Date</th>
+                    <th>Supplier Name</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in filteredTransactions" :key="item.id">
+                    <td>{{ item.batch_number }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ formatDate(item.expiration_date) }}</td>
+                    <td>{{ item.SupplierName }}</td>
+                    <td>
+                      <button class="action-btn delete" @click="deleteAddedTransaction(item.id)">
+                        <i class="pi pi-trash"></i> 
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div v-else class="no-data">
+                No added stock available.
+              </div>
+            </div>
+          </div>
 
-    <div v-else class="deduct-card">
-      <div class="transaction-header">
-        <span :class="['transaction-type', item.TransactionType ? item.TransactionType.toLowerCase() : 'deduct']">
-          {{ item.TransactionType === 'Deduct' ? 'Deducted' : item.TransactionType }}  </span>
-       <span class="transaction-date">{{ formatDateTime(item.TransactionDate) }}</span>
-      </div>
-      <div class="transaction-details">
-        <div class="transaction-item">
-          <span class="label">Product Name</span>
-          <span class="value">{{ item.ProductName }}</span>
-        </div>
-        <div class="transaction-item">
-          <span class="label">Quantity Deducted</span>
-          <span class="value quantity-deducted">{{ item.QuantityDeducted }}</span>
-        </div>
-        <div class="transaction-item">
-          <span class="label">Cost Price</span>
-          <span class="value price">{{ item.CostPrice }}</span>
+          <div class="combined-container" v-if="transactionFilter === 'deducted'">
+            <div class="combined-transactions">
+              <table v-if="filteredTransactions.length > 0">
+                <thead>
+                  <tr>
+                    <th>Transaction Date</th>
+                    <th>Quantity Deducted</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in filteredTransactions" :key="item.TransactionID">
+                    <td>{{ formatDate(item.TransactionDate) }}</td>
+                    <td>{{ item.QuantityDeducted }}</td>
+                    <td>
+                      <button class="action-btn delete" @click="deleteDeductedTransaction(item.TransactionID)">
+                        <i class="pi pi-trash"></i> 
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div v-else class="no-data">
+                No deducted stock available.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-
   </div>
-</div>
-
-        </div>
-      </div> 
-    </div> 
-  </div> 
 </template>
 
 <script>
@@ -200,8 +179,9 @@ export default {
         from: '',
         to: ''
       },
-      combinedTransactions: [],
-      transactionFilter: 'all',
+      addedTransactions: [],
+      deductedTransactions: [],
+      transactionFilter: 'added', // Set initial filter to 'added'
     };
   },
   computed: {
@@ -209,91 +189,65 @@ export default {
       return new Date().toISOString().split('T')[0];
     },
     filteredTransactions() {
-    let transactions = [...this.combinedTransactions];
+      let transactions = this.transactionFilter === 'added' ? this.addedTransactions : this.deductedTransactions;
 
-    if (this.transactionFilter === "added") {
-      transactions = transactions.filter(item => item.stock_location);
-    } else if (this.transactionFilter === "deducted") {
-      transactions = transactions.filter(item => !item.stock_location);
+      if (this.dateFilter.from || this.dateFilter.to) {
+        const fromDate = new Date(this.dateFilter.from);
+        const toDate = new Date(this.dateFilter.to);
+        toDate.setHours(23, 59, 59); // To include the end of the 'to' date
+
+        transactions = transactions.filter(item => {
+          const itemDate = new Date(item.created_at || item.TransactionDate); // Filter by correct date
+          return itemDate >= fromDate && itemDate <= toDate;
+        });
+      }
+
+      return transactions;
     }
-
-    if (this.dateFilter.from && this.dateFilter.to) {
-      const fromDate = new Date(this.dateFilter.from);
-      const toDate = new Date(this.dateFilter.to);
-      toDate.setHours(23, 59, 59);
-
-      transactions = transactions.filter(item => {
-        const itemDate = new Date(item.created_at || item.TransactionDate);
-        return itemDate >= fromDate && itemDate <= toDate;
-      });
-    }
-
-    return transactions;
-  }
   },
   async created() {
-  try {
-    let productId = this.$route.params.id;
-    productId = parseInt(productId, 10).toString();
+    try {
+      let productId = this.$route.params.id;
+      productId = parseInt(productId, 10).toString();
 
-    const productResponse = await axios.get(`http://127.0.0.1:8000/api/stock/stockin/${productId}`);
-    this.product = { ...productResponse.data };
+      const productResponse = await axios.get(`http://127.0.0.1:8000/api/stock/stockin/${productId}`);
+      this.product = { ...productResponse.data };
 
-    const stockResponse = await axios.get(`http://127.0.0.1:8000/api/stock/stockdetails/${productId}`);
-    
-    this.combinedTransactions = [
-      ...stockResponse.data.StockDetails, 
-      ...stockResponse.data.DeductedTransactions
-    ].sort((a, b) => new Date(b.created_at || b.TransactionDate) - new Date(a.created_at || a.TransactionDate));
+      const stockResponse = await axios.get(`http://127.0.0.1:8000/api/stock/stockdetails/${productId}`);
+      this.addedTransactions = stockResponse.data.StockDetails;
+      this.deductedTransactions = stockResponse.data.DeductedTransactions;
 
-  } catch (error) {
-    console.error("API Error:", error);
-    this.error = error.response?.data?.detail || 'Failed to load product details';
-    useToast().error(this.error);
-  } finally {
-    this.loading = false;
-  }
-},
+    } catch (error) {
+      console.error("API Error:", error);
+      this.error = error.response?.data?.detail || 'Failed to load product details';
+      useToast().error(this.error);
+    } finally {
+      this.loading = false;
+    }
+  },
   methods: {
-    
-    getStatusByQuantity(quantity) {
-      if (quantity <= 0) return 'Out of Stock';
-      if (quantity <= 10) return 'Low Stock';
-      return 'In Stock';
-    },
-
-    getStatusClass(quantity) {
-      const status = this.getStatusByQuantity(quantity);
-      return `status status-${status.toLowerCase().replace(/ /g, '-')}`;
-    },
-    clearDateFilter() {
-      this.dateFilter = { from: '', to: '' };
-    },
     handleSidebarToggle(collapsed) {
       this.isSidebarCollapsed = collapsed;
     },
-    formatDateTime(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleString();
+    deleteAddedTransaction(id) {
+      this.addedTransactions = this.addedTransactions.filter(item => item.id !== id);
+      useToast().success('Added transaction deleted');
+    },
+    deleteDeductedTransaction(TransactionID) {
+      this.deductedTransactions = this.deductedTransactions.filter(item => item.TransactionID !== TransactionID);
+      useToast().success('Deducted transaction deleted');
+    },
+    clearDateFilter() {
+      this.dateFilter = { from: '', to: '' };
     },
     formatDate(dateString) {
       const date = new Date(dateString);
       return date.toLocaleDateString();
     },
-    formatTimestamp(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleDateString();
-    },
-    isExpiringSoon(dateString) {
-      const expDate = new Date(dateString);
-      const today = new Date();
-      return (expDate - today) / (1000 * 60 * 60 * 24) <= 30;
-    },
   }
 };
 </script>
 
-  
   <style scoped>
 .app-container {
   margin-left: 230px;
@@ -353,18 +307,38 @@ export default {
     transform: translateX(-5px);
   }
   
-
   .content-layout {
   display: grid;
-  grid-template-columns: 1fr 400px; /* Main content + stock details */
+  grid-template-columns: 1fr; /* Single column layout to center everything */
   gap: 30px;
   min-height: calc(100vh - 180px);
 }
 
+.details-container {
+  display: flex;
+  flex-direction: column;
+}
 .main-content {
   background: white;
   border-radius: 15px;
   padding: 30px;
+  display: flex;
+  gap: 20px;
+  width: auto;
+}
+.product-details-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  width: 100%;
+}
+.product-details {
+  flex: 1;
+  max-width: 350px;
+}
+.details-grid {
+  flex: 1;
+  max-width: 100%;
 }
   /* Product Header Styles */
   .product-header {
@@ -521,14 +495,11 @@ export default {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   }
   .stock-details-sidebar {
-  background: white;
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 20px;
   position: sticky;
   top: 20px;
   height: calc(100vh - 140px);
-  overflow: hidden;
+  overflow: auto;
   display: flex;
   flex-direction: column;
 }
@@ -632,18 +603,31 @@ export default {
   background: #fff3e0;
   animation: pulse 2s infinite;
 }
-.combined-transactions {
-  flex: 1;
-  overflow-y: auto;
-  margin-top: 20px;
-  padding-right: 10px;
+
+table {
+  width: 100%;
+    border-collapse: collapse;
 }
 
+table th,
+table td {
+  padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
 
-.stock-card-footer {
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #eee;
+table th {
+  background-color: #f8f9fa;
+  color: #333;
+  font-weight: bold;
+}
+
+table td {
+  background-color: white;
+}
+
+table tbody tr:hover {
+  background-color: #f1f1f1;
 }
 .timestamp, .transaction-date {
   font-size: 0.85rem;
@@ -652,78 +636,34 @@ export default {
   padding: 4px 10px;
   border-radius: 12px;
 }
-
-.stock-card-item .value.price {
-  color: #1976d2;
-  background: #e3f2fd;
-  font-family: monospace;
-  font-size: 1.1rem;
-}
 .stock-details-header {
-  color: #333;
-  font-weight: 900;
   font-size: 1.2rem;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #f0f0f0;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20px;
 }
-  
-  .stock-details-header::before {
-    content: '';
-    width: 4px;
-    height: 24px;
-    background: #E54F70;
-    border-radius: 2px;
-  }
-  
-  .stock-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 25px;
-  }
-
-  
-  .stock-card-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 15px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    margin-bottom: 10px;
-  }
-  
-  .stock-card-item .label {
-    color: #6c757d;
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-  
-  .stock-card-item .value {
-    font-weight: 600;
-    font-size: 1rem;
-    color: #2c3e50;
-    padding: 4px 12px;
-    background: white;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-  
-  .stock-card-item .value.quantity {
-    color: #2e7d32;
-    background: #e8f5e9;
-    font-size: 1.1rem;
-  }
-  
-  .stock-card-item .value.expiring {
-    color: #f57c00;
-    background: #fff3e0;
-    animation: pulse 2s infinite;
-  }
+.stock-details-header-container{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.stock-right{
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.stock-left{
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+}
   .date-filter {
   background: #f8f9fa;
-  padding: 15px;
+  padding: 30px;
+  display:flex;
   border-radius: 12px;
-  margin-top: 15px;
 }
 .transaction-filters {
   display: flex;
@@ -785,7 +725,7 @@ export default {
   background: white;
   border: 1px solid #E54F70;
   color: #E54F70;
-  padding: 8px 16px;
+  padding:  12px;
   border-radius: 8px;
   cursor: pointer;
   display: flex;
@@ -793,13 +733,29 @@ export default {
   gap: 8px;
   transition: all 0.3s ease;
   font-size: 0.9rem;
-  margin-left: auto;
+  margin-left: 50px;
 }
 
 .clear-filter:hover {
   background: #E54F70;
   color: white;
 }
+.combined-container {
+  position: relative;
+    flex-grow: 1;
+    height: 37dvw;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    border-radius: 15px;
+    overflow-y: auto;
+    margin-left: 5px;
+    padding: 0;
+  }
+  .action-btn.delete {
+    background-color: transparent;
+    color: #dc3545;
+  }
+
   @keyframes pulse {
     0% { opacity: 1; }
     50% { opacity: 0.7; }
@@ -848,11 +804,6 @@ export default {
     gap: 10px;
   }
 
-  .clear-filter {
-    width: 100%;
-    justify-content: center;
-    margin-top: 10px;
-  }
   }
   @media (max-width: 1024px) {
   .content-layout {
@@ -866,49 +817,4 @@ export default {
     margin-top: 20px;
   }
 }
-/* Add to your existing <style> section */
-.transaction-type {
-  font-weight: bold;
-  font-size: 0.9rem;
-  padding: 4px 8px;
-  border-radius: 12px;
-  color: white;
-  display: inline-block;
-}
-
-.transaction-type.add {
-  background-color: #28a745 !important; /* Green for added stock */
-}
-
-.transaction-type.added {
-  background-color: #28a745 !important; /* Green for added stock */
-}
-.transaction-type.deduct {
-  background-color: #dc3545 !important; /* Red for deducted stock */
-}
-
-.transaction-type.deducted {
-  background-color: #dc3545 !important; /* Red for deducted stock */
-}
-.deducted-transactions {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 2px solid #f0f0f0;
-}
-
-.section-header {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-header i {
-  color: #E54F70;
-}
-
-
   </style>

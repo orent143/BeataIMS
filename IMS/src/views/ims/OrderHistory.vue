@@ -22,36 +22,38 @@
     </div>
 
     <div class="sales-container">
-    <table class="sales-table">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>Customer</th>
-          <th>Total Amount</th>
-          <th>Payment Method</th>
-          <th>Date</th>
-          <th>Details</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="order in filteredOrders" :key="order.order_id">
-          <td class="order-id">{{ order.order_id }}</td>
-          <td>{{ order.customer_name }}</td>
-          <td>₱{{ formatPrice(order.total_amount) }}</td>
-          <td>
-            <span :class="['payment-badge', order.payment_method.toLowerCase()]">
-              {{ order.payment_method }}
-            </span>
-          </td>
-          <td>{{ formatDate(order.OrderDate) }}</td>
-          <td>
-            <button class="btn-details" @click="redirectToOrderDetails(order.order_id)">
-                  VIEW DETAILS
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+      <table class="sales-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Total Items</th>
+            <th>Total Amount</th>
+            <th>Payment Method</th>
+            <th>Date</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="order in filteredOrders" :key="order.history_id">
+            <td class="order-id">{{ order.history_id }}</td>
+            <td>{{ order.customer_name }}</td>
+            <td>{{ order.total_items }}</td>
+            <td>₱{{ formatPrice(order.total_amount) }}</td>
+            <td>
+              <span :class="['payment-badge', order.payment_method.toLowerCase()]">
+                {{ order.payment_method }}
+              </span>
+            </td>
+            <td>{{ formatDate(order.created_at) }}</td>
+            <td>
+              <button class="btn-details" @click="redirectToOrderDetails(order.history_id)">
+                VIEW DETAILS
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
       <div class="totals-container">
         <div class="totals-item">
@@ -101,7 +103,7 @@ export default {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(order =>
           order.customer_name.toLowerCase().includes(query) ||
-          order.order_id.toString().includes(query)
+          order.history_id.toString().includes(query)
         );
       }
 
@@ -122,7 +124,14 @@ export default {
       this.loading = true;
       try {
         const response = await axios.get('http://127.0.0.1:8000/api/ordersummary/orders/history');
-        this.orders = response.data;
+        this.orders = response.data.map(order => ({
+          history_id: order.history_id,
+          customer_name: order.customer_name,
+          total_items: order.total_items,
+          total_amount: order.total_amount,
+          payment_method: order.payment_method,
+          created_at: order.created_at || 'N/A'  // Handle null dates gracefully
+        }));
       } catch (error) {
         console.error('Error fetching orders:', error);
       } finally {
@@ -135,7 +144,7 @@ export default {
     },
 
     formatDate(dateString) {
-      if (!dateString) return 'N/A';
+      if (!dateString || dateString === 'N/A') return 'N/A';
       return new Date(dateString).toLocaleString('en-US', {
         year: 'numeric',
         month: 'short',
@@ -149,11 +158,11 @@ export default {
       this.showFilterDropdown = !this.showFilterDropdown;
     },
 
-    redirectToOrderDetails(orderId) {
-    this.$router.push({
-      path: `/vieworderdetails/${orderId}`
-    });
-  }
+    redirectToOrderDetails(historyId) {
+      this.$router.push({
+        path: `/vieworderdetails/${historyId}`
+      });
+    }
   },
 
   mounted() {
@@ -162,13 +171,18 @@ export default {
 };
 </script>
 
+
 <style scoped>
 .app-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
   margin-left: 230px;
-  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.app-container.sidebar-collapsed {
+  margin-left: 70px;
+  padding-left: 20px;
 }
 
 .header-container {

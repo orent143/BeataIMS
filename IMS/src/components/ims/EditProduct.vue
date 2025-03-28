@@ -1,89 +1,96 @@
-<template> 
-  <div class="popout-form" v-if="isVisible">
-    <div class="form-header">
-      <h2>Edit Product</h2>
-      <button class="close-btn" @click="closeForm">x</button>
+<template>
+  <div>
+    <!-- Overlay for the Edit Product form -->
+    <div class="form-overlay" v-if="isVisible"></div>
+
+    <!-- Edit Product Form -->
+    <div class="popout-form" v-if="isVisible">
+      <div class="form-header">
+        <h2>Edit Product</h2>
+        <button class="close-btn" @click="closeForm">x</button>
+      </div>
+
+      <form @submit.prevent="confirmAndSubmit" class="form-container">
+        <div class="form-group">
+          <label for="name">Item Name</label>
+          <input 
+            id="name" 
+            v-model="product.ProductName" 
+            placeholder="Item Name" 
+            required 
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="unitPrice">Unit Price</label>
+          <input 
+            id="unitPrice" 
+            v-model="product.UnitPrice" 
+            type="number" 
+            placeholder="Unit Price" 
+            required 
+            min="0" 
+            step="0.01" 
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select 
+            id="category" 
+            v-model="product.CategoryID" 
+            required
+          >
+            <option value="" disabled>Select Category</option>
+            <option 
+              v-for="category in categories" 
+              :key="category.id" 
+              :value="category.id"
+            >
+              {{ category.CategoryName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group image-section">
+          <label for="image">Product Image</label>
+          <div class="image-upload-container">
+            <label for="image" class="image-upload">
+              <input 
+                type="file" 
+                id="image" 
+                @change="handleFileUpload" 
+                accept="image/*"
+              />
+              <img 
+                v-if="imagePreview" 
+                :src="imagePreview" 
+                class="preview-image" 
+                alt="Product preview"
+              />
+              <span v-if="!imagePreview" class="upload-text">
+                Upload New Image
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="add-item-btn">Update Product</button>
+        </div>
+      </form>
     </div>
 
-    <form @submit.prevent="confirmAndSubmit" class="form-container">
-      <div class="form-group">
-        <label for="name">Item Name</label>
-        <input 
-          id="name" 
-          v-model="product.ProductName" 
-          placeholder="Item Name" 
-          required 
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="unitPrice">Unit Price</label>
-        <input 
-          id="unitPrice" 
-          v-model="product.UnitPrice" 
-          type="number" 
-          placeholder="Unit Price" 
-          required 
-          min="0" 
-          step="0.01" 
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="category">Category</label>
-        <select 
-          id="category" 
-          v-model="product.CategoryID" 
-          required
-        >
-          <option value="" disabled>Select Category</option>
-          <option 
-            v-for="category in categories" 
-            :key="category.id" 
-            :value="category.id"
-          >
-            {{ category.CategoryName }}
-          </option>
-        </select>
-      </div>
-
-      <div class="form-group image-section">
-        <label for="image">Product Image</label>
-        <div class="image-upload-container">
-          <label for="image" class="image-upload">
-            <input 
-              type="file" 
-              id="image" 
-              @change="handleFileUpload" 
-              accept="image/*"
-            />
-            <img 
-              v-if="imagePreview" 
-              :src="imagePreview" 
-              class="preview-image" 
-              alt="Product preview"
-            />
-            <span v-if="!imagePreview" class="upload-text">
-              Upload New Image
-            </span>
-          </label>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="add-item-btn">Update Product</button>
-      </div>
-    </form>
-  </div>
-
-  <div class="modal-overlay" v-if="showConfirmModal">
-    <div class="confirmation-modal">
-      <div class="modal-content">
-        <h3>Confirm Update</h3>
-        <p>Are you sure you want to update this product?</p>
-        <div class="modal-actions">
-          <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
-          <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" v-if="showConfirmModal">
+      <div class="confirmation-modal">
+        <div class="modal-content">
+          <h3>Confirm Update</h3>
+          <p>Are you sure you want to update this product?</p>
+          <div class="modal-actions">
+            <button @click="cancelSubmit" class="cancel-btn">Cancel</button>
+            <button @click="confirmSubmit" class="confirm-btn">Confirm</button>
+          </div>
         </div>
       </div>
     </div>
@@ -246,18 +253,30 @@ export default {
 
 
 <style scoped>
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  z-index: 999; /* Ensure it's on top of other elements */
+}
+
+/* Edit Product Form */
 .popout-form {
   background-color: #ffffff;
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.459);
-  position: absolute;
-  right: 50%;
+  position: fixed;
   top: 50%;
-  transform: translate(50%, -50%);
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 400px;
-  max-width: 100%;
+  z-index: 1000;
 }
+
 
 .form-header {
   display: flex;

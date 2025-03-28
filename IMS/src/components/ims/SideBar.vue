@@ -64,7 +64,6 @@ export default {
           icon: "pi pi-dollar",
           submenu: [
             { name: "Create Orders", path: "/createorder", icon: "pi-plus-circle" },
-            { name: "Record Sales", path: "/record-sales", icon: "pi-pencil" },
             { name: "View Sales", path: "/ordershistory", icon: "pi-eye" },
           ],
           isOpen: false,

@@ -1,126 +1,125 @@
 <template>
-<Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
-
-<SideBar :isCollapsed="isSidebarCollapsed" />
-
-<div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
-    <div class="order-details">
+    <Header :isSidebarCollapsed="isSidebarCollapsed" @toggle-sidebar="handleSidebarToggle" />
+    <SideBar :isCollapsed="isSidebarCollapsed" />
+  
+    <div class="app-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
+      <div class="order-details">
         <div v-if="loading" class="loading">Loading...</div>
         <div v-else-if="error" class="error">{{ error }}</div>
         <div v-else class="order-container">
-            <!-- Order Summary Section -->
-            <div class="summary-section">
-                <h2>Order Summary</h2>
-                <div class="summary-details">
-                    <div class="detail-row">
-                        <span>Order ID:</span>
-                        <span>#{{ order.order_id }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span>Customer Name:</span>
-                        <span>{{ order.customer_name }}</span>
-                    </div>
-                    <div class="detail-row">
-    <span>Date:</span>
-    <span>{{ formatDate(order.OrderDate) }}</span> <!-- ✅ Use a date formatting method -->
-</div>
-                    <div class="detail-row">
-                        <span>Payment Method:</span>
-                        <span>{{ order.payment_method }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span>Total Items:</span>
-                        <span>{{ order.total_items }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span>Total Amount:</span>
-                        <span>₱{{ order.total_amount.toFixed(2) }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span>Cash:</span>
-                        <span>₱{{ order.cash_on_hand.toFixed(2) }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span>Change:</span>
-                        <span>₱{{ order.change.toFixed(2) }}</span>
-                    </div>
-                    <div class="detail-row">
-    <span>Employee ID:</span>
-    <span>{{ order.employee_id && order.employee_id !== 0 ? order.employee_id : 'N/A' }}</span>
-</div>
-                </div>
+          
+          <!-- Order Summary Section -->
+          <div class="summary-section">
+            <h2>Order Summary</h2>
+            <div class="summary-details">
+              <div class="detail-row">
+                <span>Order ID:</span>
+                <span>#{{ order.history_id }}</span>
+              </div>
+              <div class="detail-row">
+                <span>Customer Name:</span>
+                <span>{{ order.customer_name }}</span>
+              </div>
+              <div class="detail-row">
+                <span>Date:</span>
+                <span>{{ formatDate(order.created_at) }}</span> 
+              </div>
+              <div class="detail-row">
+                <span>Payment Method:</span>
+                <span>{{ order.payment_method }}</span>
+              </div>
+              <div class="detail-row">
+                <span>Total Items:</span>
+                <span>{{ order.total_items }}</span>
+              </div>
+              <div class="detail-row">
+                <span>Total Amount:</span>
+                <span>₱{{ formatPrice(order.total_amount) }}</span>
+              </div>
             </div>
-
-            <!-- Order Items Section -->
-            <div class="items-section">
-                <h2>Order Items</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Product ID</th>
-                            <th>Name</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="item in order.items" :key="item.product_id">
-                            <td>{{ item.product_id }}</td>
-                            <td>{{ item.name }}</td>
-                            <td>{{ item.quantity }}</td>
-                            <td>₱{{ item.price.toFixed(2) }}</td>
-                            <td>₱{{ (item.quantity * item.price).toFixed(2) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+          </div>
+  
+          <!-- Order Items Section -->
+          <div class="items-section">
+            <h2>Order Items</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Product ID</th>
+                  <th>Name</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in order.items" :key="item.product_id">
+                  <td>{{ item.product_id }}</td>
+                  <td>{{ item.product_name }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>₱{{ formatPrice(item.price) }}</td>
+                  <td>₱{{ formatPrice(item.quantity * item.price) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+  
         </div>
+      </div>
     </div>
-</div>
-</template>
-
-<script>
-import axios from 'axios'
-import Header from '@/components/Header.vue'    
-import SideBar from '@/components/ims/SideBar.vue'
-
-export default {
+  </template>
+  
+  <script>
+  import axios from 'axios'
+  import Header from '@/components/Header.vue'    
+  import SideBar from '@/components/ims/SideBar.vue'
+  
+  export default {
     components: {
-    SideBar,
-    Header,
-  },
+      SideBar,
+      Header,
+    },
     name: 'OrderDetails',
     data() {
-        return {
-            order: null,
-            loading: true,
-            error: null
-        }
+      return {
+        isSidebarCollapsed: false,
+        order: null,
+        loading: true,
+        error: null
+      }
     },
     async created() {
-    try {
-        const orderId = this.$route.params.orderId; // ✅ Use the correct route parameter name
-        const response = await axios.get(`http://127.0.0.1:8000/api/ordersummary/orders/history/${orderId}`);
+      try {
+        const historyId = this.$route.params.id;
+        const response = await axios.get(`http://127.0.0.1:8000/api/ordersummary/orders/history/${historyId}`);
         this.order = response.data;
         this.loading = false;
-    } catch (err) {
+      } catch (err) {
         this.error = 'Error loading order details';
         this.loading = false;
         console.error('Error:', err);
-    }
-},
+      }
+    },
     methods: {
-    formatDate(date) {
+      handleSidebarToggle(collapsed) {
+        this.isSidebarCollapsed = collapsed;
+      },
+      formatDate(date) {
         if (!date) return "N/A";
         const options = { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" };
         return new Date(date).toLocaleDateString("en-US", options);
+      },
+      formatPrice(value) {
+        return value ? Number(value).toFixed(2) : "0.00";
+      },
+      
     }
-}
-}
-</script>
+  }
+  </script>
+  
 
 <style scoped>
+
 .order-details {
     padding: 20px;
     max-width: 1000px;
@@ -140,7 +139,15 @@ export default {
     display: grid;
     gap: 20px;
 }
-
+.items-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-height: 400px; /* Adjust height as needed */
+    overflow-y: auto; /* Enables vertical scrolling */
+    overflow-x: hidden; /* Prevents horizontal overflow */
+}
 .summary-section, .items-section {
     background: white;
     border-radius: 8px;

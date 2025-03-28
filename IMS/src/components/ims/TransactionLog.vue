@@ -14,7 +14,6 @@
               <th>Product Name</th>
               <th>Transaction Type</th>
               <th>Quantity</th>
-              <th>Cost Price</th>
               <th>Date & Time</th>
             </tr>
           </thead>
@@ -32,7 +31,6 @@
               }">
                 {{ transaction.quantity > 0 ? '+' : ''}}{{ transaction.quantity }}
               </td>
-              <td>{{ formatCurrency(transaction.cost_price) }}</td>
               <td>{{ formatDate(transaction.created_at) }}</td>
             </tr>
           </tbody>

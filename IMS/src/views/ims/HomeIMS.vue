@@ -22,7 +22,7 @@
           </div>
           <div class="card-content">
             <h3>Total Revenue</h3>
-            <p class="amount">₱{{ animatedTotalCost.toFixed(2) }}</p>
+            <p class="amount">₱{{ Math.round(animatedTotalRevenue.toFixed(2)) }}</p>
             <p class="subtitle">Overall Sales</p>
           </div>
         </div>
@@ -133,14 +133,14 @@ export default {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       }),
-      totalCost: 0,
       totalProducts: 0,
       lowStockCount: 0,
       topSellingProduct: 'Espresso',
       recentActivities: [],
-      animatedTotalCost: 0,
+      totalRevenue: 0, // This will store the fetched total revenue
+      animatedTotalRevenue: 0,
       animatedTotalProducts: 0,
       animatedLowStockCount: 0,
     };
@@ -149,25 +149,27 @@ export default {
     handleSidebarToggle(collapsed) {
       this.isSidebarCollapsed = collapsed;
     },
-    async fetchTotalCost() {
+    async fetchTotalRevenue() {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/stock/total_cost");
-        this.totalCost = parseFloat(response.data.total_cost);
+        const response = await axios.get("http://127.0.0.1:8000/api/sales/total-sales-revenue");
+        this.totalRevenue = parseFloat(response.data.total_sales_revenue); // Correct field from backend
+        this.animatedTotalRevenue = this.totalRevenue; // Directly set the total revenue
       } catch (error) {
-        console.error("Error fetching total cost:", error);
+        console.error("Error fetching total revenue:", error);
       }
     },
-    async fetchTotalProducts() {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/inventory/inventoryproduct/total");
-        this.totalProducts = parseInt(response.data.total_products);
-      } catch (error) {
-        console.error("Error fetching total products:", error);
-      }
-    },
+
+  async fetchTotalProducts() {
+    try {
+      const response = await axios.get("http://127.0.0.1:8000/api/inventory/total-products");
+      this.totalProducts = response.data.total_products;
+    } catch (error) {
+      console.error("Error fetching total products:", error);
+    }
+  },
     async fetchTotalLowStocks() {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/stock/stocks/low_stock/total");
+        const response = await axios.get("http://127.0.0.1:8000/api/inventory/low-stock-total");
         this.lowStockCount = parseInt(response.data.total_low_stock);
       } catch (error) {
         console.error("Error fetching total stocks:", error);
@@ -190,11 +192,11 @@ export default {
         .sort((a, b) => new Date(b.OrderDate) - new Date(a.OrderDate))
         .slice(0, 5)
         .map(order => ({
-          id: order.order_id,
+          id: order.history_id,
           customerName: order.customer_name,
           itemCount: order.total_items || 1,
           total: this.formatPrice(order.total_amount),
-          date: new Date(order.OrderDate),
+          date: new Date(order.created_at),
           status: order.payment_method
         }));
     } catch (error) {
@@ -203,8 +205,8 @@ export default {
   },
 
   formatPrice(value) {
-    return Number(value).toFixed(2);
-  },
+      return Number(value).toFixed(2);
+    },
 
   formatDate(date) {
     return date.toLocaleString('en-US', {
@@ -230,8 +232,8 @@ export default {
     }
   },
   watch: {
-    totalCost(newVal) {
-      this.animateValue('animatedTotalCost', newVal);
+    totalRevenue(newVal) {
+      this.animateValue('animatedTotalRevenue', newVal); // Animate the total revenue
     },
     totalProducts(newVal) {
       this.animateValue('animatedTotalProducts', newVal);
@@ -241,7 +243,7 @@ export default {
     }
   },
   mounted() {
-    this.fetchTotalCost(); 
+    this.fetchTotalRevenue(); // Fetch total revenue when the component is mounted
     this.fetchTotalProducts();
     this.fetchTotalLowStocks();
     this.fetchActivityLogs();

@@ -1,48 +1,37 @@
-<template> 
+<template>
   <div class="menu-item-card" :class="{ 'to-be-made': isToBeMade }">
     <div class="item-image-container">
       <img 
-        v-if="item.image" 
-        :src="item.image" 
+        :src="imageSrc" 
         :alt="item.name" 
         class="menu-image" 
       />
     </div>
-    
+
     <div class="item-details">
       <h3>{{ item.name }}</h3>
       <p class="price">₱{{ formattedPrice }}</p>
-      
+
       <p class="stock" 
          :class="{ 'low-stock': !isToBeMade && item.stock <= 5, 'to-be-made-tag': isToBeMade }">
         {{ isToBeMade ? 'To Be Made (∞)' : `Stock: ${item.stock}` }}
       </p>
 
       <div class="item-controls">
-      <input 
-        type="number"
-        min="1"
-        :max="isToBeMade ? null : item.stock"
-        :value="quantity"
-        @input="updateQuantity($event.target.value)"
-        class="quantity-input"
-        :disabled="shouldDisableInput"
-      />
-      
-      <button 
-        class="add-btn"
-        @click="emitAdd"
-        :class="{ 
-          'selected': selected,
-          'to-be-made-btn': isToBeMade 
-        }"
-        :disabled="shouldDisableButton"
-      >
-        {{ selected ? 'Update' : 'Add' }}
-      </button>
+        <button 
+          class="add-btn"
+          @click="emitAdd"
+          :class="{ 
+            'selected': selected,
+            'to-be-made-btn': isToBeMade 
+          }"
+          :disabled="shouldDisableButton"
+        >
+          {{ selected ? 'Added' : 'Add' }}
+        </button>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -50,7 +39,6 @@ export default {
   name: 'MenuItemCard',
   props: {
     item: Object,
-    quantity: Number,
     selected: Boolean
   },
   computed: {
@@ -60,18 +48,15 @@ export default {
     formattedPrice() {
       return `${Number(this.item.price || 0).toFixed(2)}`;
     },
-    shouldDisableInput() {
-      return !this.isToBeMade && this.item.stock <= 0;
-    },
     shouldDisableButton() {
       return !this.isToBeMade && this.item.stock <= 0;
+    },
+    // Computed property for image source with fallback to placeholder
+    imageSrc() {
+      return this.item.image ? this.item.image : '/path/to/placeholder-image.jpg'; // Default image URL if no image
     }
   },
   methods: {
-    updateQuantity(value) {
-      const quantity = Math.max(1, Number(value));
-      this.$emit('update:quantity', quantity);
-    },
     emitAdd() {
       this.$emit('add', { 
         ...this.item, 
@@ -82,7 +67,6 @@ export default {
 };
 </script>
 
-  
 <style scoped>
 .menu-item-card {
   background-color: #f5f5f5;
