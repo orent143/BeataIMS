@@ -147,7 +147,7 @@
             <p><strong>Unit Price:</strong> {{ stockData.UnitPrice || '0.00' }}</p>
             <p>
               <strong>Current Supplier:</strong>
-              <span class="supplier-name">{{ stockData.CurrentSupplier || 'N/A' }}</span>
+              <span class="supplier-name">{{ getSupplierName() || 'N/A' }}</span>
             </p>
             <p><strong>Total Quantity:</strong> {{ getTotalQuantity() }}</p>
             <p><strong>Total Locations:</strong> {{ stockData.Stocks.length }}</p>
@@ -287,10 +287,9 @@ export default {
     },
 
     getSupplierName() {
-      if (!this.selectedSupplier) return "Not selected";
-      const supplier = this.suppliers.find(s => s.id === this.selectedSupplier);
-      return supplier ? supplier.suppliername : "Unknown";
-    },
+  const supplier = this.suppliers.find(s => s.id === this.selectedSupplier);
+  return supplier ? supplier.suppliername : "Unknown";
+},
 
     getTotalQuantity() {
       return this.stockData.Stocks.reduce((total, stock) => {
@@ -306,39 +305,44 @@ export default {
       }
     },
     submitForm() {
-      // Trigger the confirmation modal before submission
-      this.showConfirmationModal();
-    },
-
+  if (!this.selectedSupplier) {
+    this.toast.error('Please select a supplier before submitting.');
+    return;
+  }
+  this.showConfirmationModal();
+},
     showConfirmationModal() {
       this.showConfirmModal = true;
     },
 
     async confirmSubmit() {
-      this.showConfirmModal = false;
-      this.isSubmitting = true;
+  this.isSubmitting = true;
 
-      try {
-        const requestBody = {
-          ProductID: this.stockData.StockID,
-          Stocks: this.stockData.Stocks.map(stock => ({
-            batch_number: stock.batch_number || null,
-            quantity: stock.quantity,
-            expiration_date: stock.expiration_date || null,
-            SupplierID: this.selectedSupplier
-          }))
-        };
+  const payload = {
+    ProductID: String(this.stockData.StockID),  
+    Stocks: this.stockData.Stocks.map(stock => ({
+      batch_number: stock.batch_number || null,
+      quantity: stock.quantity,
+      expiration_date: stock.expiration_date || null,
+      SupplierName: this.getSupplierName() 
+    }))
+  };
 
-        const response = await axios.post('http://127.0.0.1:8000/api/stock/stockin/', requestBody);
-        this.toast.success(response.data.message || 'Stock added successfully');
-        this.resetForm();
-      } catch (error) {
-        console.error('Error submitting stock:', error);
-        this.toast.error('Failed to add stock');
-      } finally {
-        this.isSubmitting = false;
-      }
-    },
+  console.log('Submitting payload:', JSON.stringify(payload, null, 2));
+
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/api/stock/stockin/', payload);
+    this.toast.success('Stock added successfully!');
+    this.resetForm();
+  } catch (error) {
+    console.error('Error submitting stock:', error);
+    this.toast.error('Failed to submit stock.');
+  } finally {
+    this.isSubmitting = false;
+    this.showConfirmModal = false;
+  }
+},
+
 
     cancelSubmit() {
       this.showConfirmModal = false;
@@ -468,6 +472,8 @@ export default {
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  max-height: 700px;  /* Adjust this value as needed */
+  overflow-y: auto; /* Enable vertical scrolling if content overflows */
 }
 
 .form-section {

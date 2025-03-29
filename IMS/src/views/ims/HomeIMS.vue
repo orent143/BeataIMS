@@ -22,7 +22,7 @@
           </div>
           <div class="card-content">
             <h3>Total Revenue</h3>
-            <p class="amount">₱{{ Math.round(animatedTotalRevenue.toFixed(2)) }}</p>
+            <p class="amount">₱{{ animatedTotalRevenue.toFixed(2) }}</p>
             <p class="subtitle">Overall Sales</p>
           </div>
         </div>
@@ -139,7 +139,8 @@ export default {
       lowStockCount: 0,
       topSellingProduct: 'Espresso',
       recentActivities: [],
-      totalRevenue: 0, // This will store the fetched total revenue
+      recentOrders: [], // Store recent orders data
+      totalRevenue: 0, // This will store t
       animatedTotalRevenue: 0,
       animatedTotalProducts: 0,
       animatedLowStockCount: 0,
@@ -150,15 +151,35 @@ export default {
       this.isSidebarCollapsed = collapsed;
     },
     async fetchTotalRevenue() {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/sales/total-sales-revenue");
-        this.totalRevenue = parseFloat(response.data.total_sales_revenue); // Correct field from backend
-        this.animatedTotalRevenue = this.totalRevenue; // Directly set the total revenue
-      } catch (error) {
-        console.error("Error fetching total revenue:", error);
-      }
-    },
+    try {
+      const response = await axios.get("http://127.0.0.1:8000/api/ordersummary/orders/daily-revenue");
+      this.totalRevenue = parseFloat(response.data.total_sales_today); // Correct field from backend
+      this.animateRevenue(); // Animate revenue after fetching total revenue
+    } catch (error) {
+      console.error("Error fetching total revenue:", error);
+    }
+  },
 
+  animateRevenue() {
+    let start = 0;
+    let end = this.totalRevenue;
+    let duration = 2000; // 2 seconds animation duration
+    let stepTime = 10; // Update every 10ms
+    let steps = duration / stepTime;
+    let increment = (end - start) / steps;
+
+    let animate = () => {
+      if (start < end) {
+        start += increment;
+        this.animatedTotalRevenue = Math.round(start * 100) / 100; // Round to 2 decimals
+        setTimeout(animate, stepTime);
+      } else {
+        this.animatedTotalRevenue = Math.round(end * 100) / 100;
+      }
+    };
+
+    animate();
+  },
   async fetchTotalProducts() {
     try {
       const response = await axios.get("http://127.0.0.1:8000/api/inventory/total-products");
